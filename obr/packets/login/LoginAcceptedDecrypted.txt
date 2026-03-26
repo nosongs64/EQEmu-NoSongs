@@ -1,0 +1,23 @@
+struct LoginBaseReply
+{
+    u8 success;
+    s32 error_string_id;
+    char error_string[];
+};
+
+struct Packet
+{
+    LoginBaseReply reply;
+    u8 unknown1;
+    u8 unknown2;
+    u32 loginserver_id;
+    char key[11];
+    u32 failed_attempts;
+    u8 show_player_count;
+    u32 offer_min_days;
+    s32 offer_min_views;
+    char username[];
+    char unknown[];
+};
+
+Packet p @ 0x00;
