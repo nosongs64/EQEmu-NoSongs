@@ -20,6 +20,6 @@ private:
 	EQ::Net::EQStreamManager *m_titanium_stream;
 	OpcodeManager            *m_sod_ops;
 	EQ::Net::EQStreamManager *m_sod_stream;
-	OpcodeManager            *m_larion_ops;
-	EQ::Net::EQStreamManager *m_larion_stream;
+	OpcodeManager            *m_steam_latest_ops;
+	EQ::Net::EQStreamManager *m_steam_latest_stream;
 };

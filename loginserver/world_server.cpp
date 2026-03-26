@@ -697,7 +697,7 @@ void WorldServer::SerializeForClientServerList(SerializeBuffer &out, bool use_lo
 		out.WriteString(m_remote_ip_address);
 	}
 
-	if (version == cv_larion) {
+	if (version == cv_steam_latest) {
 		out.WriteUInt32(9000);
 	}
 
@@ -712,7 +712,7 @@ void WorldServer::SerializeForClientServerList(SerializeBuffer &out, bool use_lo
 			out.WriteInt32(LS::ServerTypeFlags::Standard);
 			break;
 	}
-	if (version == cv_larion) {
+	if (version == cv_steam_latest) {
 		auto server_id = m_server_id;
 		//if this is 0, the client will not show the server in the list
 		out.WriteUInt32(1);

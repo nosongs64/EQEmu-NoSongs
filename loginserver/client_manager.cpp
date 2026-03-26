@@ -57,7 +57,7 @@ void CheckSoDOpcodeFile(const std::string &path)
 	}
 }
 
-void CheckLarionOpcodeFile(const std::string &path)
+void CheckSteamLatestOpcodeFile(const std::string &path)
 {
 	if (File::Exists(path)) {
 		return;
@@ -160,40 +160,40 @@ ClientManager::ClientManager()
 		}
 	);
 
-	int larion_port = server.config.GetVariableInt("client_configuration", "larion_port", 15900);
+	int steam_latest_port = server.config.GetVariableInt("client_configuration", "steam_latest_port", 15900);
 
-	EQStreamManagerInterfaceOptions larion_opts(larion_port, false, false);
+	EQStreamManagerInterfaceOptions steam_latest_opts(steam_latest_port, false, false);
 
-	m_larion_stream = new EQ::Net::EQStreamManager(larion_opts);
-	m_larion_ops    = new RegularOpcodeManager;
+	m_steam_latest_stream = new EQ::Net::EQStreamManager(steam_latest_opts);
+	m_steam_latest_ops    = new RegularOpcodeManager;
 
 	opcodes_path = fmt::format(
 		"{}/{}",
 		PathManager::Instance()->GetOpcodePath(),
-		"login_opcodes_larion.conf"
+		"login_opcodes_steam_latest.conf"
 	);
 
-	CheckLarionOpcodeFile(opcodes_path);
+	CheckSteamLatestOpcodeFile(opcodes_path);
 
-	if (!m_larion_ops->LoadOpcodes(opcodes_path.c_str())) {
+	if (!m_steam_latest_ops->LoadOpcodes(opcodes_path.c_str())) {
 		LogError(
-			"ClientManager fatal error: couldn't load opcodes for Larion file [{}]",
-			server.config.GetVariableString("client_configuration", "larion_opcodes", "login_opcodes.conf")
+			"ClientManager fatal error: couldn't load opcodes for Steam Latest file [{}]",
+			server.config.GetVariableString("client_configuration", "steam_latest_opcodes", "login_opcodes.conf")
 		);
 
 		run_server = false;
 	}
 
-	m_larion_stream->OnNewConnection(
+	m_steam_latest_stream->OnNewConnection(
 		[this](std::shared_ptr<EQ::Net::EQStream> stream) {
 			LogInfo(
-				"New Larion client connection from [{}:{}]",
+				"New Steam Latest client connection from [{}:{}]",
 				long2ip(stream->GetRemoteIP()),
 				stream->GetRemotePort()
 			);
 
-			stream->SetOpcodeManager(&m_larion_ops);
-			Client *c = new Client(stream, cv_larion);
+			stream->SetOpcodeManager(&m_steam_latest_ops);
+			Client *c = new Client(stream, cv_steam_latest);
 			m_clients.push_back(c);
 		}
 	);
