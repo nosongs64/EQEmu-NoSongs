@@ -83,6 +83,12 @@ struct PlayEverquestResponse {
 	uint32                server_number;
 };
 
+//for reference
+struct SystemFingerprint {
+	LoginBaseMessage base_header;
+	char fingerprint[1];
+};
+
 #pragma pack()
 
 enum LSClientVersion {

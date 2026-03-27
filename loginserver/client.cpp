@@ -71,6 +71,9 @@ bool Client::Process()
 				SendPlayToWorld((const char *) app->pBuffer);
 				break;
 			}
+			case OP_SystemFingerprint: {
+				break;
+			}
 		}
 
 		delete app;
@@ -87,16 +90,19 @@ void Client::HandleSessionReady(const char *data, unsigned int size)
 		return;
 	}
 
-	if (size < sizeof(unsigned int)) {
+	if (size < sizeof(int32)) {
 		LogError("Session ready was too small");
 		return;
 	}
+
+	//existing sequence id
+	int32 sequence_in = *(int32*)data;
 
 	m_client_status = cs_waiting_for_login;
 
 	auto *outapp = new EQApplicationPacket(OP_ChatMessage, sizeof(LoginHandShakeReply));
 	auto buf     = reinterpret_cast<LoginHandShakeReply *>(outapp->pBuffer);
-	buf->base_header.sequence    = 0x02;
+	buf->base_header.sequence    = sequence_in;
 	buf->base_reply.success      = true;
 	buf->base_reply.error_str_id = 0x65; // 101 "No Error"
 
