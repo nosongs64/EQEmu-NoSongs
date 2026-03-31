@@ -50,6 +50,21 @@ struct PlayerLoginReply {
 	char    unknown[1];                 // variable length, password unlikely? client doesn't send this on re-login from char select
 };
 
+struct PlayerLoginReplySteamLatest
+{
+	LoginBaseReplyMessage base_reply;
+	int8_t  unk1;                       // (default: 0)
+	int8_t  unk2;                       // (default: 0)
+	int32_t lsid;                       // (default: -1)
+	char    key[11];                    // client reads until null (variable length)
+	int32_t failed_attempts;
+	bool    show_player_count;          // admin flag, enables admin button and shows server player counts (default: false)
+	int32_t unk3;					    // guess, needs more investigation (default: 0)
+	int32_t unk4;					    // guess, needs more investigation (default: 0)
+	char    username[1];                // variable length, if not empty client attempts to re-login to server select when quitting from char select and sends this in a struct
+	char    unknown[1];                 // variable length, password unlikely? client doesn't send this on re-login from char select
+};
+
 // variable length, for reference
 struct LoginClientServerData {
 	char    ip[1];

@@ -452,46 +452,86 @@ void Client::DoSuccessfulLogin(LoginAccountsRepository::LoginAccounts &a)
 	m_account_name     = a.account_name;
 	m_loginserver_name = a.source_loginserver;
 
-	// unencrypted
-	LoginBaseMessage h{};
-	h.sequence     = m_login_base_message.sequence;
-	h.compressed   = false;
-	h.encrypt_type = m_login_base_message.encrypt_type;
-	h.unk3         = m_login_base_message.unk3;
+	if (m_client_version == cv_steam_latest) {
+		// unencrypted
+		LoginBaseMessage h{};
+		h.sequence = m_login_base_message.sequence;
+		h.compressed = false;
+		h.encrypt_type = m_login_base_message.encrypt_type;
+		h.unk3 = m_login_base_message.unk3;
 
-	// not serializing any of the variable length strings so just use struct directly
-	PlayerLoginReply r{};
-	r.base_reply.success         = true;
-	r.base_reply.error_str_id    = 101; // No Error
-	r.unk1                       = 0;
-	r.unk2                       = 0;
-	r.lsid                       = a.id;
-	r.failed_attempts            = 0;
-	r.show_player_count          = server.options.IsShowPlayerCountEnabled();
-	r.offer_min_days             = 99;
-	r.offer_min_views            = -1;
-	r.offer_cooldown_minutes     = 0;
-	r.web_offer_number           = 0;
-	r.web_offer_min_days         = 99;
-	r.web_offer_min_views        = -1;
-	r.web_offer_cooldown_minutes = 0;
-	memcpy(r.key, m_key.c_str(), m_key.size());
+		// not serializing any of the variable length strings so just use struct directly
+		PlayerLoginReplySteamLatest r{};
+		r.base_reply.success = true;
+		r.base_reply.error_str_id = 101; // No Error
+		r.unk1 = 0;
+		r.unk2 = 0;
+		r.lsid = a.id;
+		r.failed_attempts = 0;
+		r.show_player_count = server.options.IsShowPlayerCountEnabled();
+		r.unk3 = 0;
+		r.unk4 = 0;
+		memcpy(r.key, m_key.c_str(), m_key.size());
 
-	SendExpansionPacketData(r);
+		//todo: needs to be fixed
+		//SendExpansionPacketData(r);
 
-	char encrypted_buffer[80] = {0};
+		char encrypted_buffer[80] = { 0 };
 
-	auto rc = eqcrypt_block((const char *) &r, sizeof(r), encrypted_buffer, 1);
-	if (rc == nullptr) {
-		LogDebug("Failed to encrypt eqcrypt block");
+		auto rc = eqcrypt_block((const char*)&r, sizeof(r), encrypted_buffer, 1);
+		if (rc == nullptr) {
+			LogDebug("Failed to encrypt eqcrypt block");
+		}
+
+		constexpr int outsize = sizeof(LoginBaseMessage) + sizeof(encrypted_buffer);
+		auto          outapp = std::make_unique<EQApplicationPacket>(OP_LoginAccepted, outsize);
+		outapp->WriteData(&h, sizeof(h));
+		outapp->WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
+
+		m_connection->QueuePacket(outapp.get());
 	}
+	else {
+		// unencrypted
+		LoginBaseMessage h{};
+		h.sequence = m_login_base_message.sequence;
+		h.compressed = false;
+		h.encrypt_type = m_login_base_message.encrypt_type;
+		h.unk3 = m_login_base_message.unk3;
 
-	constexpr int outsize = sizeof(LoginBaseMessage) + sizeof(encrypted_buffer);
-	auto          outapp  = std::make_unique<EQApplicationPacket>(OP_LoginAccepted, outsize);
-	outapp->WriteData(&h, sizeof(h));
-	outapp->WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
+		// not serializing any of the variable length strings so just use struct directly
+		PlayerLoginReply r{};
+		r.base_reply.success = true;
+		r.base_reply.error_str_id = 101; // No Error
+		r.unk1 = 0;
+		r.unk2 = 0;
+		r.lsid = a.id;
+		r.failed_attempts = 0;
+		r.show_player_count = server.options.IsShowPlayerCountEnabled();
+		r.offer_min_days = 99;
+		r.offer_min_views = -1;
+		r.offer_cooldown_minutes = 0;
+		r.web_offer_number = 0;
+		r.web_offer_min_days = 99;
+		r.web_offer_min_views = -1;
+		r.web_offer_cooldown_minutes = 0;
+		memcpy(r.key, m_key.c_str(), m_key.size());
 
-	m_connection->QueuePacket(outapp.get());
+		SendExpansionPacketData(r);
+
+		char encrypted_buffer[80] = { 0 };
+
+		auto rc = eqcrypt_block((const char*)&r, sizeof(r), encrypted_buffer, 1);
+		if (rc == nullptr) {
+			LogDebug("Failed to encrypt eqcrypt block");
+		}
+
+		constexpr int outsize = sizeof(LoginBaseMessage) + sizeof(encrypted_buffer);
+		auto          outapp = std::make_unique<EQApplicationPacket>(OP_LoginAccepted, outsize);
+		outapp->WriteData(&h, sizeof(h));
+		outapp->WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
+
+		m_connection->QueuePacket(outapp.get());
+	}
 
 	m_client_status = cs_logged_in;
 }
