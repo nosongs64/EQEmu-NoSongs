@@ -345,28 +345,55 @@ void Client::SendFailedLogin()
 	m_stored_username.clear();
 	m_stored_password.clear();
 
-	// unencrypted
-	LoginBaseMessage h{};
-	h.sequence     = m_login_base_message.sequence; // login (3)
-	h.encrypt_type = m_login_base_message.encrypt_type;
+	if (m_client_version == cv_steam_latest) {
+		// unencrypted
+		LoginBaseMessage h{};
+		h.sequence = m_login_base_message.sequence; // login (3)
+		h.encrypt_type = m_login_base_message.encrypt_type;
 
-	// encrypted
-	PlayerLoginReply r{};
-	r.base_reply.success      = false;
-	r.base_reply.error_str_id = 105; // Error - The username and/or password were not valid
+		// encrypted
+		PlayerLoginReplySteamLatest r{};
+		r.base_reply.success = false;
+		r.base_reply.error_str_id = 105; // Error - The username and/or password were not valid
 
-	char encrypted_buffer[80] = {0};
-	auto rc                   = eqcrypt_block((const char *) &r, sizeof(r), encrypted_buffer, 1);
-	if (rc == nullptr) {
-		LogDebug("Failed to encrypt eqcrypt block for failed login");
+		char encrypted_buffer[80] = { 0 };
+		auto rc = eqcrypt_block((const char*)&r, sizeof(r), encrypted_buffer, 1);
+		if (rc == nullptr) {
+			LogDebug("Failed to encrypt eqcrypt block for failed login");
+		}
+
+		constexpr int       outsize = sizeof(LoginBaseMessage) + sizeof(encrypted_buffer);
+		EQApplicationPacket outapp(OP_LoginAccepted, outsize);
+		outapp.WriteData(&h, sizeof(h));
+		outapp.WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
+
+		m_connection->QueuePacket(&outapp);
 	}
+	else {
+		// unencrypted
+		LoginBaseMessage h{};
+		h.sequence = m_login_base_message.sequence; // login (3)
+		h.encrypt_type = m_login_base_message.encrypt_type;
 
-	constexpr int       outsize = sizeof(LoginBaseMessage) + sizeof(encrypted_buffer);
-	EQApplicationPacket outapp(OP_LoginAccepted, outsize);
-	outapp.WriteData(&h, sizeof(h));
-	outapp.WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
+		// encrypted
+		PlayerLoginReply r{};
+		r.base_reply.success = false;
+		r.base_reply.error_str_id = 105; // Error - The username and/or password were not valid
 
-	m_connection->QueuePacket(&outapp);
+		char encrypted_buffer[80] = { 0 };
+		auto rc = eqcrypt_block((const char*)&r, sizeof(r), encrypted_buffer, 1);
+		if (rc == nullptr) {
+			LogDebug("Failed to encrypt eqcrypt block for failed login");
+		}
+
+		constexpr int       outsize = sizeof(LoginBaseMessage) + sizeof(encrypted_buffer);
+		EQApplicationPacket outapp(OP_LoginAccepted, outsize);
+		outapp.WriteData(&h, sizeof(h));
+		outapp.WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
+
+		m_connection->QueuePacket(&outapp);
+	}
+	
 	m_client_status = cs_failed_to_login;
 }
 
