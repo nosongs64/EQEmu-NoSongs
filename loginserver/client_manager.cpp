@@ -71,7 +71,7 @@ void CheckSteamLatestOpcodeFile(const std::string &path)
 		fprintf(f, "OP_ServerListRequest=0x0004\n");
 		fprintf(f, "OP_PlayEverquestRequest=0x000d\n");
 		fprintf(f, "OP_PlayEverquestResponse=0x0023\n");
-		fprintf(f, "OP_ChatMessage=0x0017\n");
+		fprintf(f, "OP_ChatMessage=0x0018\n");
 		fprintf(f, "OP_LoginAccepted=0x0019\n");
 		fprintf(f, "OP_ServerListResponse=0x001a\n");
 		fprintf(f, "OP_Poll=0x002a\n");
