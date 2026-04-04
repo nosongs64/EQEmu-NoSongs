@@ -47,6 +47,13 @@ static const uint32 ADVANCED_LORE_LENGTH = 8192;
 #pragma pack(push)
 #pragma pack(1)
 
+struct EqGuid
+{
+	uint32_t Id;
+	uint16_t WorldId;
+	uint16_t Reserved;
+};
+
 struct LoginInfo {
 /*000*/	char	login_info[64];
 /*064*/	uint8	unknown064[124];
@@ -326,6 +333,7 @@ union
 	bool buyer;
 	bool untargetable;
 	uint32 npc_tint_id;
+	EqGuid CharacterGuid;
 };
 
 struct PlayerState_Struct {

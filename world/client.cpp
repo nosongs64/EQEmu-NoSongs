@@ -1223,8 +1223,10 @@ bool Client::Process() {
 	}
 
 	if(connect.Check()){
-		SendGuildList();// Send OPCode: OP_GuildsList
-		SendApproveWorld();
+		if (!(m_ClientVersionBit & EQ::versions::maskLaurionAndLater)) {
+			SendGuildList();// Send OPCode: OP_GuildsList
+			SendApproveWorld();
+		}
 		connect.Disable();
 	}
 

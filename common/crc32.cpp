@@ -99,6 +99,24 @@ uint32 CRC32::GenerateNoFlip(const uint8* buf, uint32 bufsize) {
 	return Update(buf, bufsize);
 }
 
+unsigned long CRC32::GetEQChecksum(uchar* in_data, uint32 in_length, uint32 start_at)
+{
+	unsigned long data;
+	unsigned long check = 0xffffffff;
+
+	for (uint32 i = start_at; i < in_length; i++)
+	{
+		data = in_data[i];
+		data = data ^ (check);
+		data = data & 0x000000ff;
+		check = check >> 8;
+		data = CRC32Table[data];
+		check = check ^ data;
+	}
+
+	return check;
+}
+
 void CRC32::SetEQChecksum(uchar* in_data, uint32 in_length, uint32 start_at)
 {
 	unsigned long data;

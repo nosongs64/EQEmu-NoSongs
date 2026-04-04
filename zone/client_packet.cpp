@@ -105,7 +105,6 @@ void MapOpcodes()
 	ConnectingOpcodes[OP_ZoneEntry] = &Client::Handle_Connect_OP_ZoneEntry;
 
 	// connected opcode handler assignments:
-	ConnectedOpcodes[OP_0x0193] = &Client::Handle_0x0193;
 	ConnectedOpcodes[OP_AAAction] = &Client::Handle_OP_AAAction;
 	ConnectedOpcodes[OP_AcceptNewTask] = &Client::Handle_OP_AcceptNewTask;
 	ConnectedOpcodes[OP_AdventureInfoRequest] = &Client::Handle_OP_AdventureInfoRequest;
@@ -1704,10 +1703,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	if ((m_pp.RestTimer > RuleI(Character, RestRegenTimeToActivate)) && (m_pp.RestTimer > RuleI(Character, RestRegenRaidTimeToActivate)))
 		m_pp.RestTimer = 0;
 
-	/* This checksum should disappear once dynamic structs are in... each struct strategy will do it */ // looks to be in place now
-	//CRC32::SetEQChecksum((unsigned char*)&m_pp, sizeof(PlayerProfile_Struct) - sizeof(m_pp.m_player_profile_version) - 4);
-	// m_pp.checksum = 0; // All server out-bound player profile packets are now translated - no need to waste cycles calculating this...
-
+	SendMembership();
+	
 	outapp = new EQApplicationPacket(OP_PlayerProfile, sizeof(PlayerProfile_Struct));
 
 	/* The entityid field in the Player Profile is used by the Client in relation to Group Leadership AA */
@@ -1878,16 +1875,6 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	SetAttackTimer();
 	conn_state = ZoneInfoSent;
 	zoneinpacket_timer.Start();
-	return;
-}
-
-// connected opcode handlers
-void Client::Handle_0x0193(const EQApplicationPacket *app)
-{
-	// Not sure what this opcode does. It started being sent when OP_ClientUpdate was
-	// changed to pump OP_ClientUpdate back out instead of OP_MobUpdate
-	// 2 bytes: 00 00
-
 	return;
 }
 
@@ -4276,21 +4263,30 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 
 	if (IsLFP())
 		worldserver.StopLFP(CharacterID());
-
-	if (GetGM())
-	{
-		if (RuleB(Character, EnableHackedFastCampForGM))
-		{
-			camp_timer.Start(100, true);
-		}
-		else {
-			OnDisconnect(true);
+	
+	if (ClientVersion() >= EQ::versions::ClientVersion::SteamLatest) {
+		if (!GetGM()) {
+			camp_timer.Start(29000, true);
 		}
 
-		return;
+		auto outapp = new EQApplicationPacket(OP_Camp, 1);
+		FastQueuePacket(&outapp);
 	}
+	else {
+		if (GetGM())
+		{
+			if (RuleB(Character, EnableHackedFastCampForGM))
+			{
+				camp_timer.Start(100, true);
+			}
+			else {
+				OnDisconnect(true);
+			}
+			return;
+		}
 
-	camp_timer.Start(29000, true);
+		camp_timer.Start(29000, true);
+	}
 
 	if (RuleB(Bots, Enabled)) {
 		bot_camp_timer.Start((RuleI(Bots, CampTimer) * 1000), true);
@@ -14568,7 +14564,10 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 		mco->rate = 1 / buy_cost_mod;
 	}
 
-	outapp->priority = 6;
+	if (m_ClientVersion >= EQ::versions::ClientVersion::SteamLatest) {
+		mco->player_id = GetID();
+	}
+	
 	QueuePacket(outapp);
 	safe_delete(outapp);
 

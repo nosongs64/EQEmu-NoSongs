@@ -21,6 +21,7 @@
 #include "common/patches/rof2.h"
 #include "common/patches/sod.h"
 #include "common/patches/sof.h"
+#include "common/patches/steam_latest.h"
 #include "common/patches/titanium.h"
 #include "common/patches/uf.h"
 
@@ -33,6 +34,7 @@ void RegisterAllPatches(EQStreamIdentifier &into)
 	UF::Register(into);
 	RoF::Register(into);
 	RoF2::Register(into);
+	SteamLatest::Register(into);
 }
 
 void ReloadAllPatches()
@@ -43,4 +45,5 @@ void ReloadAllPatches()
 	UF::Reload();
 	RoF::Reload();
 	RoF2::Reload();
+	SteamLatest::Reload();
 }
