@@ -1,3 +1,20 @@
+/*	EQEmu: EQEmulator
+
+	Copyright (C) 2001-2026 EQEmu Development Team
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 #ifdef LUA_EQEMU
 
 #include "lua_general.h"
@@ -6703,9 +6720,9 @@ luabind::scope lua_register_general() {
 		luabind::def("world_wide_add_ldon_points", (void(*)(uint32,int))&lua_world_wide_add_ldon_points),
 		luabind::def("world_wide_add_ldon_points", (void(*)(uint32,int,uint8))&lua_world_wide_add_ldon_points),
 		luabind::def("world_wide_add_ldon_points", (void(*)(uint32,int,uint8,uint8))&lua_world_wide_add_ldon_points),
-		luabind::def("world_wide_add_ldon_loss", (void(*)(uint32))&lua_world_wide_add_ldon_win),
-		luabind::def("world_wide_add_ldon_loss", (void(*)(uint32,uint8))&lua_world_wide_add_ldon_win),
-		luabind::def("world_wide_add_ldon_loss", (void(*)(uint32,uint8,uint8))&lua_world_wide_add_ldon_win),
+		luabind::def("world_wide_add_ldon_win", (void(*)(uint32))&lua_world_wide_add_ldon_win),
+		luabind::def("world_wide_add_ldon_win", (void(*)(uint32,uint8))&lua_world_wide_add_ldon_win),
+		luabind::def("world_wide_add_ldon_win", (void(*)(uint32,uint8,uint8))&lua_world_wide_add_ldon_win),
 		luabind::def("world_wide_assign_task", (void(*)(uint32))&lua_world_wide_assign_task),
 		luabind::def("world_wide_assign_task", (void(*)(uint32,bool))&lua_world_wide_assign_task),
 		luabind::def("world_wide_assign_task", (void(*)(uint32,bool,uint8))&lua_world_wide_assign_task),
@@ -6865,7 +6882,9 @@ luabind::scope lua_register_events() {
 			luabind::value("trade", static_cast<int>(EVENT_TRADE)),
 			luabind::value("death", static_cast<int>(EVENT_DEATH)),
 			luabind::value("spawn", static_cast<int>(EVENT_SPAWN)),
+			luabind::value("attack", static_cast<int>(EVENT_ATTACK)),
 			luabind::value("combat", static_cast<int>(EVENT_COMBAT)),
+			luabind::value("aggro", static_cast<int>(EVENT_AGGRO)),
 			luabind::value("slay", static_cast<int>(EVENT_SLAY)),
 			luabind::value("waypoint_arrive", static_cast<int>(EVENT_WAYPOINT_ARRIVE)),
 			luabind::value("waypoint_depart", static_cast<int>(EVENT_WAYPOINT_DEPART)),
