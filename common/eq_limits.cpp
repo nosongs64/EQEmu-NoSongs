@@ -117,7 +117,8 @@ static const EQ::constants::LookupEntry constants_static_lookup_entries[EQ::vers
 		SteamLatest::constants::EXPANSION_BIT,
 		SteamLatest::constants::EXPANSIONS_MASK,
 		SteamLatest::constants::CHARACTER_CREATION_LIMIT,
-		SteamLatest::constants::SAY_LINK_BODY_SIZE
+		SteamLatest::constants::SAY_LINK_BODY_SIZE,
+		SteamLatest::constants::MAX_BAZAAR_TRADERS
 	)
 };
 
@@ -396,7 +397,7 @@ static const EQ::inventory::LookupEntry inventory_static_lookup_entries[EQ::vers
 			RoF2::invtype::VIEW_MOD_PC_SIZE,	RoF2::invtype::VIEW_MOD_BANK_SIZE,			RoF2::invtype::VIEW_MOD_SHARED_BANK_SIZE,
 			RoF2::invtype::VIEW_MOD_LIMBO_SIZE,	RoF2::invtype::ALT_STORAGE_SIZE,			RoF2::invtype::ARCHIVED_SIZE,
 			RoF2::invtype::MAIL_SIZE,			RoF2::invtype::GUILD_TROPHY_TRIBUTE_SIZE,	RoF2::invtype::KRONO_SIZE,
-			RoF2::invtype::OTHER_SIZE
+			RoF2::invtype::GUILD_BANK_MAIN_SIZE, RoF2::invtype::GUILD_BANK_DEPOSIT_SIZE, RoF2::invtype::OTHER_SIZE
 		),
 	
 		RoF2::invslot::EQUIPMENT_BITMASK,
@@ -802,7 +803,7 @@ static const EQ::inventory::LookupEntry inventory_static_lookup_entries[EQ::vers
 			RoF2::invtype::VIEW_MOD_PC_SIZE,	RoF2::invtype::VIEW_MOD_BANK_SIZE,	RoF2::invtype::VIEW_MOD_SHARED_BANK_SIZE,
 			RoF2::invtype::VIEW_MOD_LIMBO_SIZE,	RoF2::INULL,						RoF2::INULL,
 			RoF2::INULL,						RoF2::INULL,						RoF2::INULL,
-			RoF2::INULL
+			RoF2::INULL,						RoF2::INULL,						RoF2::INULL
 		),
 
 		RoF2::INULL,
@@ -1283,7 +1284,7 @@ static const EQ::spells::LookupEntry spells_static_lookup_entries[EQ::versions::
 		RoF2::spells::NPC_BUFFS,
 		RoF2::spells::PET_BUFFS,
 		RoF2::spells::MERC_BUFFS
-	)
+	),
 	/*[ClientVersion::SteamLatest] =*/
 	EQ::spells::LookupEntry(
 		SteamLatest::spells::SPELL_ID_MAX,

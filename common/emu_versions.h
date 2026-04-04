@@ -79,7 +79,7 @@ namespace EQ
 			UF,
 			RoF,
 			RoF2,
-			SteamLatest
+			SteamLatest,
 			NPC,
 			NPCMerchant,
 			Merc,
@@ -227,7 +227,6 @@ namespace EQ
 			maskHoT = 0x0001FFFF,
 			maskVoA = 0x0003FFFF,
 			maskRoF = 0x0007FFFF,
-			maskCotF = 0x000FFFFF
 			maskCotF = 0x000FFFFF,
 			maskTDS = 0x001FFFFF,
 			maskTBM = 0x003FFFFF,

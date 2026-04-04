@@ -1238,9 +1238,6 @@ void Client::Handle_Connect_OP_WorldObjectsSent(const EQApplicationPacket *app)
 
 void Client::Handle_Connect_OP_ZoneComplete(const EQApplicationPacket *app)
 {
-	auto outapp = new EQApplicationPacket(OP_0x0347, 0);
-	QueuePacket(outapp);
-	safe_delete(outapp);
 	return;
 }
 
