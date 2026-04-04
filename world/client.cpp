@@ -1223,7 +1223,7 @@ bool Client::Process() {
 	}
 
 	if(connect.Check()){
-		if (!(m_ClientVersionBit & EQ::versions::maskLaurionAndLater)) {
+		if (!(m_ClientVersionBit & EQ::versions::maskSteamLatestAndLater)) {
 			SendGuildList();// Send OPCode: OP_GuildsList
 			SendApproveWorld();
 		}
