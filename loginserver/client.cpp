@@ -369,7 +369,7 @@ void Client::SendFailedLogin()
 		h.encrypt_type = m_login_base_message.encrypt_type;
 
 		// encrypted
-		PlayerLoginReplySteamLatest r{};
+		PlayerLoginReplyTOB r{};
 		r.base_reply.success = false;
 		r.base_reply.error_str_id = 105; // Error - The username and/or password were not valid
 
@@ -505,7 +505,7 @@ void Client::DoSuccessfulLogin(LoginAccountsRepository::LoginAccounts &a)
 		h.unk3 = m_login_base_message.unk3;
 
 		// not serializing any of the variable length strings so just use struct directly
-		PlayerLoginReplySteamLatest r{};
+		PlayerLoginReplyTOB r{};
 		r.base_reply.success = true;
 		r.base_reply.error_str_id = 101; // No Error
 		r.unk1 = 0;

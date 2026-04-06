@@ -67,7 +67,7 @@ struct PlayerLoginReply {
 	char    unknown[1];                 // variable length, password unlikely? client doesn't send this on re-login from char select
 };
 
-struct PlayerLoginReplySteamLatest
+struct PlayerLoginReplyTOB
 {
 	LoginBaseReplyMessage base_reply;
 	int8_t  unk1;                       // (default: 0)

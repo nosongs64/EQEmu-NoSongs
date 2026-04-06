@@ -9159,7 +9159,7 @@ void Client::SendHPUpdateMarquee(){
 }
 
 void Client::SendMembership() {
-	if (m_ClientVersion >= EQ::versions::ClientVersion::SteamLatest) {
+	if (m_ClientVersion >= EQ::versions::ClientVersion::TOB) {
 		auto outapp = new EQApplicationPacket(OP_SendMembership, sizeof(Membership_Struct));
 		Membership_Struct* mc = (Membership_Struct*)outapp->pBuffer;
 

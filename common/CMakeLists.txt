@@ -93,8 +93,8 @@ set(common_sources
     patches/sod_limits.cpp
     patches/sof.cpp
     patches/sof_limits.cpp
-    patches/steam_latest.cpp
-    patches/steam_latest_limits.cpp
+        patches/tob.cpp
+        patches/tob_limits.cpp
     patches/titanium.cpp
     patches/titanium_limits.cpp
     patches/uf.cpp
@@ -676,10 +676,10 @@ set(common_headers
     patches/sof_limits.h
     patches/sof_ops.h
     patches/sof_structs.h
-    patches/steam_latest.h
-    patches/steam_latest_limits.h
-    patches/steam_latest_ops.h
-    patches/steam_latest_structs.h
+        patches/tob.h
+        patches/tob_limits.h
+        patches/tob_ops.h
+        patches/tob_structs.h
     patches/ss_declare.h
     patches/ss_define.h
     patches/ss_register.h

@@ -1,7 +1,7 @@
 #include "../global_define.h"
 #include "../eqemu_config.h"
 #include "../eqemu_logsys.h"
-#include "steam_latest.h"
+#include "tob.h"
 #include "../opcodemgr.h"
 
 #include "../eq_stream_ident.h"
@@ -11,7 +11,7 @@
 #include "../misc_functions.h"
 #include "../strings.h"
 #include "../inventory_profile.h"
-#include "steam_latest_structs.h"
+#include "tob_structs.h"
 #include "../rulesys.h"
 #include "../path_manager.h"
 #include "../classes.h"
@@ -24,46 +24,48 @@
 #include <cassert>
 #include <cinttypes>
 
-namespace SteamLatest
+#include "world/sof_char_create_data.h"
+
+namespace TOB
 {
-	static const char* name = "SteamLatest";
+	static const char* name = "TOB";
 	static OpcodeManager* opcodes = nullptr;
 	static Strategy struct_strategy;
 
 	void SerializeItem(SerializeBuffer &buffer, const EQ::ItemInstance* inst, int16 slot_id, uint8 depth, ItemPacketType packet_type);
 
 	// message link converters
-	static inline void ServerToSteamLatestConvertLinks(std::string& message_out, const std::string& message_in);
-	static inline void SteamLatestToServerConvertLinks(std::string& message_out, const std::string& message_in);
+	static inline void ServerToTOBConvertLinks(std::string& message_out, const std::string& message_in);
+	static inline void TOBToServerConvertLinks(std::string& message_out, const std::string& message_in);
 
 	// SpawnAppearance
-	static inline uint32 ServerToSteamLatestSpawnAppearanceType(uint32 server_type);
-	static inline uint32 SteamLatestToServerSpawnAppearanceType(uint32 steam_latest_type);
+	static inline uint32 ServerToTOBSpawnAppearanceType(uint32 server_type);
+	static inline uint32 TOBToServerSpawnAppearanceType(uint32 steam_latest_type);
 
 	// server to client inventory location converters
-	static inline structs::InventorySlot_Struct ServerToSteamLatestSlot(uint32 server_slot);
-	static inline structs::InventorySlot_Struct ServerToSteamLatestCorpseSlot(uint32 server_corpse_slot);
-	static inline uint32 ServerToSteamLatestCorpseMainSlot(uint32 server_corpse_slot);
-	static inline structs::TypelessInventorySlot_Struct ServerToSteamLatestTypelessSlot(uint32 server_slot, int16 server_type);
+	static inline structs::InventorySlot_Struct ServerToTOBSlot(uint32 server_slot);
+	static inline structs::InventorySlot_Struct ServerToTOBCorpseSlot(uint32 server_corpse_slot);
+	static inline uint32 ServerToTOBCorpseMainSlot(uint32 server_corpse_slot);
+	static inline structs::TypelessInventorySlot_Struct ServerToTOBTypelessSlot(uint32 server_slot, int16 server_type);
 
 	// client to server inventory location converters
-	static inline uint32 SteamLatestToServerSlot(structs::InventorySlot_Struct steam_latest_slot);
-	static inline uint32 SteamLatestToServerCorpseSlot(structs::InventorySlot_Struct steam_latest_corpse_slot);
-	static inline uint32 SteamLatestToServerCorpseMainSlot(uint32 steam_latest_corpse_slot);
-	static inline uint32 SteamLatestToServerTypelessSlot(structs::TypelessInventorySlot_Struct steam_latest_slot, int16 steam_latest_type);
-	static inline structs::InventorySlot_Struct SteamLatestCastingInventorySlotToInventorySlot(structs::CastSpellInventorySlot_Struct steam_latest_slot);
-	static inline structs::CastSpellInventorySlot_Struct SteamLatestInventorySlotToCastingInventorySlot(structs::InventorySlot_Struct steam_latest_slot);
+	static inline uint32 TOBToServerSlot(structs::InventorySlot_Struct steam_latest_slot);
+	static inline uint32 TOBToServerCorpseSlot(structs::InventorySlot_Struct steam_latest_corpse_slot);
+	static inline uint32 TOBToServerCorpseMainSlot(uint32 steam_latest_corpse_slot);
+	static inline uint32 TOBToServerTypelessSlot(structs::TypelessInventorySlot_Struct steam_latest_slot, int16 steam_latest_type);
+	static inline structs::InventorySlot_Struct TOBCastingInventorySlotToInventorySlot(structs::CastSpellInventorySlot_Struct steam_latest_slot);
+	static inline structs::CastSpellInventorySlot_Struct TOBInventorySlotToCastingInventorySlot(structs::InventorySlot_Struct steam_latest_slot);
 
 	// Item packet types
-	static item::ItemPacketType ServerToSteamLatestItemPacketType(ItemPacketType steam_latest_type);
+	static item::ItemPacketType ServerToTOBItemPacketType(ItemPacketType steam_latest_type);
 
 	// casting slots
-	static inline spells::CastingSlot ServerToSteamLatestCastingSlot(EQ::spells::CastingSlot slot);
-	static inline EQ::spells::CastingSlot SteamLatestToServerCastingSlot(spells::CastingSlot slot);
+	static inline spells::CastingSlot ServerToTOBCastingSlot(EQ::spells::CastingSlot slot);
+	static inline EQ::spells::CastingSlot TOBToServerCastingSlot(spells::CastingSlot slot);
 
 	// buff slots
-	static inline int ServerToSteamLatestBuffSlot(int index);
-	static inline int SteamLatestToServerBuffSlot(int index);
+	static inline int ServerToTOBBuffSlot(int index);
+	static inline int TOBToServerBuffSlot(int index);
 
 	void Register(EQStreamIdentifier& into)
 	{
@@ -122,7 +124,8 @@ namespace SteamLatest
 	{
 		//all opcodes default to passthrough.
 #include "ss_register.h"
-#include "steam_latest_ops.h"
+#include "tob_ops.h"
+
 	}
 
 	std::string Strategy::Describe() const
@@ -135,7 +138,7 @@ namespace SteamLatest
 
 	const EQ::versions::ClientVersion Strategy::ClientVersion() const
 	{
-		return EQ::versions::ClientVersion::SteamLatest;
+		return EQ::versions::ClientVersion::TOB;
 	}
 
 #include "ss_define.h"
@@ -181,7 +184,7 @@ namespace SteamLatest
 		ENCODE_LENGTH_EXACT(ApplyPoison_Struct);
 		SETUP_DIRECT_ENCODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
 
-		eq->inventorySlot = ServerToSteamLatestTypelessSlot(emu->inventorySlot, EQ::invtype::typePossessions);
+		eq->inventorySlot = ServerToTOBTypelessSlot(emu->inventorySlot, EQ::invtype::typePossessions);
 		OUT(success);
 
 		FINISH_ENCODE();
@@ -253,7 +256,7 @@ namespace SteamLatest
 		eq->affect.z = emu->buff.z;
 		eq->affect.level = emu->buff.level;
 
-		eq->slot_id = ServerToSteamLatestBuffSlot(emu->slotid);
+		eq->slot_id = ServerToTOBBuffSlot(emu->slotid);
 		if (emu->bufffade == 1)
 		{
 			eq->buff_fade = 1;
@@ -272,7 +275,7 @@ namespace SteamLatest
 			outapp->WriteUInt32(0);	// tic timer
 			outapp->WriteUInt8(0);		// Type of OP_BuffCreate packet ?
 			outapp->WriteUInt16(1);		// 1 buff in this packet
-			outapp->WriteUInt32(ServerToSteamLatestBuffSlot(emu->slotid));
+			outapp->WriteUInt32(ServerToTOBBuffSlot(emu->slotid));
 			outapp->WriteUInt32(0xffffffff);		// SpellID (0xffff to remove)
 			outapp->WriteUInt32(0);			// Duration
 			outapp->WriteUInt32(0);			// numhits
@@ -292,7 +295,7 @@ namespace SteamLatest
 	{
 		SETUP_VAR_ENCODE(BuffIcon_Struct);
 
-		//SteamLatest has one extra 0x00 byte before the end byte
+		//TOB has one extra 0x00 byte before the end byte
 		uint32 sz = 13 + (17 * emu->count) + emu->name_lengths; // 17 includes nullterm
 		__packet->size = sz;
 		__packet->pBuffer = new unsigned char[sz];
@@ -305,7 +308,7 @@ namespace SteamLatest
 
 		for (int i = 0; i < emu->count; ++i)
 		{
-			__packet->WriteUInt32(emu->type == 0 ? ServerToSteamLatestBuffSlot(emu->entries[i].buff_slot) : emu->entries[i].buff_slot);
+			__packet->WriteUInt32(emu->type == 0 ? ServerToTOBBuffSlot(emu->entries[i].buff_slot) : emu->entries[i].buff_slot);
 			__packet->WriteUInt32(emu->entries[i].spell_id);
 			__packet->WriteUInt32(emu->entries[i].tics_remaining);
 			__packet->WriteUInt32(emu->entries[i].num_hits); // Unknown
@@ -333,11 +336,11 @@ namespace SteamLatest
 		ENCODE_LENGTH_EXACT(CastSpell_Struct);
 		SETUP_DIRECT_ENCODE(CastSpell_Struct, structs::CastSpell_Struct);
 
-		eq->slot = static_cast<uint32>(ServerToSteamLatestCastingSlot(static_cast<EQ::spells::CastingSlot>(emu->slot)));
+		eq->slot = static_cast<uint32>(ServerToTOBCastingSlot(static_cast<EQ::spells::CastingSlot>(emu->slot)));
 
 		OUT(spell_id);
 		//we should double check this cause it feels wrong
-		eq->inventory_slot = SteamLatestInventorySlotToCastingInventorySlot(ServerToSteamLatestSlot(emu->inventoryslot));
+		eq->inventory_slot = TOBInventorySlotToCastingInventorySlot(ServerToTOBSlot(emu->inventoryslot));
 		//OUT(inventoryslot);
 		OUT(target_id);
 
@@ -355,7 +358,7 @@ namespace SteamLatest
 
 		std::string old_message = emu->message;
 		std::string new_message;
-		ServerToSteamLatestConvertLinks(new_message, old_message);
+		ServerToTOBConvertLinks(new_message, old_message);
 
 		in->size = strlen(emu->sender) + strlen(emu->targetname) + new_message.length() + 43;
 
@@ -381,6 +384,53 @@ namespace SteamLatest
 		VARSTRUCT_ENCODE_TYPE(uint8, OutBuffer, 0);	// Unknown
 
 		delete[] __emu_buffer;
+		dest->FastQueuePacket(&in, ack_req);
+	}
+
+	ENCODE(OP_CharacterCreateRequest) {
+		EQApplicationPacket* in = *p;
+		*p = nullptr;
+
+		// need to calculate the size of the buffer
+		uint8* inptr = in->pBuffer;
+		inptr += sizeof(uint8);
+
+		uint32 allocs = *(uint32*)inptr; // allocations count
+		inptr += sizeof(uint32) + sizeof(RaceClassAllocation) * allocs;
+
+		uint32 combos = *(uint32*)inptr; // combos count
+
+		SerializeBuffer buf(sizeof(uint8) + 2 * sizeof(uint32) +
+			allocs * sizeof(structs::RaceClassAllocation) +
+			combos * sizeof(structs::RaceClassCombos));
+
+		// write the modified contents to the buffer
+		buf.WriteUInt8(in->ReadUInt8());
+
+		buf.WriteUInt32(in->ReadUInt32()); // allocations
+		for (uint32 i = 0; i < allocs; i++) {
+			// RaceClassAllocations is 15 uint32's
+			for (int j = 0; j < 15; ++j)
+				buf.WriteUInt32(in->ReadUInt32());
+		}
+
+		buf.WriteUInt32(in->ReadUInt32()); // combos
+		for (uint32 i = 0; i < combos; ++i) {
+			buf.WriteUInt64(in->ReadUInt32()); // expansion required -- only actual conversion
+			for (int j = 0; j < 5; ++j)
+				buf.WriteUInt32(in->ReadUInt32());
+		}
+
+		// will need to delete this after we swap, or it will leak
+		uchar* emu_buffer = in->pBuffer;
+
+		// swap into in
+		in->size = buf.size();
+		in->pBuffer = new uint8[buf.size()];
+		memcpy(in->pBuffer, buf.buffer(), buf.size());
+
+		delete[] emu_buffer;
+
 		dest->FastQueuePacket(&in, ack_req);
 	}
 
@@ -522,7 +572,7 @@ namespace SteamLatest
 
 	ENCODE(OP_DeleteCharge)
 	{
-		Log(Logs::Detail, Logs::Netcode, "SteamLatest::ENCODE(OP_DeleteCharge)");
+		Log(Logs::Detail, Logs::Netcode, "TOB::ENCODE(OP_DeleteCharge)");
 
 		ENCODE_FORWARD(OP_MoveItem);
 	}
@@ -532,8 +582,8 @@ namespace SteamLatest
 		ENCODE_LENGTH_EXACT(DeleteItem_Struct);
 		SETUP_DIRECT_ENCODE(DeleteItem_Struct, structs::DeleteItem_Struct);
 
-		eq->from_slot = ServerToSteamLatestSlot(emu->from_slot);
-		eq->to_slot = ServerToSteamLatestSlot(emu->to_slot);
+		eq->from_slot = ServerToTOBSlot(emu->from_slot);
+		eq->to_slot = ServerToTOBSlot(emu->to_slot);
 		OUT(number_in_stack);
 
 		FINISH_ENCODE();
@@ -607,7 +657,7 @@ namespace SteamLatest
 
 		for (int i = 0; i < 9; ++i) {
 			std::string new_message;
-			ServerToSteamLatestConvertLinks(new_message, old_message_array[i]);
+			ServerToTOBConvertLinks(new_message, old_message_array[i]);
 			buffer.WriteLengthString(new_message);
 		}
 
@@ -755,7 +805,7 @@ namespace SteamLatest
 		uchar* __emu_buffer = in->pBuffer;
 		ItemPacket_Struct* old_item_pkt = (ItemPacket_Struct*)__emu_buffer;
 
-		auto type = ServerToSteamLatestItemPacketType(old_item_pkt->PacketType);
+		auto type = ServerToTOBItemPacketType(old_item_pkt->PacketType);
 		if (type == item::ItemPacketType::ItemPacketInvalid) {
 			delete in;
 			return;
@@ -931,10 +981,10 @@ namespace SteamLatest
 		ENCODE_LENGTH_EXACT(MoveItem_Struct);
 		SETUP_DIRECT_ENCODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::Detail, Logs::Netcode, "SteamLatest::ENCODE(OP_MoveItem)");
+		Log(Logs::Detail, Logs::Netcode, "TOB::ENCODE(OP_MoveItem)");
 
-		eq->from_slot = ServerToSteamLatestSlot(emu->from_slot);
-		eq->to_slot = ServerToSteamLatestSlot(emu->to_slot);
+		eq->from_slot = ServerToTOBSlot(emu->from_slot);
+		eq->to_slot = ServerToTOBSlot(emu->to_slot);
 		OUT(number_in_stack);
 
 		FINISH_ENCODE();
@@ -2232,15 +2282,15 @@ namespace SteamLatest
 
 		OUT(object_type);
 		OUT(some_id);
-		eq->container_slot = ServerToSteamLatestSlot(emu->unknown1);
-		structs::InventorySlot_Struct SteamLatestSlot;
-		SteamLatestSlot.Type = 8;	// Observed
-		SteamLatestSlot.Padding1 = 0;
-		SteamLatestSlot.Slot = 0xffff;
-		SteamLatestSlot.SubIndex = 0xffff;
-		SteamLatestSlot.AugIndex = 0xffff;
-		SteamLatestSlot.Padding2 = 0;
-		eq->unknown_slot = SteamLatestSlot;
+		eq->container_slot = ServerToTOBSlot(emu->unknown1);
+		structs::InventorySlot_Struct TOBSlot;
+		TOBSlot.Type = 8;	// Observed
+		TOBSlot.Padding1 = 0;
+		TOBSlot.Slot = 0xffff;
+		TOBSlot.SubIndex = 0xffff;
+		TOBSlot.AugIndex = 0xffff;
+		TOBSlot.Padding2 = 0;
+		eq->unknown_slot = TOBSlot;
 		OUT(recipe_id);
 		OUT(reply_code);
 
@@ -2762,7 +2812,7 @@ namespace SteamLatest
 		SETUP_DIRECT_ENCODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Response_Struct);
 
 		OUT(npcid);
-		eq->inventory_slot = ServerToSteamLatestTypelessSlot(emu->itemslot, EQ::invtype::typePossessions);
+		eq->inventory_slot = ServerToTOBTypelessSlot(emu->itemslot, EQ::invtype::typePossessions);
 		OUT(quantity);
 		OUT(price);
 
@@ -2827,7 +2877,7 @@ namespace SteamLatest
 
 		in->ReadString(old_message);
 
-		ServerToSteamLatestConvertLinks(new_message, old_message);
+		ServerToTOBConvertLinks(new_message, old_message);
 
 		buf.WriteString(new_message);
 
@@ -2849,12 +2899,12 @@ namespace SteamLatest
 		if (sas->type != AppearanceType::Size)
 		{
 			//steam_latest struct is different than rof2's but the idea is the same
-			//we will probably want to better implement SteamLatest's structure later
+			//we will probably want to better implement TOB's structure later
 			auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(structs::SpawnAppearance_Struct));
 			structs::SpawnAppearance_Struct *eq = (structs::SpawnAppearance_Struct*)outapp->pBuffer;
 	
 			eq->spawn_id = sas->spawn_id;
-			eq->type = ServerToSteamLatestSpawnAppearanceType(sas->type);
+			eq->type = ServerToTOBSpawnAppearanceType(sas->type);
 			eq->parameter = sas->parameter;
 	
 			dest->FastQueuePacket(&outapp, ack_req);
@@ -3452,7 +3502,7 @@ namespace SteamLatest
 		DECODE_LENGTH_EXACT(structs::ApplyPoison_Struct);
 		SETUP_DIRECT_DECODE(ApplyPoison_Struct, structs::ApplyPoison_Struct);
 
-		emu->inventorySlot = SteamLatestToServerTypelessSlot(eq->inventorySlot, invtype::typePossessions);
+		emu->inventorySlot = TOBToServerTypelessSlot(eq->inventorySlot, invtype::typePossessions);
 		IN(success);
 
 		FINISH_DIRECT_DECODE();
@@ -3474,8 +3524,8 @@ namespace SteamLatest
 		DECODE_LENGTH_EXACT(structs::AugmentItem_Struct);
 		SETUP_DIRECT_DECODE(AugmentItem_Struct, structs::AugmentItem_Struct);
 
-		emu->container_slot = SteamLatestToServerSlot(eq->container_slot);
-		emu->augment_slot = SteamLatestToServerSlot(eq->augment_slot);
+		emu->container_slot = TOBToServerSlot(eq->container_slot);
+		emu->augment_slot = TOBToServerSlot(eq->augment_slot);
 		emu->container_index = eq->container_index;
 		emu->augment_index = eq->augment_index;
 		emu->dest_inst_id = eq->dest_inst_id;
@@ -3505,7 +3555,7 @@ namespace SteamLatest
 		DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
 		SETUP_DIRECT_DECODE(CastSpell_Struct, structs::CastSpell_Struct);
 
-		emu->slot = static_cast<uint32>(SteamLatestToServerCastingSlot(static_cast<spells::CastingSlot>(eq->slot)));
+		emu->slot = static_cast<uint32>(TOBToServerCastingSlot(static_cast<spells::CastingSlot>(eq->slot)));
 
 		IN(spell_id);
 		emu->inventoryslot = -1;
@@ -3540,7 +3590,7 @@ namespace SteamLatest
 
 		std::string old_message = InBuffer;
 		std::string new_message;
-		SteamLatestToServerConvertLinks(new_message, old_message);
+		TOBToServerConvertLinks(new_message, old_message);
 
 		__packet->size = sizeof(ChannelMessage_Struct) + new_message.length() + 1;
 		__packet->pBuffer = new unsigned char[__packet->size];
@@ -3612,8 +3662,8 @@ namespace SteamLatest
 		DECODE_LENGTH_EXACT(structs::DeleteItem_Struct);
 		SETUP_DIRECT_DECODE(DeleteItem_Struct, structs::DeleteItem_Struct);
 
-		emu->from_slot = SteamLatestToServerSlot(eq->from_slot);
-		emu->to_slot = SteamLatestToServerSlot(eq->to_slot);
+		emu->from_slot = TOBToServerSlot(eq->from_slot);
+		emu->to_slot = TOBToServerSlot(eq->to_slot);
 		IN(number_in_stack);
 
 		FINISH_DIRECT_DECODE();
@@ -3678,10 +3728,10 @@ namespace SteamLatest
 		DECODE_LENGTH_EXACT(structs::MoveItem_Struct);
 		SETUP_DIRECT_DECODE(MoveItem_Struct, structs::MoveItem_Struct);
 
-		Log(Logs::Detail, Logs::Netcode, "SteamLatest::DECODE(OP_MoveItem)");
+		Log(Logs::Detail, Logs::Netcode, "TOB::DECODE(OP_MoveItem)");
 
-		emu->from_slot = SteamLatestToServerSlot(eq->from_slot);
-		emu->to_slot = SteamLatestToServerSlot(eq->to_slot);
+		emu->from_slot = TOBToServerSlot(eq->from_slot);
+		emu->to_slot = TOBToServerSlot(eq->to_slot);
 		IN(number_in_stack);
 
 		FINISH_DIRECT_DECODE();
@@ -3696,7 +3746,7 @@ namespace SteamLatest
 
 		int r;
 		for (r = 0; r < 29; r++) {
-			// Size 68 in SteamLatest
+			// Size 68 in TOB
 			IN(filters[r]);
 		}
 
@@ -3722,7 +3772,7 @@ namespace SteamLatest
 		SETUP_DIRECT_DECODE(Merchant_Purchase_Struct, structs::Merchant_Purchase_Request_Struct);
 
 		IN(npcid);
-		emu->itemslot = SteamLatestToServerTypelessSlot(eq->inventory_slot, invtype::typePossessions);
+		emu->itemslot = TOBToServerTypelessSlot(eq->inventory_slot, invtype::typePossessions);
 		IN(quantity);
 
 		FINISH_DIRECT_DECODE();
@@ -3743,7 +3793,7 @@ namespace SteamLatest
 		SETUP_DIRECT_DECODE(SpawnAppearance_Struct, structs::SpawnAppearance_Struct);
 
 		IN(spawn_id);
-		emu->type = SteamLatestToServerSpawnAppearanceType(eq->type);
+		emu->type = TOBToServerSpawnAppearanceType(eq->type);
 		IN(parameter);
 
 		FINISH_DIRECT_DECODE();
@@ -3754,8 +3804,8 @@ namespace SteamLatest
 		DECODE_LENGTH_EXACT(structs::NewCombine_Struct);
 		SETUP_DIRECT_DECODE(NewCombine_Struct, structs::NewCombine_Struct);
 
-		emu->container_slot = SteamLatestToServerSlot(eq->container_slot);
-		emu->guildtribute_slot = SteamLatestToServerSlot(eq->guildtribute_slot); // this should only return INVALID_INDEX until implemented
+		emu->container_slot = TOBToServerSlot(eq->container_slot);
+		emu->guildtribute_slot = TOBToServerSlot(eq->guildtribute_slot); // this should only return INVALID_INDEX until implemented
 
 		FINISH_DIRECT_DECODE();
 	}
@@ -4411,10 +4461,10 @@ namespace SteamLatest
 		structs::InventorySlot_Struct slot_id{};
 		switch (packet_type) {
 		case ItemPacketLoot:
-			slot_id = ServerToSteamLatestCorpseSlot(slot_id_in);
+			slot_id = ServerToTOBCorpseSlot(slot_id_in);
 			break;
 		default:
-			slot_id = ServerToSteamLatestSlot(slot_id_in);
+			slot_id = ServerToTOBSlot(slot_id_in);
 			break;
 		}
 
@@ -4582,7 +4632,7 @@ namespace SteamLatest
 		buffer.WriteInt32(0); //unsupported atm
 	}
 
-	static inline void ServerToSteamLatestConvertLinks(std::string& message_out, const std::string& message_in)
+	static inline void ServerToTOBConvertLinks(std::string& message_out, const std::string& message_in)
 	{
 		if (message_in.find('\x12') == std::string::npos) {
 			message_out = message_in;
@@ -4674,298 +4724,298 @@ namespace SteamLatest
 		}
 	}
 
-	static inline void SteamLatestToServerConvertLinks(std::string& message_out, const std::string& message_in) {
+	static inline void TOBToServerConvertLinks(std::string& message_out, const std::string& message_in) {
 		message_out = message_in;
 	}
 
-	static inline uint32 ServerToSteamLatestSpawnAppearanceType(uint32 server_type) {
+	static inline uint32 ServerToTOBSpawnAppearanceType(uint32 server_type) {
 		switch (server_type)
 		{
 		case AppearanceType::WhoLevel:
-			return structs::SteamLatestAppearance::WhoLevel;
+			return structs::TOBAppearance::WhoLevel;
 		case AppearanceType::MaxHealth:
-			return structs::SteamLatestAppearance::MaxHealth;
+			return structs::TOBAppearance::MaxHealth;
 		case AppearanceType::Invisibility:
-			return structs::SteamLatestAppearance::Invisibility;
+			return structs::TOBAppearance::Invisibility;
 		case AppearanceType::PVP:
-			return structs::SteamLatestAppearance::PVP;
+			return structs::TOBAppearance::PVP;
 		case AppearanceType::Light:
-			return structs::SteamLatestAppearance::Light;
+			return structs::TOBAppearance::Light;
 		case AppearanceType::Animation:
-			return structs::SteamLatestAppearance::Animation;
+			return structs::TOBAppearance::Animation;
 		case AppearanceType::Sneak:
-			return structs::SteamLatestAppearance::Sneak;
+			return structs::TOBAppearance::Sneak;
 		case AppearanceType::SpawnID:
-			return structs::SteamLatestAppearance::SpawnID;
+			return structs::TOBAppearance::SpawnID;
 		case AppearanceType::Health:
-			return structs::SteamLatestAppearance::Health;
+			return structs::TOBAppearance::Health;
 		case AppearanceType::Linkdead:
-			return structs::SteamLatestAppearance::Linkdead;
+			return structs::TOBAppearance::Linkdead;
 		case AppearanceType::FlyMode:
-			return structs::SteamLatestAppearance::FlyMode;
+			return structs::TOBAppearance::FlyMode;
 		case AppearanceType::GM:
-			return structs::SteamLatestAppearance::GM;
+			return structs::TOBAppearance::GM;
 		case AppearanceType::Anonymous:
-			return structs::SteamLatestAppearance::Anonymous;
+			return structs::TOBAppearance::Anonymous;
 		case AppearanceType::GuildID:
-			return structs::SteamLatestAppearance::GuildID;
+			return structs::TOBAppearance::GuildID;
 		case AppearanceType::AFK:
-			return structs::SteamLatestAppearance::AFK;
+			return structs::TOBAppearance::AFK;
 		case AppearanceType::Pet:
-			return structs::SteamLatestAppearance::Pet;
+			return structs::TOBAppearance::Pet;
 		case AppearanceType::Summoned:
-			return structs::SteamLatestAppearance::Summoned;
+			return structs::TOBAppearance::Summoned;
 		case AppearanceType::SetType:
-			return structs::SteamLatestAppearance::NPCName;
+			return structs::TOBAppearance::NPCName;
 		case AppearanceType::CancelSneakHide:
-			return structs::SteamLatestAppearance::CancelSneakHide;
+			return structs::TOBAppearance::CancelSneakHide;
 		case AppearanceType::AreaHealthRegen:
-			return structs::SteamLatestAppearance::AreaHealthRegen;
+			return structs::TOBAppearance::AreaHealthRegen;
 		case AppearanceType::AreaManaRegen:
-			return structs::SteamLatestAppearance::AreaManaRegen;
+			return structs::TOBAppearance::AreaManaRegen;
 		case AppearanceType::AreaEnduranceRegen:
-			return structs::SteamLatestAppearance::AreaEnduranceRegen;
+			return structs::TOBAppearance::AreaEnduranceRegen;
 		case AppearanceType::FreezeBeneficialBuffs:
-			return structs::SteamLatestAppearance::FreezeBeneficialBuffs;
+			return structs::TOBAppearance::FreezeBeneficialBuffs;
 		case AppearanceType::NPCTintIndex:
-			return structs::SteamLatestAppearance::NPCTintIndex;
+			return structs::TOBAppearance::NPCTintIndex;
 		case AppearanceType::ShowHelm:
-			return structs::SteamLatestAppearance::ShowHelm;
+			return structs::TOBAppearance::ShowHelm;
 		case AppearanceType::DamageState:
-			return structs::SteamLatestAppearance::DamageState;
+			return structs::TOBAppearance::DamageState;
 		case AppearanceType::TextureType:
-			return structs::SteamLatestAppearance::TextureType;
+			return structs::TOBAppearance::TextureType;
 		case AppearanceType::GuildShow:
-			return structs::SteamLatestAppearance::GuildShow;
+			return structs::TOBAppearance::GuildShow;
 		case AppearanceType::OfflineMode:
-			return structs::SteamLatestAppearance::OfflineMode;
+			return structs::TOBAppearance::OfflineMode;
 		default:
-			return structs::SteamLatestAppearance::None;
+			return structs::TOBAppearance::None;
 		}
 	}
 
-	static inline uint32 SteamLatestToServerSpawnAppearanceType(uint32 steam_latest_type) {
+	static inline uint32 TOBToServerSpawnAppearanceType(uint32 steam_latest_type) {
 		switch (steam_latest_type)
 		{
-		case structs::SteamLatestAppearance::WhoLevel:
+		case structs::TOBAppearance::WhoLevel:
 			return AppearanceType::WhoLevel;
-		case structs::SteamLatestAppearance::MaxHealth:
+		case structs::TOBAppearance::MaxHealth:
 			return AppearanceType::MaxHealth;
-		case structs::SteamLatestAppearance::Invisibility:
+		case structs::TOBAppearance::Invisibility:
 			return AppearanceType::Invisibility;
-		case structs::SteamLatestAppearance::PVP:
+		case structs::TOBAppearance::PVP:
 			return AppearanceType::PVP;
-		case structs::SteamLatestAppearance::Light:
+		case structs::TOBAppearance::Light:
 			return AppearanceType::Light;
-		case structs::SteamLatestAppearance::Animation:
+		case structs::TOBAppearance::Animation:
 			return AppearanceType::Animation;
-		case structs::SteamLatestAppearance::Sneak:
+		case structs::TOBAppearance::Sneak:
 			return AppearanceType::Sneak;
-		case structs::SteamLatestAppearance::SpawnID:
+		case structs::TOBAppearance::SpawnID:
 			return AppearanceType::SpawnID;
-		case structs::SteamLatestAppearance::Health:
+		case structs::TOBAppearance::Health:
 			return AppearanceType::Health;
-		case structs::SteamLatestAppearance::Linkdead:
+		case structs::TOBAppearance::Linkdead:
 			return AppearanceType::Linkdead;
-		case structs::SteamLatestAppearance::FlyMode:
+		case structs::TOBAppearance::FlyMode:
 			return AppearanceType::FlyMode;
-		case structs::SteamLatestAppearance::GM:
+		case structs::TOBAppearance::GM:
 			return AppearanceType::GM;
-		case structs::SteamLatestAppearance::Anonymous:
+		case structs::TOBAppearance::Anonymous:
 			return AppearanceType::Anonymous;
-		case structs::SteamLatestAppearance::GuildID:
+		case structs::TOBAppearance::GuildID:
 			return AppearanceType::GuildID;
-		case structs::SteamLatestAppearance::AFK:
+		case structs::TOBAppearance::AFK:
 			return AppearanceType::AFK;
-		case structs::SteamLatestAppearance::Pet:
+		case structs::TOBAppearance::Pet:
 			return AppearanceType::Pet;
-		case structs::SteamLatestAppearance::Summoned:
+		case structs::TOBAppearance::Summoned:
 			return AppearanceType::Summoned;
-		case structs::SteamLatestAppearance::SetType:
+		case structs::TOBAppearance::SetType:
 			return AppearanceType::NPCName;
-		case structs::SteamLatestAppearance::CancelSneakHide:
+		case structs::TOBAppearance::CancelSneakHide:
 			return AppearanceType::CancelSneakHide;
-		case structs::SteamLatestAppearance::AreaHealthRegen:
+		case structs::TOBAppearance::AreaHealthRegen:
 			return AppearanceType::AreaHealthRegen;
-		case structs::SteamLatestAppearance::AreaManaRegen:
+		case structs::TOBAppearance::AreaManaRegen:
 			return AppearanceType::AreaManaRegen;
-		case structs::SteamLatestAppearance::AreaEnduranceRegen:
+		case structs::TOBAppearance::AreaEnduranceRegen:
 			return AppearanceType::AreaEnduranceRegen;
-		case structs::SteamLatestAppearance::FreezeBeneficialBuffs:
+		case structs::TOBAppearance::FreezeBeneficialBuffs:
 			return AppearanceType::FreezeBeneficialBuffs;
-		case structs::SteamLatestAppearance::NPCTintIndex:
+		case structs::TOBAppearance::NPCTintIndex:
 			return AppearanceType::NPCTintIndex;
-		case structs::SteamLatestAppearance::ShowHelm:
+		case structs::TOBAppearance::ShowHelm:
 			return AppearanceType::ShowHelm;
-		case structs::SteamLatestAppearance::DamageState:
+		case structs::TOBAppearance::DamageState:
 			return AppearanceType::DamageState;
-		case structs::SteamLatestAppearance::TextureType:
+		case structs::TOBAppearance::TextureType:
 			return AppearanceType::TextureType;
-		case structs::SteamLatestAppearance::GuildShow:
+		case structs::TOBAppearance::GuildShow:
 			return AppearanceType::GuildShow;
-		case structs::SteamLatestAppearance::OfflineMode:
+		case structs::TOBAppearance::OfflineMode:
 			return AppearanceType::OfflineMode;
 		default:
 			return AppearanceType::Die;
 		}
 	}
 
-	static inline structs::InventorySlot_Struct ServerToSteamLatestSlot(uint32 server_slot)
+	static inline structs::InventorySlot_Struct ServerToTOBSlot(uint32 server_slot)
 	{
-		structs::InventorySlot_Struct SteamLatestSlot;
-		SteamLatestSlot.Type = invtype::TYPE_INVALID;
-		SteamLatestSlot.Slot = invslot::SLOT_INVALID;
-		SteamLatestSlot.SubIndex = invbag::SLOT_INVALID;
-		SteamLatestSlot.AugIndex = invaug::SOCKET_INVALID;
+		structs::InventorySlot_Struct TOBSlot;
+		TOBSlot.Type = invtype::TYPE_INVALID;
+		TOBSlot.Slot = invslot::SLOT_INVALID;
+		TOBSlot.SubIndex = invbag::SLOT_INVALID;
+		TOBSlot.AugIndex = invaug::SOCKET_INVALID;
 
 		uint32 TempSlot = EQ::invslot::SLOT_INVALID;
 
 		if (server_slot < EQ::invtype::POSSESSIONS_SIZE) {
-			SteamLatestSlot.Type = invtype::typePossessions;
+			TOBSlot.Type = invtype::typePossessions;
 
 			if (server_slot == EQ::invslot::slotCursor) {
-				SteamLatestSlot.Slot = invslot::slotCursor;
+				TOBSlot.Slot = invslot::slotCursor;
 			}
 			else 
 			{
-				SteamLatestSlot.Slot = server_slot;
+				TOBSlot.Slot = server_slot;
 			}
 		}
 
 		else if (server_slot <= EQ::invbag::CURSOR_BAG_END && server_slot >= EQ::invbag::GENERAL_BAGS_BEGIN) {
 			TempSlot = server_slot - EQ::invbag::GENERAL_BAGS_BEGIN;
 
-			SteamLatestSlot.Type = invtype::typePossessions;
-			SteamLatestSlot.Slot = invslot::GENERAL_BEGIN + (TempSlot / EQ::invbag::SLOT_COUNT);
-			SteamLatestSlot.SubIndex = TempSlot - ((SteamLatestSlot.Slot - invslot::GENERAL_BEGIN) * EQ::invbag::SLOT_COUNT);
+			TOBSlot.Type = invtype::typePossessions;
+			TOBSlot.Slot = invslot::GENERAL_BEGIN + (TempSlot / EQ::invbag::SLOT_COUNT);
+			TOBSlot.SubIndex = TempSlot - ((TOBSlot.Slot - invslot::GENERAL_BEGIN) * EQ::invbag::SLOT_COUNT);
 		}
 
 		else if (server_slot <= EQ::invslot::TRIBUTE_END && server_slot >= EQ::invslot::TRIBUTE_BEGIN) {
-			SteamLatestSlot.Type = invtype::typeTribute;
-			SteamLatestSlot.Slot = server_slot - EQ::invslot::TRIBUTE_BEGIN;
+			TOBSlot.Type = invtype::typeTribute;
+			TOBSlot.Slot = server_slot - EQ::invslot::TRIBUTE_BEGIN;
 		}
 
 		else if (server_slot <= EQ::invslot::GUILD_TRIBUTE_END && server_slot >= EQ::invslot::GUILD_TRIBUTE_BEGIN) {
-			SteamLatestSlot.Type = invtype::typeGuildTribute;
-			SteamLatestSlot.Slot = server_slot - EQ::invslot::GUILD_TRIBUTE_BEGIN;
+			TOBSlot.Type = invtype::typeGuildTribute;
+			TOBSlot.Slot = server_slot - EQ::invslot::GUILD_TRIBUTE_BEGIN;
 		}
 
 		else if (server_slot == EQ::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
-			SteamLatestSlot.Type = invtype::typeWorld;
+			TOBSlot.Type = invtype::typeWorld;
 		}
 
 		else if (server_slot <= EQ::invslot::BANK_END && server_slot >= EQ::invslot::BANK_BEGIN) {
-			SteamLatestSlot.Type = invtype::typeBank;
-			SteamLatestSlot.Slot = server_slot - EQ::invslot::BANK_BEGIN;
+			TOBSlot.Type = invtype::typeBank;
+			TOBSlot.Slot = server_slot - EQ::invslot::BANK_BEGIN;
 		}
 
 		else if (server_slot <= EQ::invbag::BANK_BAGS_END && server_slot >= EQ::invbag::BANK_BAGS_BEGIN) {
 			TempSlot = server_slot - EQ::invbag::BANK_BAGS_BEGIN;
 
-			SteamLatestSlot.Type = invtype::typeBank;
-			SteamLatestSlot.Slot = TempSlot / EQ::invbag::SLOT_COUNT;
-			SteamLatestSlot.SubIndex = TempSlot - (SteamLatestSlot.Slot * EQ::invbag::SLOT_COUNT);
+			TOBSlot.Type = invtype::typeBank;
+			TOBSlot.Slot = TempSlot / EQ::invbag::SLOT_COUNT;
+			TOBSlot.SubIndex = TempSlot - (TOBSlot.Slot * EQ::invbag::SLOT_COUNT);
 		}
 
 		else if (server_slot <= EQ::invslot::SHARED_BANK_END && server_slot >= EQ::invslot::SHARED_BANK_BEGIN) {
-			SteamLatestSlot.Type = invtype::typeSharedBank;
-			SteamLatestSlot.Slot = server_slot - EQ::invslot::SHARED_BANK_BEGIN;
+			TOBSlot.Type = invtype::typeSharedBank;
+			TOBSlot.Slot = server_slot - EQ::invslot::SHARED_BANK_BEGIN;
 		}
 
 		else if (server_slot <= EQ::invbag::SHARED_BANK_BAGS_END && server_slot >= EQ::invbag::SHARED_BANK_BAGS_BEGIN) {
 			TempSlot = server_slot - EQ::invbag::SHARED_BANK_BAGS_BEGIN;
 
-			SteamLatestSlot.Type = invtype::typeSharedBank;
-			SteamLatestSlot.Slot = TempSlot / EQ::invbag::SLOT_COUNT;
-			SteamLatestSlot.SubIndex = TempSlot - (SteamLatestSlot.Slot * EQ::invbag::SLOT_COUNT);
+			TOBSlot.Type = invtype::typeSharedBank;
+			TOBSlot.Slot = TempSlot / EQ::invbag::SLOT_COUNT;
+			TOBSlot.SubIndex = TempSlot - (TOBSlot.Slot * EQ::invbag::SLOT_COUNT);
 		}
 
 		else if (server_slot <= EQ::invslot::TRADE_END && server_slot >= EQ::invslot::TRADE_BEGIN) {
-			SteamLatestSlot.Type = invtype::typeTrade;
-			SteamLatestSlot.Slot = server_slot - EQ::invslot::TRADE_BEGIN;
+			TOBSlot.Type = invtype::typeTrade;
+			TOBSlot.Slot = server_slot - EQ::invslot::TRADE_BEGIN;
 		}
 
 		else if (server_slot <= EQ::invbag::TRADE_BAGS_END && server_slot >= EQ::invbag::TRADE_BAGS_BEGIN) {
 			TempSlot = server_slot - EQ::invbag::TRADE_BAGS_BEGIN;
 
-			SteamLatestSlot.Type = invtype::typeTrade;
-			SteamLatestSlot.Slot = TempSlot / EQ::invbag::SLOT_COUNT;
-			SteamLatestSlot.SubIndex = TempSlot - (SteamLatestSlot.Slot * EQ::invbag::SLOT_COUNT);
+			TOBSlot.Type = invtype::typeTrade;
+			TOBSlot.Slot = TempSlot / EQ::invbag::SLOT_COUNT;
+			TOBSlot.SubIndex = TempSlot - (TOBSlot.Slot * EQ::invbag::SLOT_COUNT);
 		}
 
 		else if (server_slot <= EQ::invslot::WORLD_END && server_slot >= EQ::invslot::WORLD_BEGIN) {
-			SteamLatestSlot.Type = invtype::typeWorld;
-			SteamLatestSlot.Slot = server_slot - EQ::invslot::WORLD_BEGIN;
+			TOBSlot.Type = invtype::typeWorld;
+			TOBSlot.Slot = server_slot - EQ::invslot::WORLD_BEGIN;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to SteamLatest Slot [%i, %i, %i, %i]",
-			server_slot, SteamLatestSlot.Type, SteamLatestSlot.Slot, SteamLatestSlot.SubIndex, SteamLatestSlot.AugIndex);
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to TOB Slot [%i, %i, %i, %i]",
+			server_slot, TOBSlot.Type, TOBSlot.Slot, TOBSlot.SubIndex, TOBSlot.AugIndex);
 
-		return SteamLatestSlot;
+		return TOBSlot;
 	}
 
-	static inline structs::InventorySlot_Struct ServerToSteamLatestCorpseSlot(uint32 server_corpse_slot)
+	static inline structs::InventorySlot_Struct ServerToTOBCorpseSlot(uint32 server_corpse_slot)
 	{
-		structs::InventorySlot_Struct SteamLatestSlot;
-		SteamLatestSlot.Type = invtype::TYPE_INVALID;
-		SteamLatestSlot.Slot = ServerToSteamLatestCorpseMainSlot(server_corpse_slot);
-		SteamLatestSlot.SubIndex = invbag::SLOT_INVALID;
-		SteamLatestSlot.AugIndex = invaug::SOCKET_INVALID;
+		structs::InventorySlot_Struct TOBSlot;
+		TOBSlot.Type = invtype::TYPE_INVALID;
+		TOBSlot.Slot = ServerToTOBCorpseMainSlot(server_corpse_slot);
+		TOBSlot.SubIndex = invbag::SLOT_INVALID;
+		TOBSlot.AugIndex = invaug::SOCKET_INVALID;
 
-		if (SteamLatestSlot.Slot != invslot::SLOT_INVALID)
-			SteamLatestSlot.Type = invtype::typeCorpse;
+		if (TOBSlot.Slot != invslot::SLOT_INVALID)
+			TOBSlot.Type = invtype::typeCorpse;
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Corpse Slot %i to SteamLatest Corpse Slot [%i, %i, %i, %i]",
-			server_corpse_slot, SteamLatestSlot.Type, SteamLatestSlot.Slot, SteamLatestSlot.SubIndex, SteamLatestSlot.AugIndex);
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Corpse Slot %i to TOB Corpse Slot [%i, %i, %i, %i]",
+			server_corpse_slot, TOBSlot.Type, TOBSlot.Slot, TOBSlot.SubIndex, TOBSlot.AugIndex);
 
-		return SteamLatestSlot;
+		return TOBSlot;
 	}
 	
-	static inline uint32 ServerToSteamLatestCorpseMainSlot(uint32 server_corpse_slot)
+	static inline uint32 ServerToTOBCorpseMainSlot(uint32 server_corpse_slot)
 	{
-		uint32 SteamLatestSlot = invslot::SLOT_INVALID;
+		uint32 TOBSlot = invslot::SLOT_INVALID;
 
 		if (server_corpse_slot <= EQ::invslot::CORPSE_END && server_corpse_slot >= EQ::invslot::CORPSE_BEGIN) {
-			SteamLatestSlot = server_corpse_slot;
+			TOBSlot = server_corpse_slot;
 		}
 
-		LogNetcode("Convert Server Corpse Slot [{}] to SteamLatest Corpse Main Slot [{}]", server_corpse_slot, SteamLatestSlot);
+		LogNetcode("Convert Server Corpse Slot [{}] to TOB Corpse Main Slot [{}]", server_corpse_slot, TOBSlot);
 
-		return SteamLatestSlot;
+		return TOBSlot;
 	}
 
-	static inline structs::TypelessInventorySlot_Struct ServerToSteamLatestTypelessSlot(uint32 server_slot, int16 server_type)
+	static inline structs::TypelessInventorySlot_Struct ServerToTOBTypelessSlot(uint32 server_slot, int16 server_type)
 	{
-		structs::TypelessInventorySlot_Struct SteamLatestSlot;
-		SteamLatestSlot.Slot = invslot::SLOT_INVALID;
-		SteamLatestSlot.SubIndex = invbag::SLOT_INVALID;
-		SteamLatestSlot.AugIndex = invaug::SOCKET_INVALID;
+		structs::TypelessInventorySlot_Struct TOBSlot;
+		TOBSlot.Slot = invslot::SLOT_INVALID;
+		TOBSlot.SubIndex = invbag::SLOT_INVALID;
+		TOBSlot.AugIndex = invaug::SOCKET_INVALID;
 
 		uint32 TempSlot = EQ::invslot::SLOT_INVALID;
 
 		if (server_type == EQ::invtype::typePossessions) {
 			if (server_slot < EQ::invtype::POSSESSIONS_SIZE) {
-				SteamLatestSlot.Slot = server_slot;
+				TOBSlot.Slot = server_slot;
 			}
 
 			else if (server_slot <= EQ::invbag::CURSOR_BAG_END && server_slot >= EQ::invbag::GENERAL_BAGS_BEGIN) {
 				TempSlot = server_slot - EQ::invbag::GENERAL_BAGS_BEGIN;
 
-				SteamLatestSlot.Slot = invslot::GENERAL_BEGIN + (TempSlot / EQ::invbag::SLOT_COUNT);
-				SteamLatestSlot.SubIndex = TempSlot - ((SteamLatestSlot.Slot - invslot::GENERAL_BEGIN) * EQ::invbag::SLOT_COUNT);
+				TOBSlot.Slot = invslot::GENERAL_BEGIN + (TempSlot / EQ::invbag::SLOT_COUNT);
+				TOBSlot.SubIndex = TempSlot - ((TOBSlot.Slot - invslot::GENERAL_BEGIN) * EQ::invbag::SLOT_COUNT);
 			}
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to SteamLatest Typeless Slot [%i, %i, %i] (implied type: %i)",
-			server_slot, SteamLatestSlot.Slot, SteamLatestSlot.SubIndex, SteamLatestSlot.AugIndex, server_type);
+		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to TOB Typeless Slot [%i, %i, %i] (implied type: %i)",
+			server_slot, TOBSlot.Slot, TOBSlot.SubIndex, TOBSlot.AugIndex, server_type);
 
-		return SteamLatestSlot;
+		return TOBSlot;
 	}
 
-	static inline uint32 SteamLatestToServerSlot(structs::InventorySlot_Struct steam_latest_slot)
+	static inline uint32 TOBToServerSlot(structs::InventorySlot_Struct steam_latest_slot)
 	{
 		if (steam_latest_slot.AugIndex < invaug::SOCKET_INVALID || steam_latest_slot.AugIndex >= invaug::SOCKET_COUNT) {
-			Log(Logs::Detail, Logs::Netcode, "Convert SteamLatest Slot [%i, %i, %i, %i] to Server Slot %i",
+			Log(Logs::Detail, Logs::Netcode, "Convert TOB Slot [%i, %i, %i, %i] to Server Slot %i",
 				steam_latest_slot.Type, steam_latest_slot.Slot, steam_latest_slot.SubIndex, steam_latest_slot.AugIndex, EQ::invslot::SLOT_INVALID);
 
 			return EQ::invslot::SLOT_INVALID;
@@ -5088,13 +5138,13 @@ namespace SteamLatest
 		}
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert SteamLatest Slot [%i, %i, %i, %i] to Server Slot %i",
+		Log(Logs::Detail, Logs::Netcode, "Convert TOB Slot [%i, %i, %i, %i] to Server Slot %i",
 			steam_latest_slot.Type, steam_latest_slot.Slot, steam_latest_slot.SubIndex, steam_latest_slot.AugIndex, server_slot);
 
 		return server_slot;
 	}
 
-	static inline uint32 SteamLatestToServerCorpseSlot(structs::InventorySlot_Struct steam_latest_corpse_slot)
+	static inline uint32 TOBToServerCorpseSlot(structs::InventorySlot_Struct steam_latest_corpse_slot)
 	{
 		uint32 ServerSlot = EQ::invslot::SLOT_INVALID;
 
@@ -5103,16 +5153,16 @@ namespace SteamLatest
 		}
 
 		else {
-			ServerSlot = SteamLatestToServerCorpseMainSlot(steam_latest_corpse_slot.Slot);
+			ServerSlot = TOBToServerCorpseMainSlot(steam_latest_corpse_slot.Slot);
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert SteamLatest Slot [%i, %i, %i, %i] to Server Slot %i",
+		Log(Logs::Detail, Logs::Netcode, "Convert TOB Slot [%i, %i, %i, %i] to Server Slot %i",
 			steam_latest_corpse_slot.Type, steam_latest_corpse_slot.Slot, steam_latest_corpse_slot.SubIndex, steam_latest_corpse_slot.AugIndex, ServerSlot);
 
 		return ServerSlot;
 	}
 
-	static inline uint32 SteamLatestToServerCorpseMainSlot(uint32 steam_latest_corpse_slot)
+	static inline uint32 TOBToServerCorpseMainSlot(uint32 steam_latest_corpse_slot)
 	{
 		uint32 ServerSlot = EQ::invslot::SLOT_INVALID;
 
@@ -5120,15 +5170,15 @@ namespace SteamLatest
 			ServerSlot = steam_latest_corpse_slot;
 		}
 
-		LogNetcode("Convert SteamLatest Corpse Main Slot [{}] to Server Corpse Slot [{}]", steam_latest_corpse_slot, ServerSlot);
+		LogNetcode("Convert TOB Corpse Main Slot [{}] to Server Corpse Slot [{}]", steam_latest_corpse_slot, ServerSlot);
 
 		return ServerSlot;
 	}
 
-	static inline uint32 SteamLatestToServerTypelessSlot(structs::TypelessInventorySlot_Struct steam_latest_slot, int16 steam_latest_type)
+	static inline uint32 TOBToServerTypelessSlot(structs::TypelessInventorySlot_Struct steam_latest_slot, int16 steam_latest_type)
 	{
 		if (steam_latest_slot.AugIndex < invaug::SOCKET_INVALID || steam_latest_slot.AugIndex >= invaug::SOCKET_COUNT) {
-			Log(Logs::Detail, Logs::Netcode, "Convert SteamLatest Typeless Slot [%i, %i, %i] (implied type: %i) to Server Slot %i",
+			Log(Logs::Detail, Logs::Netcode, "Convert TOB Typeless Slot [%i, %i, %i] (implied type: %i) to Server Slot %i",
 				steam_latest_slot.Slot, steam_latest_slot.SubIndex, steam_latest_slot.AugIndex, steam_latest_type, EQ::invslot::SLOT_INVALID);
 
 			return EQ::invslot::SLOT_INVALID;
@@ -5242,13 +5292,13 @@ namespace SteamLatest
 		}
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert SteamLatest Typeless Slot [%i, %i, %i] (implied type: %i) to Server Slot %i",
+		Log(Logs::Detail, Logs::Netcode, "Convert TOB Typeless Slot [%i, %i, %i] (implied type: %i) to Server Slot %i",
 			steam_latest_slot.Slot, steam_latest_slot.SubIndex, steam_latest_slot.AugIndex, steam_latest_type, ServerSlot);
 
 		return ServerSlot;
 	}
 
-	static inline structs::InventorySlot_Struct SteamLatestCastingInventorySlotToInventorySlot(structs::CastSpellInventorySlot_Struct steam_latest_slot) {
+	static inline structs::InventorySlot_Struct TOBCastingInventorySlotToInventorySlot(structs::CastSpellInventorySlot_Struct steam_latest_slot) {
 		structs::InventorySlot_Struct ret;
 		ret.Type = steam_latest_slot.type;
 		ret.Slot = steam_latest_slot.slot;
@@ -5257,7 +5307,7 @@ namespace SteamLatest
 		return ret;
 	}
 
-	static inline structs::CastSpellInventorySlot_Struct SteamLatestInventorySlotToCastingInventorySlot(structs::InventorySlot_Struct steam_latest_slot) {
+	static inline structs::CastSpellInventorySlot_Struct TOBInventorySlotToCastingInventorySlot(structs::InventorySlot_Struct steam_latest_slot) {
 		structs::CastSpellInventorySlot_Struct ret;
 		ret.type = steam_latest_slot.Type;
 		ret.slot = steam_latest_slot.Slot;
@@ -5266,7 +5316,7 @@ namespace SteamLatest
 		return ret;
 	}
 
-	static item::ItemPacketType ServerToSteamLatestItemPacketType(ItemPacketType server_type) {
+	static item::ItemPacketType ServerToTOBItemPacketType(ItemPacketType server_type) {
 		switch (server_type) {
 		case ItemPacketType::ItemPacketMerchant:
 			return item::ItemPacketType::ItemPacketMerchant;
@@ -5295,7 +5345,7 @@ namespace SteamLatest
 
 	//This stuff isn't right because they for one removed potion belt
 	//This will probably be enough to get casting working for now though
-	static inline spells::CastingSlot ServerToSteamLatestCastingSlot(EQ::spells::CastingSlot slot) {
+	static inline spells::CastingSlot ServerToTOBCastingSlot(EQ::spells::CastingSlot slot) {
 		switch (slot) {
 		case EQ::spells::CastingSlot::Gem1:
 			return spells::CastingSlot::Gem1;
@@ -5333,7 +5383,7 @@ namespace SteamLatest
 		}
 	}
 
-	static inline EQ::spells::CastingSlot SteamLatestToServerCastingSlot(spells::CastingSlot slot) {
+	static inline EQ::spells::CastingSlot TOBToServerCastingSlot(spells::CastingSlot slot) {
 		switch (slot) {
 		case spells::CastingSlot::Gem1:
 			return EQ::spells::CastingSlot::Gem1;
@@ -5370,8 +5420,8 @@ namespace SteamLatest
 		}
 	}
 
-	//SteamLatest has the same # of long buffs as rof2, but 10 more short buffs
-	static inline int ServerToSteamLatestBuffSlot(int index)
+	//TOB has the same # of long buffs as rof2, but 10 more short buffs
+	static inline int ServerToTOBBuffSlot(int index)
 	{
 		// we're a disc
 		if (index >= EQ::spells::LONG_BUFFS + EQ::spells::SHORT_BUFFS)
@@ -5384,7 +5434,7 @@ namespace SteamLatest
 		return index; // as long as we guard against bad slots server side, we should be fine
 	}
 
-	static inline int SteamLatestToServerBuffSlot(int index)
+	static inline int TOBToServerBuffSlot(int index)
 	{
 		// we're a disc
 		if (index >= spells::LONG_BUFFS + spells::SHORT_BUFFS)
@@ -5396,5 +5446,5 @@ namespace SteamLatest
 		// we're a normal buff
 		return index; // as long as we guard against bad slots server side, we should be fine
 	}
-} /*SteamLatest*/
+} /*TOB*/
 

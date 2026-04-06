@@ -1,7 +1,7 @@
 #ifndef STEAM_LATEST_STRUCTS_H_
 #define STEAM_LATEST_STRUCTS_H_
 
-namespace SteamLatest {
+namespace TOB {
 	namespace structs {
 		// constants
 		static const uint32 MAX_PP_AA_ARRAY = 300;
@@ -94,7 +94,7 @@ namespace SteamLatest {
 
 		struct ExpansionInfo_Struct {
 			/*000*/	char	Unknown000[64];
-			/*064*/	uint32	Expansions;
+			/*064*/	uint64	Expansions;
 		};
 
 		/*
@@ -181,7 +181,7 @@ namespace SteamLatest {
 			/*000*/	uint32 CharCount;	//number of chars in this packet
 		};
 
-		enum SteamLatestAppearance : uint32
+		enum TOBAppearance : uint32
 		{
 			None,
 			WhoLevel,
@@ -1011,6 +1011,25 @@ namespace SteamLatest {
 			/*007*/	uint8	unknown007; // seen 0
 			/*008*/
 		};
+
+		/*
+		 * Structs used in OP_CharacterCreateRequest
+		 */
+		struct RaceClassAllocation {
+			uint32 Index;
+			uint32 BaseStats[7];
+			uint32 DefaultPointAllocation[7];
+		};
+
+		struct RaceClassCombos {
+			uint64_t ExpansionRequired;
+			uint32 Race;
+			uint32 Class;
+			uint32 Deity;
+			uint32 AllocationIndex;
+			uint32 Zone;
+		};
+
 #pragma pack()
 
 	};	//end namespace structs

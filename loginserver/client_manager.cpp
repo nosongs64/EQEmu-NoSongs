@@ -74,7 +74,7 @@ void CheckSoDOpcodeFile(const std::string &path)
 	}
 }
 
-void CheckSteamLatestOpcodeFile(const std::string &path)
+void CheckTOBOpcodeFile(const std::string &path)
 {
 	if (File::Exists(path)) {
 		return;
@@ -190,7 +190,7 @@ ClientManager::ClientManager()
 		"login_opcodes_steam_latest.conf"
 	);
 
-	CheckSteamLatestOpcodeFile(opcodes_path);
+	CheckTOBOpcodeFile(opcodes_path);
 
 	if (!m_steam_latest_ops->LoadOpcodes(opcodes_path.c_str())) {
 		LogError(

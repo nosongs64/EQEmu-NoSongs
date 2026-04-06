@@ -5,7 +5,7 @@
 
 class EQStreamIdentifier;
 
-namespace SteamLatest
+namespace TOB
 {
 
 	//these are the only public member of this namespace.
@@ -28,9 +28,10 @@ namespace SteamLatest
 
 		//magic macro to declare our opcode processors
 #include "ss_declare.h"
-#include "steam_latest_ops.h"
+#include "tob_ops.h"
+
 	};
 
-}; /*SteamLatest*/
+}; /*TOB*/
 
 #endif /*COMMON_LAURION_H*/

@@ -4261,7 +4261,7 @@ void Client::Handle_OP_Camp(const EQApplicationPacket *app)
 	if (IsLFP())
 		worldserver.StopLFP(CharacterID());
 	
-	if (ClientVersion() >= EQ::versions::ClientVersion::SteamLatest) {
+	if (ClientVersion() >= EQ::versions::ClientVersion::TOB) {
 		if (!GetGM()) {
 			camp_timer.Start(29000, true);
 		}
@@ -14561,7 +14561,7 @@ void Client::Handle_OP_ShopRequest(const EQApplicationPacket *app)
 		mco->rate = 1 / buy_cost_mod;
 	}
 
-	if (m_ClientVersion >= EQ::versions::ClientVersion::SteamLatest) {
+	if (m_ClientVersion >= EQ::versions::ClientVersion::TOB) {
 		mco->player_id = GetID();
 	}
 	
