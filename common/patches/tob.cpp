@@ -40,7 +40,7 @@ namespace TOB
 
 	// SpawnAppearance
 	static inline uint32 ServerToTOBSpawnAppearanceType(uint32 server_type);
-	static inline uint32 TOBToServerSpawnAppearanceType(uint32 steam_latest_type);
+	static inline uint32 TOBToServerSpawnAppearanceType(uint32 tob_type);
 
 	// server to client inventory location converters
 	static inline structs::InventorySlot_Struct ServerToTOBSlot(uint32 server_slot);
@@ -49,15 +49,15 @@ namespace TOB
 	static inline structs::TypelessInventorySlot_Struct ServerToTOBTypelessSlot(uint32 server_slot, int16 server_type);
 
 	// client to server inventory location converters
-	static inline uint32 TOBToServerSlot(structs::InventorySlot_Struct steam_latest_slot);
-	static inline uint32 TOBToServerCorpseSlot(structs::InventorySlot_Struct steam_latest_corpse_slot);
-	static inline uint32 TOBToServerCorpseMainSlot(uint32 steam_latest_corpse_slot);
-	static inline uint32 TOBToServerTypelessSlot(structs::TypelessInventorySlot_Struct steam_latest_slot, int16 steam_latest_type);
-	static inline structs::InventorySlot_Struct TOBCastingInventorySlotToInventorySlot(structs::CastSpellInventorySlot_Struct steam_latest_slot);
-	static inline structs::CastSpellInventorySlot_Struct TOBInventorySlotToCastingInventorySlot(structs::InventorySlot_Struct steam_latest_slot);
+	static inline uint32 TOBToServerSlot(structs::InventorySlot_Struct tob_slot);
+	static inline uint32 TOBToServerCorpseSlot(structs::InventorySlot_Struct tob_corpse_slot);
+	static inline uint32 TOBToServerCorpseMainSlot(uint32 tob_corpse_slot);
+	static inline uint32 TOBToServerTypelessSlot(structs::TypelessInventorySlot_Struct tob_slot, int16 tob_type);
+	static inline structs::InventorySlot_Struct TOBCastingInventorySlotToInventorySlot(structs::CastSpellInventorySlot_Struct tob_slot);
+	static inline structs::CastSpellInventorySlot_Struct TOBInventorySlotToCastingInventorySlot(structs::InventorySlot_Struct tob_slot);
 
 	// Item packet types
-	static item::ItemPacketType ServerToTOBItemPacketType(ItemPacketType steam_latest_type);
+	static item::ItemPacketType ServerToTOBItemPacketType(ItemPacketType tob_type);
 
 	// casting slots
 	static inline spells::CastingSlot ServerToTOBCastingSlot(EQ::spells::CastingSlot slot);
@@ -2898,7 +2898,7 @@ namespace TOB
 	
 		if (sas->type != AppearanceType::Size)
 		{
-			//steam_latest struct is different than rof2's but the idea is the same
+			//tob struct is different than rof2's but the idea is the same
 			//we will probably want to better implement TOB's structure later
 			auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(structs::SpawnAppearance_Struct));
 			structs::SpawnAppearance_Struct *eq = (structs::SpawnAppearance_Struct*)outapp->pBuffer;
@@ -4794,8 +4794,8 @@ namespace TOB
 		}
 	}
 
-	static inline uint32 TOBToServerSpawnAppearanceType(uint32 steam_latest_type) {
-		switch (steam_latest_type)
+	static inline uint32 TOBToServerSpawnAppearanceType(uint32 tob_type) {
+		switch (tob_type)
 		{
 		case structs::TOBAppearance::WhoLevel:
 			return AppearanceType::WhoLevel;
@@ -5012,11 +5012,11 @@ namespace TOB
 		return TOBSlot;
 	}
 
-	static inline uint32 TOBToServerSlot(structs::InventorySlot_Struct steam_latest_slot)
+	static inline uint32 TOBToServerSlot(structs::InventorySlot_Struct tob_slot)
 	{
-		if (steam_latest_slot.AugIndex < invaug::SOCKET_INVALID || steam_latest_slot.AugIndex >= invaug::SOCKET_COUNT) {
+		if (tob_slot.AugIndex < invaug::SOCKET_INVALID || tob_slot.AugIndex >= invaug::SOCKET_COUNT) {
 			Log(Logs::Detail, Logs::Netcode, "Convert TOB Slot [%i, %i, %i, %i] to Server Slot %i",
-				steam_latest_slot.Type, steam_latest_slot.Slot, steam_latest_slot.SubIndex, steam_latest_slot.AugIndex, EQ::invslot::SLOT_INVALID);
+				tob_slot.Type, tob_slot.Slot, tob_slot.SubIndex, tob_slot.AugIndex, EQ::invslot::SLOT_INVALID);
 
 			return EQ::invslot::SLOT_INVALID;
 		}
@@ -5024,110 +5024,110 @@ namespace TOB
 		uint32 server_slot = EQ::invslot::SLOT_INVALID;
 		uint32 temp_slot = invslot::SLOT_INVALID;
 
-		switch (steam_latest_slot.Type) {
+		switch (tob_slot.Type) {
 		case invtype::typePossessions: {
-			if (steam_latest_slot.Slot >= invslot::POSSESSIONS_BEGIN && steam_latest_slot.Slot <= invslot::POSSESSIONS_END) {
-				if (steam_latest_slot.SubIndex == invbag::SLOT_INVALID) {
-					if (steam_latest_slot.Slot == invslot::slotCursor) {
+			if (tob_slot.Slot >= invslot::POSSESSIONS_BEGIN && tob_slot.Slot <= invslot::POSSESSIONS_END) {
+				if (tob_slot.SubIndex == invbag::SLOT_INVALID) {
+					if (tob_slot.Slot == invslot::slotCursor) {
 						server_slot = EQ::invslot::slotCursor;
 					} 
-					else if(steam_latest_slot.Slot == invslot::slotGeneral11 || steam_latest_slot.Slot == invslot::slotGeneral12) 
+					else if(tob_slot.Slot == invslot::slotGeneral11 || tob_slot.Slot == invslot::slotGeneral12)
 					{
 						return EQ::invslot::SLOT_INVALID;
 					}
 					else {
-						server_slot = steam_latest_slot.Slot;
+						server_slot = tob_slot.Slot;
 					}
 				}
 
-				else if (steam_latest_slot.SubIndex >= invbag::SLOT_BEGIN && steam_latest_slot.SubIndex <= invbag::SLOT_END) {
-					if (steam_latest_slot.Slot < invslot::GENERAL_BEGIN)
+				else if (tob_slot.SubIndex >= invbag::SLOT_BEGIN && tob_slot.SubIndex <= invbag::SLOT_END) {
+					if (tob_slot.Slot < invslot::GENERAL_BEGIN)
 						return EQ::invslot::SLOT_INVALID;
 
-					temp_slot = (steam_latest_slot.Slot - invslot::GENERAL_BEGIN) * invbag::SLOT_COUNT;
-					server_slot = EQ::invbag::GENERAL_BAGS_BEGIN + temp_slot + steam_latest_slot.SubIndex;
+					temp_slot = (tob_slot.Slot - invslot::GENERAL_BEGIN) * invbag::SLOT_COUNT;
+					server_slot = EQ::invbag::GENERAL_BAGS_BEGIN + temp_slot + tob_slot.SubIndex;
 				}
 			}
 
 			break;
 		}
 		case invtype::typeBank: {
-			if (steam_latest_slot.Slot >= invslot::SLOT_BEGIN && steam_latest_slot.Slot < invtype::BANK_SIZE) {
-				if (steam_latest_slot.SubIndex == invbag::SLOT_INVALID) {
-					server_slot = EQ::invslot::BANK_BEGIN + steam_latest_slot.Slot;
+			if (tob_slot.Slot >= invslot::SLOT_BEGIN && tob_slot.Slot < invtype::BANK_SIZE) {
+				if (tob_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = EQ::invslot::BANK_BEGIN + tob_slot.Slot;
 				}
 
-				else if (steam_latest_slot.SubIndex >= invbag::SLOT_BEGIN && steam_latest_slot.SubIndex <= invbag::SLOT_END) {
-					temp_slot = steam_latest_slot.Slot * invbag::SLOT_COUNT;
-					server_slot = EQ::invbag::BANK_BAGS_BEGIN + temp_slot + steam_latest_slot.SubIndex;
+				else if (tob_slot.SubIndex >= invbag::SLOT_BEGIN && tob_slot.SubIndex <= invbag::SLOT_END) {
+					temp_slot = tob_slot.Slot * invbag::SLOT_COUNT;
+					server_slot = EQ::invbag::BANK_BAGS_BEGIN + temp_slot + tob_slot.SubIndex;
 				}
 			}
 
 			break;
 		}
 		case invtype::typeSharedBank: {
-			if (steam_latest_slot.Slot >= invslot::SLOT_BEGIN && steam_latest_slot.Slot < invtype::SHARED_BANK_SIZE) {
-				if (steam_latest_slot.SubIndex == invbag::SLOT_INVALID) {
-					server_slot = EQ::invslot::SHARED_BANK_BEGIN + steam_latest_slot.Slot;
+			if (tob_slot.Slot >= invslot::SLOT_BEGIN && tob_slot.Slot < invtype::SHARED_BANK_SIZE) {
+				if (tob_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = EQ::invslot::SHARED_BANK_BEGIN + tob_slot.Slot;
 				}
 
-				else if (steam_latest_slot.SubIndex >= invbag::SLOT_BEGIN && steam_latest_slot.SubIndex <= invbag::SLOT_END) {
-					temp_slot = steam_latest_slot.Slot * invbag::SLOT_COUNT;
-					server_slot = EQ::invbag::SHARED_BANK_BAGS_BEGIN + temp_slot + steam_latest_slot.SubIndex;
+				else if (tob_slot.SubIndex >= invbag::SLOT_BEGIN && tob_slot.SubIndex <= invbag::SLOT_END) {
+					temp_slot = tob_slot.Slot * invbag::SLOT_COUNT;
+					server_slot = EQ::invbag::SHARED_BANK_BAGS_BEGIN + temp_slot + tob_slot.SubIndex;
 				}
 			}
 
 			break;
 		}
 		case invtype::typeTrade: {
-			if (steam_latest_slot.Slot >= invslot::SLOT_BEGIN && steam_latest_slot.Slot < invtype::TRADE_SIZE) {
-				if (steam_latest_slot.SubIndex == invbag::SLOT_INVALID) {
-					server_slot = EQ::invslot::TRADE_BEGIN + steam_latest_slot.Slot;
+			if (tob_slot.Slot >= invslot::SLOT_BEGIN && tob_slot.Slot < invtype::TRADE_SIZE) {
+				if (tob_slot.SubIndex == invbag::SLOT_INVALID) {
+					server_slot = EQ::invslot::TRADE_BEGIN + tob_slot.Slot;
 				}
 
-				else if (steam_latest_slot.SubIndex >= invbag::SLOT_BEGIN && steam_latest_slot.SubIndex <= invbag::SLOT_END) {
-					temp_slot = steam_latest_slot.Slot * invbag::SLOT_COUNT;
-					server_slot = EQ::invbag::TRADE_BAGS_BEGIN + temp_slot + steam_latest_slot.SubIndex;
+				else if (tob_slot.SubIndex >= invbag::SLOT_BEGIN && tob_slot.SubIndex <= invbag::SLOT_END) {
+					temp_slot = tob_slot.Slot * invbag::SLOT_COUNT;
+					server_slot = EQ::invbag::TRADE_BAGS_BEGIN + temp_slot + tob_slot.SubIndex;
 				}
 			}
 
 			break;
 		}
 		case invtype::typeWorld: {
-			if (steam_latest_slot.Slot >= invslot::SLOT_BEGIN && steam_latest_slot.Slot < invtype::WORLD_SIZE) {
-				server_slot = EQ::invslot::WORLD_BEGIN + steam_latest_slot.Slot;
+			if (tob_slot.Slot >= invslot::SLOT_BEGIN && tob_slot.Slot < invtype::WORLD_SIZE) {
+				server_slot = EQ::invslot::WORLD_BEGIN + tob_slot.Slot;
 			}
 
-			else if (steam_latest_slot.Slot == invslot::SLOT_INVALID) {
+			else if (tob_slot.Slot == invslot::SLOT_INVALID) {
 				server_slot = EQ::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
 			}
 
 			break;
 		}
 		case invtype::typeLimbo: {
-			if (steam_latest_slot.Slot >= invslot::SLOT_BEGIN && steam_latest_slot.Slot < invtype::LIMBO_SIZE) {
+			if (tob_slot.Slot >= invslot::SLOT_BEGIN && tob_slot.Slot < invtype::LIMBO_SIZE) {
 				server_slot = EQ::invslot::slotCursor;
 			}
 
 			break;
 		}
 		case invtype::typeTribute: {
-			if (steam_latest_slot.Slot >= invslot::SLOT_BEGIN && steam_latest_slot.Slot < invtype::TRIBUTE_SIZE) {
-				server_slot = EQ::invslot::TRIBUTE_BEGIN + steam_latest_slot.Slot;
+			if (tob_slot.Slot >= invslot::SLOT_BEGIN && tob_slot.Slot < invtype::TRIBUTE_SIZE) {
+				server_slot = EQ::invslot::TRIBUTE_BEGIN + tob_slot.Slot;
 			}
 
 			break;
 		}
 		case invtype::typeGuildTribute: {
-			if (steam_latest_slot.Slot >= invslot::SLOT_BEGIN && steam_latest_slot.Slot < invtype::GUILD_TRIBUTE_SIZE) {
-				server_slot = EQ::invslot::GUILD_TRIBUTE_BEGIN + steam_latest_slot.Slot;
+			if (tob_slot.Slot >= invslot::SLOT_BEGIN && tob_slot.Slot < invtype::GUILD_TRIBUTE_SIZE) {
+				server_slot = EQ::invslot::GUILD_TRIBUTE_BEGIN + tob_slot.Slot;
 			}
 
 			break;
 		}
 		case invtype::typeCorpse: {
-			if (steam_latest_slot.Slot >= invslot::CORPSE_BEGIN && steam_latest_slot.Slot <= invslot::CORPSE_END) {
-				server_slot = steam_latest_slot.Slot;
+			if (tob_slot.Slot >= invslot::CORPSE_BEGIN && tob_slot.Slot <= invslot::CORPSE_END) {
+				server_slot = tob_slot.Slot;
 			}
 
 			break;
@@ -5139,47 +5139,47 @@ namespace TOB
 		}
 
 		Log(Logs::Detail, Logs::Netcode, "Convert TOB Slot [%i, %i, %i, %i] to Server Slot %i",
-			steam_latest_slot.Type, steam_latest_slot.Slot, steam_latest_slot.SubIndex, steam_latest_slot.AugIndex, server_slot);
+			tob_slot.Type, tob_slot.Slot, tob_slot.SubIndex, tob_slot.AugIndex, server_slot);
 
 		return server_slot;
 	}
 
-	static inline uint32 TOBToServerCorpseSlot(structs::InventorySlot_Struct steam_latest_corpse_slot)
+	static inline uint32 TOBToServerCorpseSlot(structs::InventorySlot_Struct tob_corpse_slot)
 	{
 		uint32 ServerSlot = EQ::invslot::SLOT_INVALID;
 
-		if (steam_latest_corpse_slot.Type != invtype::typeCorpse || steam_latest_corpse_slot.SubIndex != invbag::SLOT_INVALID || steam_latest_corpse_slot.AugIndex != invaug::SOCKET_INVALID) {
+		if (tob_corpse_slot.Type != invtype::typeCorpse || tob_corpse_slot.SubIndex != invbag::SLOT_INVALID || tob_corpse_slot.AugIndex != invaug::SOCKET_INVALID) {
 			ServerSlot = EQ::invslot::SLOT_INVALID;
 		}
 
 		else {
-			ServerSlot = TOBToServerCorpseMainSlot(steam_latest_corpse_slot.Slot);
+			ServerSlot = TOBToServerCorpseMainSlot(tob_corpse_slot.Slot);
 		}
 
 		Log(Logs::Detail, Logs::Netcode, "Convert TOB Slot [%i, %i, %i, %i] to Server Slot %i",
-			steam_latest_corpse_slot.Type, steam_latest_corpse_slot.Slot, steam_latest_corpse_slot.SubIndex, steam_latest_corpse_slot.AugIndex, ServerSlot);
+			tob_corpse_slot.Type, tob_corpse_slot.Slot, tob_corpse_slot.SubIndex, tob_corpse_slot.AugIndex, ServerSlot);
 
 		return ServerSlot;
 	}
 
-	static inline uint32 TOBToServerCorpseMainSlot(uint32 steam_latest_corpse_slot)
+	static inline uint32 TOBToServerCorpseMainSlot(uint32 tob_corpse_slot)
 	{
 		uint32 ServerSlot = EQ::invslot::SLOT_INVALID;
 
-		if (steam_latest_corpse_slot <= invslot::CORPSE_END && steam_latest_corpse_slot >= invslot::CORPSE_BEGIN) {
-			ServerSlot = steam_latest_corpse_slot;
+		if (tob_corpse_slot <= invslot::CORPSE_END && tob_corpse_slot >= invslot::CORPSE_BEGIN) {
+			ServerSlot = tob_corpse_slot;
 		}
 
-		LogNetcode("Convert TOB Corpse Main Slot [{}] to Server Corpse Slot [{}]", steam_latest_corpse_slot, ServerSlot);
+		LogNetcode("Convert TOB Corpse Main Slot [{}] to Server Corpse Slot [{}]", tob_corpse_slot, ServerSlot);
 
 		return ServerSlot;
 	}
 
-	static inline uint32 TOBToServerTypelessSlot(structs::TypelessInventorySlot_Struct steam_latest_slot, int16 steam_latest_type)
+	static inline uint32 TOBToServerTypelessSlot(structs::TypelessInventorySlot_Struct tob_slot, int16 tob_type)
 	{
-		if (steam_latest_slot.AugIndex < invaug::SOCKET_INVALID || steam_latest_slot.AugIndex >= invaug::SOCKET_COUNT) {
+		if (tob_slot.AugIndex < invaug::SOCKET_INVALID || tob_slot.AugIndex >= invaug::SOCKET_COUNT) {
 			Log(Logs::Detail, Logs::Netcode, "Convert TOB Typeless Slot [%i, %i, %i] (implied type: %i) to Server Slot %i",
-				steam_latest_slot.Slot, steam_latest_slot.SubIndex, steam_latest_slot.AugIndex, steam_latest_type, EQ::invslot::SLOT_INVALID);
+				tob_slot.Slot, tob_slot.SubIndex, tob_slot.AugIndex, tob_type, EQ::invslot::SLOT_INVALID);
 
 			return EQ::invslot::SLOT_INVALID;
 		}
@@ -5187,101 +5187,101 @@ namespace TOB
 		uint32 ServerSlot = EQ::invslot::SLOT_INVALID;
 		uint32 TempSlot = invslot::SLOT_INVALID;
 
-		switch (steam_latest_type) {
+		switch (tob_type) {
 		case invtype::typePossessions: {
-			if (steam_latest_slot.Slot >= invslot::POSSESSIONS_BEGIN && steam_latest_slot.Slot <= invslot::POSSESSIONS_END) {
-				if (steam_latest_slot.SubIndex == invbag::SLOT_INVALID) {
-					ServerSlot = steam_latest_slot.Slot;
+			if (tob_slot.Slot >= invslot::POSSESSIONS_BEGIN && tob_slot.Slot <= invslot::POSSESSIONS_END) {
+				if (tob_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = tob_slot.Slot;
 				}
 
-				else if (steam_latest_slot.SubIndex >= invbag::SLOT_BEGIN && steam_latest_slot.SubIndex <= invbag::SLOT_END) {
-					if (steam_latest_slot.Slot < invslot::GENERAL_BEGIN)
+				else if (tob_slot.SubIndex >= invbag::SLOT_BEGIN && tob_slot.SubIndex <= invbag::SLOT_END) {
+					if (tob_slot.Slot < invslot::GENERAL_BEGIN)
 						return EQ::invslot::SLOT_INVALID;
 
-					TempSlot = (steam_latest_slot.Slot - invslot::GENERAL_BEGIN) * invbag::SLOT_COUNT;
-					ServerSlot = EQ::invbag::GENERAL_BAGS_BEGIN + TempSlot + steam_latest_slot.SubIndex;
+					TempSlot = (tob_slot.Slot - invslot::GENERAL_BEGIN) * invbag::SLOT_COUNT;
+					ServerSlot = EQ::invbag::GENERAL_BAGS_BEGIN + TempSlot + tob_slot.SubIndex;
 				}
 			}
 
 			break;
 		}
 		case invtype::typeBank: {
-			if (steam_latest_slot.Slot >= invslot::SLOT_BEGIN && steam_latest_slot.Slot < invtype::BANK_SIZE) {
-				if (steam_latest_slot.SubIndex == invbag::SLOT_INVALID) {
-					ServerSlot = EQ::invslot::BANK_BEGIN + steam_latest_slot.Slot;
+			if (tob_slot.Slot >= invslot::SLOT_BEGIN && tob_slot.Slot < invtype::BANK_SIZE) {
+				if (tob_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = EQ::invslot::BANK_BEGIN + tob_slot.Slot;
 				}
 
-				else if (steam_latest_slot.SubIndex >= invbag::SLOT_BEGIN && steam_latest_slot.SubIndex <= invbag::SLOT_END) {
-					TempSlot = steam_latest_slot.Slot * invbag::SLOT_COUNT;
-					ServerSlot = EQ::invbag::BANK_BAGS_BEGIN + TempSlot + steam_latest_slot.SubIndex;
+				else if (tob_slot.SubIndex >= invbag::SLOT_BEGIN && tob_slot.SubIndex <= invbag::SLOT_END) {
+					TempSlot = tob_slot.Slot * invbag::SLOT_COUNT;
+					ServerSlot = EQ::invbag::BANK_BAGS_BEGIN + TempSlot + tob_slot.SubIndex;
 				}
 			}
 
 			break;
 		}
 		case invtype::typeSharedBank: {
-			if (steam_latest_slot.Slot >= invslot::SLOT_BEGIN && steam_latest_slot.Slot < invtype::SHARED_BANK_SIZE) {
-				if (steam_latest_slot.SubIndex == invbag::SLOT_INVALID) {
-					ServerSlot = EQ::invslot::SHARED_BANK_BEGIN + steam_latest_slot.Slot;
+			if (tob_slot.Slot >= invslot::SLOT_BEGIN && tob_slot.Slot < invtype::SHARED_BANK_SIZE) {
+				if (tob_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = EQ::invslot::SHARED_BANK_BEGIN + tob_slot.Slot;
 				}
 
-				else if (steam_latest_slot.SubIndex >= invbag::SLOT_BEGIN && steam_latest_slot.SubIndex <= invbag::SLOT_END) {
-					TempSlot = steam_latest_slot.Slot * invbag::SLOT_COUNT;
-					ServerSlot = EQ::invbag::SHARED_BANK_BAGS_BEGIN + TempSlot + steam_latest_slot.SubIndex;
+				else if (tob_slot.SubIndex >= invbag::SLOT_BEGIN && tob_slot.SubIndex <= invbag::SLOT_END) {
+					TempSlot = tob_slot.Slot * invbag::SLOT_COUNT;
+					ServerSlot = EQ::invbag::SHARED_BANK_BAGS_BEGIN + TempSlot + tob_slot.SubIndex;
 				}
 			}
 
 			break;
 		}
 		case invtype::typeTrade: {
-			if (steam_latest_slot.Slot >= invslot::SLOT_BEGIN && steam_latest_slot.Slot < invtype::TRADE_SIZE) {
-				if (steam_latest_slot.SubIndex == invbag::SLOT_INVALID) {
-					ServerSlot = EQ::invslot::TRADE_BEGIN + steam_latest_slot.Slot;
+			if (tob_slot.Slot >= invslot::SLOT_BEGIN && tob_slot.Slot < invtype::TRADE_SIZE) {
+				if (tob_slot.SubIndex == invbag::SLOT_INVALID) {
+					ServerSlot = EQ::invslot::TRADE_BEGIN + tob_slot.Slot;
 				}
 
-				else if (steam_latest_slot.SubIndex >= invbag::SLOT_BEGIN && steam_latest_slot.SubIndex <= invbag::SLOT_END) {
-					TempSlot = steam_latest_slot.Slot * invbag::SLOT_COUNT;
-					ServerSlot = EQ::invbag::TRADE_BAGS_BEGIN + TempSlot + steam_latest_slot.SubIndex;
+				else if (tob_slot.SubIndex >= invbag::SLOT_BEGIN && tob_slot.SubIndex <= invbag::SLOT_END) {
+					TempSlot = tob_slot.Slot * invbag::SLOT_COUNT;
+					ServerSlot = EQ::invbag::TRADE_BAGS_BEGIN + TempSlot + tob_slot.SubIndex;
 				}
 			}
 
 			break;
 		}
 		case invtype::typeWorld: {
-			if (steam_latest_slot.Slot >= invslot::SLOT_BEGIN && steam_latest_slot.Slot < invtype::WORLD_SIZE) {
-				ServerSlot = EQ::invslot::WORLD_BEGIN + steam_latest_slot.Slot;
+			if (tob_slot.Slot >= invslot::SLOT_BEGIN && tob_slot.Slot < invtype::WORLD_SIZE) {
+				ServerSlot = EQ::invslot::WORLD_BEGIN + tob_slot.Slot;
 			}
 
-			else if (steam_latest_slot.Slot == invslot::SLOT_INVALID) {
+			else if (tob_slot.Slot == invslot::SLOT_INVALID) {
 				ServerSlot = EQ::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
 			}
 
 			break;
 		}
 		case invtype::typeLimbo: {
-			if (steam_latest_slot.Slot >= invslot::SLOT_BEGIN && steam_latest_slot.Slot < invtype::LIMBO_SIZE) {
+			if (tob_slot.Slot >= invslot::SLOT_BEGIN && tob_slot.Slot < invtype::LIMBO_SIZE) {
 				ServerSlot = EQ::invslot::slotCursor;
 			}
 
 			break;
 		}
 		case invtype::typeTribute: {
-			if (steam_latest_slot.Slot >= invslot::SLOT_BEGIN && steam_latest_slot.Slot < invtype::TRIBUTE_SIZE) {
-				ServerSlot = EQ::invslot::TRIBUTE_BEGIN + steam_latest_slot.Slot;
+			if (tob_slot.Slot >= invslot::SLOT_BEGIN && tob_slot.Slot < invtype::TRIBUTE_SIZE) {
+				ServerSlot = EQ::invslot::TRIBUTE_BEGIN + tob_slot.Slot;
 			}
 
 			break;
 		}
 		case invtype::typeGuildTribute: {
-			if (steam_latest_slot.Slot >= invslot::SLOT_BEGIN && steam_latest_slot.Slot < invtype::GUILD_TRIBUTE_SIZE) {
-				ServerSlot = EQ::invslot::GUILD_TRIBUTE_BEGIN + steam_latest_slot.Slot;
+			if (tob_slot.Slot >= invslot::SLOT_BEGIN && tob_slot.Slot < invtype::GUILD_TRIBUTE_SIZE) {
+				ServerSlot = EQ::invslot::GUILD_TRIBUTE_BEGIN + tob_slot.Slot;
 			}
 
 			break;
 		}
 		case invtype::typeCorpse: {
-			if (steam_latest_slot.Slot >= invslot::CORPSE_BEGIN && steam_latest_slot.Slot <= invslot::CORPSE_END) {
-				ServerSlot = steam_latest_slot.Slot;
+			if (tob_slot.Slot >= invslot::CORPSE_BEGIN && tob_slot.Slot <= invslot::CORPSE_END) {
+				ServerSlot = tob_slot.Slot;
 			}
 
 			break;
@@ -5293,26 +5293,26 @@ namespace TOB
 		}
 
 		Log(Logs::Detail, Logs::Netcode, "Convert TOB Typeless Slot [%i, %i, %i] (implied type: %i) to Server Slot %i",
-			steam_latest_slot.Slot, steam_latest_slot.SubIndex, steam_latest_slot.AugIndex, steam_latest_type, ServerSlot);
+			tob_slot.Slot, tob_slot.SubIndex, tob_slot.AugIndex, tob_type, ServerSlot);
 
 		return ServerSlot;
 	}
 
-	static inline structs::InventorySlot_Struct TOBCastingInventorySlotToInventorySlot(structs::CastSpellInventorySlot_Struct steam_latest_slot) {
+	static inline structs::InventorySlot_Struct TOBCastingInventorySlotToInventorySlot(structs::CastSpellInventorySlot_Struct tob_slot) {
 		structs::InventorySlot_Struct ret;
-		ret.Type = steam_latest_slot.type;
-		ret.Slot = steam_latest_slot.slot;
-		ret.SubIndex = steam_latest_slot.sub_index;
-		ret.AugIndex = steam_latest_slot.aug_index;
+		ret.Type = tob_slot.type;
+		ret.Slot = tob_slot.slot;
+		ret.SubIndex = tob_slot.sub_index;
+		ret.AugIndex = tob_slot.aug_index;
 		return ret;
 	}
 
-	static inline structs::CastSpellInventorySlot_Struct TOBInventorySlotToCastingInventorySlot(structs::InventorySlot_Struct steam_latest_slot) {
+	static inline structs::CastSpellInventorySlot_Struct TOBInventorySlotToCastingInventorySlot(structs::InventorySlot_Struct tob_slot) {
 		structs::CastSpellInventorySlot_Struct ret;
-		ret.type = steam_latest_slot.Type;
-		ret.slot = steam_latest_slot.Slot;
-		ret.sub_index = steam_latest_slot.SubIndex;
-		ret.aug_index = steam_latest_slot.AugIndex;
+		ret.type = tob_slot.Type;
+		ret.slot = tob_slot.Slot;
+		ret.sub_index = tob_slot.SubIndex;
+		ret.aug_index = tob_slot.AugIndex;
 		return ret;
 	}
 

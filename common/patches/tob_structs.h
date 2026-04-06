@@ -399,7 +399,7 @@ namespace TOB {
 		struct EnterWorld_Struct {
 			/*000*/	char	name[64];
 			/*064*/	int32	unknown1;
-			/*068*/	int32	unknown2; //steam_latest handles these differently so for now im just going to ignore them till i figure it out
+			/*068*/	int32	unknown2; //tob handles these differently so for now im just going to ignore them till i figure it out
 		};
 
 		struct ZoneChange_Struct {
@@ -1033,6 +1033,6 @@ namespace TOB {
 #pragma pack()
 
 	};	//end namespace structs
-};	//end namespace steam_latest
+};	//end namespace tob
 
 #endif /*LAURION_STRUCTS_H_*/

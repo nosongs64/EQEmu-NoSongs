@@ -362,7 +362,7 @@ void Client::SendFailedLogin()
 	m_stored_username.clear();
 	m_stored_password.clear();
 
-	if (m_client_version == cv_steam_latest) {
+	if (m_client_version == cv_tob) {
 		// unencrypted
 		LoginBaseMessage h{};
 		h.sequence = m_login_base_message.sequence; // login (3)
@@ -496,7 +496,7 @@ void Client::DoSuccessfulLogin(LoginAccountsRepository::LoginAccounts &a)
 	m_account_name     = a.account_name;
 	m_loginserver_name = a.source_loginserver;
 
-	if (m_client_version == cv_steam_latest) {
+	if (m_client_version == cv_tob) {
 		// unencrypted
 		LoginBaseMessage h{};
 		h.sequence = m_login_base_message.sequence;

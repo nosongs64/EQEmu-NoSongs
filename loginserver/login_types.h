@@ -126,7 +126,7 @@ struct SystemFingerprint {
 enum LSClientVersion {
 	cv_titanium,
 	cv_sod,
-	cv_steam_latest
+	cv_tob
 };
 
 enum LSClientStatus {

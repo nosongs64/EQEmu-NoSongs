@@ -177,31 +177,31 @@ ClientManager::ClientManager()
 		}
 	);
 
-	int steam_latest_port = server.config.GetVariableInt("client_configuration", "steam_latest_port", 15900);
+	int tob_port = server.config.GetVariableInt("client_configuration", "tob_port", 15900);
 
-	EQStreamManagerInterfaceOptions steam_latest_opts(steam_latest_port, false, false);
+	EQStreamManagerInterfaceOptions tob_opts(tob_port, false, false);
 
-	m_steam_latest_stream = new EQ::Net::EQStreamManager(steam_latest_opts);
-	m_steam_latest_ops    = new RegularOpcodeManager;
+	m_tob_stream = new EQ::Net::EQStreamManager(tob_opts);
+	m_tob_ops    = new RegularOpcodeManager;
 
 	opcodes_path = fmt::format(
 		"{}/{}",
 		PathManager::Instance()->GetOpcodePath(),
-		"login_opcodes_steam_latest.conf"
+		"login_opcodes_tob.conf"
 	);
 
 	CheckTOBOpcodeFile(opcodes_path);
 
-	if (!m_steam_latest_ops->LoadOpcodes(opcodes_path.c_str())) {
+	if (!m_tob_ops->LoadOpcodes(opcodes_path.c_str())) {
 		LogError(
 			"ClientManager fatal error: couldn't load opcodes for Steam Latest file [{}]",
-			server.config.GetVariableString("client_configuration", "steam_latest_opcodes", "login_opcodes.conf")
+			server.config.GetVariableString("client_configuration", "tob_opcodes", "login_opcodes.conf")
 		);
 
 		run_server = false;
 	}
 
-	m_steam_latest_stream->OnNewConnection(
+	m_tob_stream->OnNewConnection(
 		[this](std::shared_ptr<EQ::Net::EQStream> stream) {
 			LogInfo(
 				"New Steam Latest client connection from [{}:{}]",
@@ -209,8 +209,8 @@ ClientManager::ClientManager()
 				stream->GetRemotePort()
 			);
 
-			stream->SetOpcodeManager(&m_steam_latest_ops);
-			Client *c = new Client(stream, cv_steam_latest);
+			stream->SetOpcodeManager(&m_tob_ops);
+			Client *c = new Client(stream, cv_tob);
 			m_clients.push_back(c);
 		}
 	);

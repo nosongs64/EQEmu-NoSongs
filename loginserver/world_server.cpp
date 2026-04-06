@@ -706,7 +706,7 @@ bool WorldServer::ValidateWorldServerAdminLogin(
 
 void WorldServer::SerializeForClientServerList(SerializeBuffer &out, bool use_local_ip, LSClientVersion version) const
 {
-	if (version == cv_steam_latest) {
+	if (version == cv_tob) {
 		if (use_local_ip) {
 			out.WriteString(GetLocalIP());
 		}
