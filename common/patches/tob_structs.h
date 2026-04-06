@@ -1022,7 +1022,7 @@ namespace TOB {
 		};
 
 		struct RaceClassCombos {
-			uint64_t ExpansionRequired;
+			uint64 ExpansionRequired;
 			uint32 Race;
 			uint32 Class;
 			uint32 Deity;
