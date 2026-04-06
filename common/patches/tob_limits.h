@@ -5,13 +5,13 @@
 #include "../emu_versions.h"
 #include "../skills.h"
 
-namespace SteamLatest
+namespace TOB
 {
 	const int16 IINVALID = -1;
 	const int16 INULL = 0;
 
 	namespace inventory {
-		inline EQ::versions::ClientVersion GetInventoryRef() { return EQ::versions::ClientVersion::SteamLatest; }
+		inline EQ::versions::ClientVersion GetInventoryRef() { return EQ::versions::ClientVersion::TOB; }
 
 		const bool ConcatenateInvTypeLimbo = false;
 
@@ -23,7 +23,7 @@ namespace SteamLatest
 	} /*inventory*/
 
 	namespace invtype {
-		inline EQ::versions::ClientVersion GetInvTypeRef() { return EQ::versions::ClientVersion::SteamLatest; }
+		inline EQ::versions::ClientVersion GetInvTypeRef() { return EQ::versions::ClientVersion::TOB; }
 
 		namespace enum_ {
 			enum InventoryTypes : int16 {
@@ -114,7 +114,7 @@ namespace SteamLatest
 	} /*invtype*/
 
 	namespace invslot {
-		inline EQ::versions::ClientVersion GetInvSlotRef() { return EQ::versions::ClientVersion::SteamLatest; }
+		inline EQ::versions::ClientVersion GetInvSlotRef() { return EQ::versions::ClientVersion::TOB; }
 
 		namespace enum_ {
 			enum InventorySlots : int16 {
@@ -186,8 +186,8 @@ namespace SteamLatest
 		const uint64 EQUIPMENT_BITMASK = 0x00000000007FFFFF;
 		const uint64 GENERAL_BITMASK = 0x00000007FF800000;
 		const uint64 CURSOR_BITMASK = 0x0000000800000000;
-		const uint64 POSSESSIONS_BITMASK = (EQUIPMENT_BITMASK | GENERAL_BITMASK | CURSOR_BITMASK); // based on 36-slot count (SteamLatest+)
-		const uint64 CORPSE_BITMASK = (GENERAL_BITMASK | CURSOR_BITMASK | (EQUIPMENT_BITMASK << 36)); // based on 36-slot count (SteamLatest+)
+		const uint64 POSSESSIONS_BITMASK = (EQUIPMENT_BITMASK | GENERAL_BITMASK | CURSOR_BITMASK); // based on 36-slot count (TOB+)
+		const uint64 CORPSE_BITMASK = (GENERAL_BITMASK | CURSOR_BITMASK | (EQUIPMENT_BITMASK << 36)); // based on 36-slot count (TOB+)
 
 
 		const char* GetInvPossessionsSlotName(int16 inv_slot);
@@ -196,7 +196,7 @@ namespace SteamLatest
 	} /*invslot*/
 
 	namespace invbag {
-		inline EQ::versions::ClientVersion GetInvBagRef() { return EQ::versions::ClientVersion::SteamLatest; }
+		inline EQ::versions::ClientVersion GetInvBagRef() { return EQ::versions::ClientVersion::TOB; }
 
 		const int16 SLOT_INVALID = IINVALID;
 		const int16 SLOT_BEGIN = INULL;
@@ -208,7 +208,7 @@ namespace SteamLatest
 	} /*invbag*/
 
 	namespace invaug {
-		inline EQ::versions::ClientVersion GetInvAugRef() { return EQ::versions::ClientVersion::SteamLatest; }
+		inline EQ::versions::ClientVersion GetInvAugRef() { return EQ::versions::ClientVersion::TOB; }
 
 		const int16 SOCKET_INVALID = IINVALID;
 		const int16 SOCKET_BEGIN = INULL;
@@ -220,7 +220,7 @@ namespace SteamLatest
 	} /*invaug*/
 
 	namespace item {
-		inline EQ::versions::ClientVersion GetItemRef() { return EQ::versions::ClientVersion::SteamLatest; }
+		inline EQ::versions::ClientVersion GetItemRef() { return EQ::versions::ClientVersion::TOB; }
 
 		//enum Unknown : int { // looks like item class..but, RoF has it too - nothing in UF-
 		//	Unknown1 = 0,
@@ -255,7 +255,7 @@ namespace SteamLatest
 	} /*item*/
 
 	namespace profile {
-		inline EQ::versions::ClientVersion GetProfileRef() { return EQ::versions::ClientVersion::SteamLatest; }
+		inline EQ::versions::ClientVersion GetProfileRef() { return EQ::versions::ClientVersion::TOB; }
 
 		const int16 BANDOLIERS_SIZE = 20;		// number of bandolier instances
 		const int16 BANDOLIER_ITEM_COUNT = 4;	// number of equipment slots in bandolier instance
@@ -267,7 +267,7 @@ namespace SteamLatest
 	} /*profile*/
 
 	namespace constants {
-		inline EQ::versions::ClientVersion GetConstantsRef() { return EQ::versions::ClientVersion::SteamLatest; }
+		inline EQ::versions::ClientVersion GetConstantsRef() { return EQ::versions::ClientVersion::TOB; }
 
 		const EQ::expansions::Expansion EXPANSION = EQ::expansions::Expansion::LS;
 		const uint32 EXPANSION_BIT = EQ::expansions::bitLS;
@@ -282,21 +282,21 @@ namespace SteamLatest
 	} /*constants*/
 
 	namespace behavior {
-		inline EQ::versions::ClientVersion GetBehaviorRef() { return EQ::versions::ClientVersion::SteamLatest; }
+		inline EQ::versions::ClientVersion GetBehaviorRef() { return EQ::versions::ClientVersion::TOB; }
 
 		const bool CoinHasWeight = false;
 
 	} /*behavior*/
 
 	namespace skills {
-		inline EQ::versions::ClientVersion GetSkillsRef() { return EQ::versions::ClientVersion::SteamLatest; }
+		inline EQ::versions::ClientVersion GetSkillsRef() { return EQ::versions::ClientVersion::TOB; }
 
 		const size_t LastUsableSkill = EQ::skills::Skill2HPiercing;
 
 	} /*skills*/
 
 	namespace spells {
-		inline EQ::versions::ClientVersion GetSkillsRef() { return EQ::versions::ClientVersion::SteamLatest; }
+		inline EQ::versions::ClientVersion GetSkillsRef() { return EQ::versions::ClientVersion::TOB; }
 
 		enum class CastingSlot : uint32 {
 			Gem1 = 0,
@@ -332,6 +332,6 @@ namespace SteamLatest
 
 	} /*spells*/
 	
-}; /* SteamLatest */
+}; /* TOB */
 
 #endif /*COMMON_LAURION_LIMITS_H*/

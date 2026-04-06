@@ -24,5 +24,5 @@ if __name__ == "__main__":
     patch_template(
         template_path='opcode.template', 
         opcodes_path='opcodes.csv', 
-        output_path='patch_SteamLatest.conf'
+        output_path='patch_TOB.conf'
     )

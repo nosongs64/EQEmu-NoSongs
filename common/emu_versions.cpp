@@ -54,8 +54,8 @@ const char* EQ::versions::ClientVersionName(ClientVersion client_version)
 		return "RoF";
 	case ClientVersion::RoF2:
 		return "RoF2";
-	case ClientVersion::SteamLatest:
-		return "SteamLatest";
+	case ClientVersion::TOB:
+		return "TOB";
 	default:
 		return "Invalid Version";
 	};
@@ -76,8 +76,8 @@ uint32 EQ::versions::ConvertClientVersionToClientVersionBit(ClientVersion client
 		return bitRoF;
 	case ClientVersion::RoF2:
 		return bitRoF2;
-	case ClientVersion::SteamLatest:
-		return bitSteamLatest;
+	case ClientVersion::TOB:
+		return bitTOB;
 	default:
 		return bitUnknown;
 	}
@@ -98,8 +98,8 @@ EQ::versions::ClientVersion EQ::versions::ConvertClientVersionBitToClientVersion
 		return ClientVersion::RoF;
 	case ((uint32)1 << (static_cast<unsigned int>(ClientVersion::RoF2) - 1)) :
 		return ClientVersion::RoF2;
-	case ((uint32)1 << (static_cast<unsigned int>(ClientVersion::SteamLatest) - 1)) :
-		return ClientVersion::SteamLatest;
+	case ((uint32)1 << (static_cast<unsigned int>(ClientVersion::TOB) - 1)) :
+		return ClientVersion::TOB;
 	default:
 		return ClientVersion::Unknown;
 	}
@@ -188,8 +188,8 @@ const char* EQ::versions::MobVersionName(MobVersion mob_version)
 		return "RoF";
 	case MobVersion::RoF2:
 		return "RoF2";
-	case MobVersion::SteamLatest:
-		return "SteamLatest";
+	case MobVersion::TOB:
+		return "TOB";
 	case MobVersion::NPC:
 		return "NPC";
 	case MobVersion::NPCMerchant:
@@ -218,7 +218,7 @@ const char* EQ::versions::MobVersionName(MobVersion mob_version)
 		return "Offline RoF";
 	case MobVersion::OfflineRoF2:
 		return "Offline RoF2";
-	case MobVersion::OfflineSteamLatest:
+	case MobVersion::OfflineTOB:
 		return "Offline Steam Latest";
 	default:
 		return "Invalid Version";
@@ -243,8 +243,8 @@ EQ::versions::ClientVersion EQ::versions::ConvertMobVersionToClientVersion(MobVe
 		return ClientVersion::RoF;
 	case MobVersion::RoF2:
 		return ClientVersion::RoF2;
-	case MobVersion::SteamLatest:
-		return ClientVersion::SteamLatest;
+	case MobVersion::TOB:
+		return ClientVersion::TOB;
 	default:
 		return ClientVersion::Unknown;
 	}
@@ -268,8 +268,8 @@ EQ::versions::MobVersion EQ::versions::ConvertClientVersionToMobVersion(ClientVe
 		return MobVersion::RoF;
 	case ClientVersion::RoF2:
 		return MobVersion::RoF2;
-	case ClientVersion::SteamLatest:
-		return MobVersion::SteamLatest;
+	case ClientVersion::TOB:
+		return MobVersion::TOB;
 	default:
 		return MobVersion::Unknown;
 	}
@@ -290,8 +290,8 @@ EQ::versions::MobVersion EQ::versions::ConvertPCMobVersionToOfflinePCMobVersion(
 		return MobVersion::OfflineRoF;
 	case MobVersion::RoF2:
 		return MobVersion::OfflineRoF2;
-		case MobVersion::SteamLatest:
-		return MobVersion::OfflineSteamLatest;
+		case MobVersion::TOB:
+		return MobVersion::OfflineTOB;
 	default:
 		return MobVersion::Unknown;
 	}
@@ -312,8 +312,8 @@ EQ::versions::MobVersion EQ::versions::ConvertOfflinePCMobVersionToPCMobVersion(
 		return MobVersion::RoF;
 	case MobVersion::OfflineRoF2:
 		return MobVersion::RoF2;
-	case MobVersion::OfflineSteamLatest:
-		return MobVersion::SteamLatest;
+	case MobVersion::OfflineTOB:
+		return MobVersion::TOB;
 	default:
 		return MobVersion::Unknown;
 	}
@@ -334,8 +334,8 @@ EQ::versions::ClientVersion EQ::versions::ConvertOfflinePCMobVersionToClientVers
 		return ClientVersion::RoF;
 	case MobVersion::OfflineRoF2:
 		return ClientVersion::RoF2;
-	case MobVersion::OfflineSteamLatest:
-		return ClientVersion::SteamLatest;
+	case MobVersion::OfflineTOB:
+		return ClientVersion::TOB;
 	default:
 		return ClientVersion::Unknown;
 	}
@@ -356,8 +356,8 @@ EQ::versions::MobVersion EQ::versions::ConvertClientVersionToOfflinePCMobVersion
 		return MobVersion::OfflineRoF;
 	case ClientVersion::RoF2:
 		return MobVersion::OfflineRoF2;
-	case ClientVersion::SteamLatest:
-		return MobVersion::OfflineSteamLatest;
+	case ClientVersion::TOB:
+		return MobVersion::OfflineTOB;
 	default:
 		return MobVersion::Unknown;
 	}

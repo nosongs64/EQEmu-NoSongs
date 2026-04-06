@@ -33,7 +33,7 @@ namespace EQ
 			UF,			// Build: 'Jun  8 2010 16:44:32'
 			RoF,		// Build: 'Dec 10 2012 17:35:44'
 			RoF2,		// Build: 'May 10 2013 23:30:08'
-			SteamLatest // Build: 'Sep 11 2025 11:54:10'
+			TOB         // Build: 'Sep 11 2025 11:54:10'
 		};
 
 		enum ClientVersionBitmask : uint32 {
@@ -45,7 +45,7 @@ namespace EQ
 			bitUF = 0x00000010,
 			bitRoF = 0x00000020,
 			bitRoF2 = 0x00000040,
-			bitSteamLatest = 0x00000080,
+			bitTOB = 0x00000080,
 			maskUnknown = 0x00000000,
 			maskTitaniumAndEarlier = 0x00000003,
 			maskSoFAndEarlier = 0x00000007,
@@ -57,11 +57,11 @@ namespace EQ
 			maskUFAndLater = 0xFFFFFFF0,
 			maskRoFAndLater = 0xFFFFFFE0,
 			maskRoF2AndLater = 0xFFFFFFC0,
-			maskSteamLatestAndLater = 0xFFFFFF80,
+			maskTOBAndLater = 0xFFFFFF80,
 			maskAllClients = 0xFFFFFFFF
 		};
 
-		const ClientVersion LastClientVersion = ClientVersion::SteamLatest;
+		const ClientVersion LastClientVersion = ClientVersion::TOB;
 		const size_t ClientVersionCount = (static_cast<size_t>(LastClientVersion) + 1);
 
 		bool IsValidClientVersion(ClientVersion client_version);
@@ -79,7 +79,7 @@ namespace EQ
 			UF,
 			RoF,
 			RoF2,
-			SteamLatest,
+			TOB,
 			NPC,
 			NPCMerchant,
 			Merc,
@@ -94,13 +94,13 @@ namespace EQ
 			OfflineUF,
 			OfflineRoF,
 			OfflineRoF2,
-			OfflineSteamLatest
+			OfflineTOB
 		};
 
-		const MobVersion LastMobVersion = MobVersion::OfflineSteamLatest;
-		const MobVersion LastPCMobVersion = MobVersion::SteamLatest;
+		const MobVersion LastMobVersion = MobVersion::OfflineTOB;
+		const MobVersion LastPCMobVersion = MobVersion::TOB;
 		const MobVersion LastNonPCMobVersion = MobVersion::BotPet;
-		const MobVersion LastOfflinePCMobVersion = MobVersion::OfflineSteamLatest;
+		const MobVersion LastOfflinePCMobVersion = MobVersion::OfflineTOB;
 		const size_t MobVersionCount = (static_cast<size_t>(LastMobVersion) + 1);
 
 		bool IsValidMobVersion(MobVersion mob_version);
@@ -133,7 +133,7 @@ namespace EQ
 			ucsUFCombined = 'E',
 			ucsRoFCombined = 'F',
 			ucsRoF2Combined = 'G',
-			ucsSteamLatestCombined = 'H'
+			ucsTOBCombined = 'H'
 		};
 
 	} /*versions*/

@@ -1,9 +1,9 @@
-#include "steam_latest_limits.h"
+#include "tob_limits.h"
 
 #include "../strings.h"
 
 
-int16 SteamLatest::invtype::GetInvTypeSize(int16 inv_type)
+int16 TOB::invtype::GetInvTypeSize(int16 inv_type)
 {
 	switch (inv_type) {
 	case invtype::typePossessions:
@@ -61,7 +61,7 @@ int16 SteamLatest::invtype::GetInvTypeSize(int16 inv_type)
 	}
 }
 
-const char* SteamLatest::invtype::GetInvTypeName(int16 inv_type)
+const char* TOB::invtype::GetInvTypeName(int16 inv_type)
 {
 	switch (inv_type) {
 	case invtype::TYPE_INVALID:
@@ -121,7 +121,7 @@ const char* SteamLatest::invtype::GetInvTypeName(int16 inv_type)
 	}
 }
 
-bool SteamLatest::invtype::IsInvTypePersistent(int16 inv_type)
+bool TOB::invtype::IsInvTypePersistent(int16 inv_type)
 {
 	switch (inv_type) {
 	case invtype::typePossessions:
@@ -139,7 +139,7 @@ bool SteamLatest::invtype::IsInvTypePersistent(int16 inv_type)
 	}
 }
 
-const char* SteamLatest::invslot::GetInvPossessionsSlotName(int16 inv_slot)
+const char* TOB::invslot::GetInvPossessionsSlotName(int16 inv_slot)
 {
 	switch (inv_slot) {
 	case invslot::SLOT_INVALID:
@@ -217,7 +217,7 @@ const char* SteamLatest::invslot::GetInvPossessionsSlotName(int16 inv_slot)
 	}
 }
 
-const char* SteamLatest::invslot::GetInvSlotName(int16 inv_type, int16 inv_slot)
+const char* TOB::invslot::GetInvSlotName(int16 inv_type, int16 inv_slot)
 {
 	if (inv_type == invtype::typePossessions)
 		return invslot::GetInvPossessionsSlotName(inv_slot);
@@ -236,7 +236,7 @@ const char* SteamLatest::invslot::GetInvSlotName(int16 inv_type, int16 inv_slot)
 	return ret_str.c_str();
 }
 
-const char* SteamLatest::invbag::GetInvBagIndexName(int16 bag_index)
+const char* TOB::invbag::GetInvBagIndexName(int16 bag_index)
 {
 	if (bag_index == invbag::SLOT_INVALID)
 		return "Invalid Bag";
@@ -250,7 +250,7 @@ const char* SteamLatest::invbag::GetInvBagIndexName(int16 bag_index)
 	return ret_str.c_str();
 }
 
-const char* SteamLatest::invaug::GetInvAugIndexName(int16 aug_index)
+const char* TOB::invaug::GetInvAugIndexName(int16 aug_index)
 {
 	if (aug_index == invaug::SOCKET_INVALID)
 		return "Invalid Augment";

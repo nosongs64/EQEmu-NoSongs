@@ -111,14 +111,14 @@ static const EQ::constants::LookupEntry constants_static_lookup_entries[EQ::vers
 		RoF2::constants::SAY_LINK_BODY_SIZE,
 		RoF2::constants::MAX_BAZAAR_TRADERS
 	),
-	/*[ClientVersion::SteamLatest] =*/
+	/*[ClientVersion::TOB] =*/
 	EQ::constants::LookupEntry(
-		SteamLatest::constants::EXPANSION,
-		SteamLatest::constants::EXPANSION_BIT,
-		SteamLatest::constants::EXPANSIONS_MASK,
-		SteamLatest::constants::CHARACTER_CREATION_LIMIT,
-		SteamLatest::constants::SAY_LINK_BODY_SIZE,
-		SteamLatest::constants::MAX_BAZAAR_TRADERS
+		TOB::constants::EXPANSION,
+		TOB::constants::EXPANSION_BIT,
+		TOB::constants::EXPANSIONS_MASK,
+		TOB::constants::CHARACTER_CREATION_LIMIT,
+		TOB::constants::SAY_LINK_BODY_SIZE,
+		TOB::constants::MAX_BAZAAR_TRADERS
 	)
 };
 
@@ -385,8 +385,8 @@ static const EQ::inventory::LookupEntry inventory_static_lookup_entries[EQ::vers
 		RoF2::inventory::ConcatenateInvTypeLimbo,
 		RoF2::inventory::AllowOverLevelEquipment
 	),
-	/*[MobVersion::SteamLatest] =*/
-	//SteamLatestTodo: These need to be set to the latest values not just use RoF2
+	/*[MobVersion::TOB] =*/
+	//TOBTodo: These need to be set to the latest values not just use RoF2
 	EQ::inventory::LookupEntry(
 		EQ::inventory::LookupEntry::InventoryTypeSize_Struct(
 			EQ::invtype::POSSESSIONS_SIZE,	RoF2::invtype::BANK_SIZE,					RoF2::invtype::SHARED_BANK_SIZE,
@@ -791,8 +791,8 @@ static const EQ::inventory::LookupEntry inventory_static_lookup_entries[EQ::vers
 		false,
 		false
 	),
-	/*[MobVersion::OfflineSteamLatest] =*/
-	//SteamLatestTodo: Need to use their own values instead of RoF2
+	/*[MobVersion::OfflineTOB] =*/
+	//TOBTodo: Need to use their own values instead of RoF2
 	EQ::inventory::LookupEntry(
 		EQ::inventory::LookupEntry::InventoryTypeSize_Struct(
 			RoF2::INULL,						RoF2::INULL,						RoF2::INULL,
@@ -1066,8 +1066,8 @@ static const EQ::behavior::LookupEntry behavior_static_lookup_entries[EQ::versio
 	EQ::behavior::LookupEntry(
 		RoF2::behavior::CoinHasWeight
 	),
-	/*[MobVersion::SteamLatest] =*/
-	//SteamLatestTodo: We need this value set properly
+	/*[MobVersion::TOB] =*/
+	//TOBTodo: We need this value set properly
 	EQ::behavior::LookupEntry(
 		RoF2::behavior::CoinHasWeight
 	),
@@ -1127,8 +1127,8 @@ static const EQ::behavior::LookupEntry behavior_static_lookup_entries[EQ::versio
 	EQ::behavior::LookupEntry(
 		RoF2::behavior::CoinHasWeight
 	),
-	/*[MobVersion::OfflineSteamLatest] =*/
-	//SteamLatestTodo: We need this value set properly
+	/*[MobVersion::OfflineTOB] =*/
+	//TOBTodo: We need this value set properly
 	EQ::behavior::LookupEntry(
 		RoF2::behavior::CoinHasWeight
 	)
@@ -1285,18 +1285,18 @@ static const EQ::spells::LookupEntry spells_static_lookup_entries[EQ::versions::
 		RoF2::spells::PET_BUFFS,
 		RoF2::spells::MERC_BUFFS
 	),
-	/*[ClientVersion::SteamLatest] =*/
+	/*[ClientVersion::TOB] =*/
 	EQ::spells::LookupEntry(
-		SteamLatest::spells::SPELL_ID_MAX,
-		SteamLatest::spells::SPELLBOOK_SIZE,
+		TOB::spells::SPELL_ID_MAX,
+		TOB::spells::SPELLBOOK_SIZE,
 		UF::spells::SPELL_GEM_COUNT, // client translators are setup to allow the max value a client supports..however, the top 4 indices are not valid in this case
-		SteamLatest::spells::LONG_BUFFS,
-		SteamLatest::spells::SHORT_BUFFS,
-		SteamLatest::spells::DISC_BUFFS,
-		SteamLatest::spells::TOTAL_BUFFS,
-		SteamLatest::spells::NPC_BUFFS,
-		SteamLatest::spells::PET_BUFFS,
-		SteamLatest::spells::MERC_BUFFS
+		TOB::spells::LONG_BUFFS,
+		TOB::spells::SHORT_BUFFS,
+		TOB::spells::DISC_BUFFS,
+		TOB::spells::TOTAL_BUFFS,
+		TOB::spells::NPC_BUFFS,
+		TOB::spells::PET_BUFFS,
+		TOB::spells::MERC_BUFFS
 	)
 };
 
