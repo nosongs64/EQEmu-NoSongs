@@ -93,8 +93,8 @@ set(common_sources
     patches/sod_limits.cpp
     patches/sof.cpp
     patches/sof_limits.cpp
-        patches/tob.cpp
-        patches/tob_limits.cpp
+    patches/tob.cpp
+    patches/tob_limits.cpp
     patches/titanium.cpp
     patches/titanium_limits.cpp
     patches/uf.cpp
@@ -676,10 +676,10 @@ set(common_headers
     patches/sof_limits.h
     patches/sof_ops.h
     patches/sof_structs.h
-        patches/tob.h
-        patches/tob_limits.h
-        patches/tob_ops.h
-        patches/tob_structs.h
+    patches/tob.h
+    patches/tob_limits.h
+    patches/tob_ops.h
+    patches/tob_structs.h
     patches/ss_declare.h
     patches/ss_define.h
     patches/ss_register.h
@@ -736,24 +736,7 @@ set(common_headers
 )
 
 # Source Groups (Regex based for automatic subdirectory handling)
-source_group("CLI" REGULAR_EXPRESSION "^cli/")
-source_group("Content" REGULAR_EXPRESSION "^content/")
-source_group("Cron" REGULAR_EXPRESSION "^cron/")
-source_group("Database" REGULAR_EXPRESSION "^database/")
-source_group("Discord" REGULAR_EXPRESSION "^discord/")
-source_group("Event" REGULAR_EXPRESSION "^event/")
-source_group("Events" REGULAR_EXPRESSION "^events/")
-source_group("Http" REGULAR_EXPRESSION "^http/")
-source_group("Json" REGULAR_EXPRESSION "^json/")
-source_group("Memory" REGULAR_EXPRESSION "^memory/")
-source_group("Net" REGULAR_EXPRESSION "^net/")
-source_group("Patches" REGULAR_EXPRESSION "^patches/")
-source_group("Process" REGULAR_EXPRESSION "^process/")
-source_group("Repositories" REGULAR_EXPRESSION "^repositories/")
-source_group("StackWalker" REGULAR_EXPRESSION "^StackWalker/")
-source_group("Stacktrace" REGULAR_EXPRESSION "^stacktrace/")
-source_group("Termcolor" REGULAR_EXPRESSION "^termcolor/")
-source_group("Util" REGULAR_EXPRESSION "^util/")
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${common_headers} ${common_sources} ${repositories})
 
 option(EQEMU_ADD_PROFILER "Link with Google perftools profiler" OFF)
 #PRNG options
