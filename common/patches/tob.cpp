@@ -1017,14 +1017,15 @@ namespace TOB
 
 		/*
 		s32 ZoneType;
-		s32 ZoneId;
+		s32 ZoneId; // combine id + instance
 		float ZoneExpModifier;
 		s32 GroupLvlExpRelated;
 		s32 FilterID;
 		s32 Unknown1;
 		*/
 		buffer.WriteInt32(emu->ztype);
-		buffer.WriteInt32(emu->zone_id);
+		buffer.WriteUInt16(emu->zone_id);
+		buffer.WriteUInt16(emu->zone_instance);
 		buffer.WriteFloat(emu->zone_exp_multiplier);
 		buffer.WriteInt32(0);
 		buffer.WriteInt32(0);
@@ -1845,7 +1846,7 @@ namespace TOB
 		}
 
 		/*
-		u32 current_zone;
+		u32 current_zone; // combine id + instance
 		float current_x;
 		float current_y;
 		float current_z;
@@ -1875,8 +1876,7 @@ namespace TOB
 		u8 status;
 		*/
 
-		out.WriteInt32(emu->guild_id);
-		out.WriteUInt32(0);
+		out.WriteUInt64(emu->guild_id);
 		out.WriteUInt8(0);
 		out.WriteUInt8(5);
 
@@ -1903,19 +1903,17 @@ namespace TOB
 		/*
 		u32 BenefitTimer;
 		s32 unknown1;
-		s32 current_favor;
-		s32 unknown2;
-		s32 all_time_favor;
-		s32 unknown3; //some of these are probably the bools on the pcclient;
-		u16 unknown4;
+		s64 current_favor;
+		s64 all_time_favor;
+		u8 unknown;
+		u8 unknown;
 		*/
 		out.WriteUInt32(600000);
 		out.WriteInt32(-1);
-		out.WriteUInt32(emu->tribute_points);
-		out.WriteUInt32(0);
-		out.WriteUInt32(emu->career_tribute_points);
-		out.WriteUInt32(0);
-		out.WriteUInt16(0);
+		out.WriteUInt64(emu->tribute_points);
+		out.WriteUInt64(emu->career_tribute_points);
+		out.WriteUInt8(0);
+		out.WriteUInt8(0);
 
 		//u32 tribute_benefit_count
 		out.WriteUInt32(5);
@@ -1944,23 +1942,50 @@ namespace TOB
 			out.WriteUInt32(0xFFFFFFFF);
 			out.WriteUInt32(0);
 		}
-		const uint8_t task_data[137] = {
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00,
-		};
 
-		//u8 tasks[137]; //on live and on xac's capture from 12/28/23 these both are the same size;
-		for (int i = 0; i < 137; i++)
-		{
-			out.WriteUInt8(task_data[i]);
+		// u32 BankItems type
+		// u32 BankItems data1
+		// u32 BankItems data2
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+
+		// s32 ActiveSharedTaskID
+		// bool IsMonsterMission
+		// s32 TaskID
+		// s32 MovingStartTime
+		// s32 InitialStartTime
+		out.WriteInt32(0);
+		out.WriteUInt8(0);
+		out.WriteInt32(0);
+		out.WriteInt32(0);
+		out.WriteInt32(0);
+
+		for (int i = 0; i < 2; ++i) {
+			// these are the element active booleans, will want to set them all individually later
+			for (int j = 0; j < 10; ++j)
+				out.WriteUInt8(0);
 		}
+
+		for (int i = 0; i < 2; ++i) {
+			// these are the current count integers, will want to set them all individually later
+			for (int j = 0; j < 10; ++j)
+				out.WriteUInt32(0);
+		}
+
+		// float RewardAdjustment
+		out.WriteFloat(0.f);
+
+		// monster mission count (set to 0 for now)
+		// monster mission packets are as follows:
+		//   s32 template id
+		//   s32 min
+		//   s32 max
+		//   s32 num selected
+		//   bool can select
+		//   string template name
+		out.WriteUInt32(0);
+
 
 		/*
 		u32 good_points_available;
