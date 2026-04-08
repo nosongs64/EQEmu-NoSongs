@@ -1017,16 +1017,14 @@ namespace TOB
 
 		/*
 		s32 ZoneType;
-		s16 ZoneId;
-		s16 ZoneInstance;
+		s32 ZoneId;
 		float ZoneExpModifier;
 		s32 GroupLvlExpRelated;
 		s32 FilterID;
 		s32 Unknown1;
 		*/
 		buffer.WriteInt32(emu->ztype);
-		buffer.WriteInt16(emu->zone_id);
-		buffer.WriteInt16(emu->zone_instance);
+		buffer.WriteInt32(emu->zone_id);
 		buffer.WriteFloat(emu->zone_exp_multiplier);
 		buffer.WriteInt32(0);
 		buffer.WriteInt32(0);
@@ -1202,10 +1200,12 @@ namespace TOB
 		u8 bNoEncumber;
 		u8 Unknown6;
 		u8 Unknown7;
+		u8 Unknown7a;
 		*/
 		buffer.WriteUInt8(1);
 		buffer.WriteUInt8(0);
 		buffer.WriteUInt8(1);
+		buffer.WriteUInt8(0);
 		buffer.WriteUInt8(0);
 		buffer.WriteUInt8(0);
 		buffer.WriteUInt8(0);
@@ -3088,8 +3088,10 @@ namespace TOB
 				buffer.WriteFloat(SpawnSize - 0.7f);
 			}
 
+			buffer.WriteFloat(1.0f); // This has something to do with collisions, generally between 1.0-1.1
+
 			/*
-			EqGuid HashKey;
+			EqGuid HashKey; -- this is actually uint64 in the client
 			*/
 			buffer.WriteUInt32(emu->CharacterGuid.Id);
 			buffer.WriteUInt16(emu->CharacterGuid.WorldId);
@@ -3142,7 +3144,7 @@ namespace TOB
 			buffer.WriteFloat(1.0f);
 			buffer.WriteInt32(-1);
 
-			if (emu->DestructibleObject || emu->class_ == Class::LDoNTreasure)
+			if (emu->DestructibleObject || emu->class_ == Class::LDoNTreasure) // flags & interactiveobject
 			{
 				/*
 				char InteractiveObjectModelName[];
@@ -4580,11 +4582,11 @@ namespace TOB
 		SerializeItemDefinition(buffer, item);
 
 		//u32 RealEstateArrayCount;
-		buffer.WriteInt32(0);
+		// buffer.WriteInt32(0);
 		//s32 RealEstateArray[RealEstateArrayCount];
 		
 		//bool bRealEstateItemPlaceable;
-		buffer.WriteInt8(0);
+		// buffer.WriteInt8(0);
 
 		//u32 SubContentSize;
 		uint32 subitem_count = 0;
