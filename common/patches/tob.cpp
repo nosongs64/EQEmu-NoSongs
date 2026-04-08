@@ -1482,12 +1482,10 @@ namespace TOB
 			s32 index;
 			s32 points_spent;
 			s32 charges_spent;
-			u8 unknown1;
 			*/
 			out.WriteUInt32(emu->aa_array[i].AA);
 			out.WriteUInt32(emu->aa_array[i].value);
 			out.WriteUInt32(emu->aa_array[i].charges);
-			out.WriteUInt8(0);
 		}
 
 		for (int i = 0; i < 60; ++i) {
@@ -1495,12 +1493,10 @@ namespace TOB
 			s32 index;
 			s32 points_spent;
 			s32 charges_spent;
-			u8 unknown1; //not sure about this one
 			*/
 			out.WriteUInt32(0);
 			out.WriteUInt32(0);
 			out.WriteUInt32(0);
-			out.WriteUInt8(0);
 		}
 
 		/*u32 skill_count;*/
@@ -1622,16 +1618,15 @@ namespace TOB
 
 			*/
 			out.WriteFloat(1.0f);
-			out.WriteUInt32(0);
-			out.WriteUInt32(0);
+			out.WriteUInt64(0);
 			out.WriteUInt32(0);
 			out.WriteUInt32(0);
 			out.WriteUInt8(0);
 			out.WriteUInt32(0xFFFFFFFF);
 			out.WriteUInt32(0);
+			out.WriteUInt32(0);
+			out.WriteUInt32(0);
 			out.WriteUInt8(0);
-			out.WriteUInt32(0);
-			out.WriteUInt32(0);
 			//SlotData slots[6];
 			for (int j = 0; j < 6; ++j) {
 				/*
@@ -1782,8 +1777,8 @@ namespace TOB
 		out.WriteUInt32(emu->endurance);
 		out.WriteUInt32(0);
 
-		//ItemIndex keyring_item_index[5];
-		for (int i = 0; i < 5; ++i) {
+		//ItemIndex keyring_item_index[6];
+		for (int i = 0; i < 6; ++i) {
 			/*
 			s16 slot1;
 			s16 slot2;
@@ -1826,7 +1821,7 @@ namespace TOB
 		u32 last_played_time;
 		u32 played_minutes;
 		u32 entitled_days;
-		u32 expansion_flags;
+		u64 expansion_flags;
 		*/
 
 		out.WriteUInt32(emu->birthday);
@@ -1834,7 +1829,7 @@ namespace TOB
 		out.WriteUInt32(emu->lastlogin);
 		out.WriteUInt32(5000);
 		out.WriteUInt32(6000);
-		out.WriteUInt32(0x3FFFFFFF);
+		out.WriteUInt64(0x3FFFFFFF);
 
 		//u32 language_count;
 		out.WriteUInt32(32);
@@ -2469,10 +2464,12 @@ namespace TOB
 		s32 AutoGrantExpansion;
 		s32 Unknown098;
 		u8 Unknown09C;
+		u8 unk TOB added
 		*/
 
 		buffer.WriteInt32(emu->expansion);
 		buffer.WriteInt32(0);
+		buffer.WriteUInt8(0);
 		buffer.WriteUInt8(0);
 
 		//u32 TotalEffects;
