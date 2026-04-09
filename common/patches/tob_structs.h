@@ -283,23 +283,23 @@ namespace TOB {
 		{
 			union {
 				struct {
-					signed y : 19;
+					signed deltaHeading : 10;
+					signed animation : 10;
+					// unsigned pad1 : 12;
+
 					signed deltaX : 13;
-
-					unsigned heading : 12;
 					signed z : 19;
-					unsigned pad1 : 1;
 
-					unsigned pitch : 12;
-					signed animation : 10;    //these might be swapped
-					signed deltaHeading : 10; //these might be swapped
-
-					signed deltaY : 13;
-					signed deltaZ : 13;
-					unsigned pad3 : 6;
+					signed y : 19;
+					unsigned heading : 12;
+					// unsigned pad2 : 1;
 
 					signed x : 19;
-					unsigned pad4 : 13;
+					signed deltaZ : 13;
+
+					unsigned pitch : 12;
+					signed deltaY : 13;
+					// unsigned pad3 : 7;
 				};
 				uint32_t raw[5];
 			};
@@ -307,19 +307,20 @@ namespace TOB {
 
 		struct Client_Position
 		{
-			/*00*/ float delta_x;
-			/*04*/ float x;
-			/*08*/ float z;
-			/*12*/ signed animation : 10;
-			       unsigned pitch : 12;
-			       signed padding1 : 10;
-			/*16*/ float delta_y;
-			/*20*/ float y;
-			/*24*/ signed delta_heading : 10;
-				   signed heading : 12;
-				   signed padding2 : 10;
-			/*28*/ float delta_z;
-			/*32*/ 
+			/*0x00*/ float y;
+			/*0x04*/ float delta_y;
+			/*0x08*/ float x;
+			/*0x0c*/ int animation : 10;
+			// signed padding1 : 22;
+			/*0x10*/ float delta_x;
+			/*0x14*/ float z;
+			/*0x18*/ float delta_z;
+			/*0x1c*/ int heading : 12;
+			int pitch : 12;
+			// signed padding2 : 8;
+			/*0x20*/ int delta_heading : 10;
+			// signed padding3 : 22;
+			/*0x24*/
 		};
 
 		struct PlayerPositionUpdateServer_Struct
