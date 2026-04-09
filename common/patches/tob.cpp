@@ -2128,24 +2128,22 @@ namespace TOB
 		//PvPKill last_kill;
 		/*
 		char name[];
-		u32 level;
-		u32 unknown1; //not sure
-		u32 unknown2; //not sure
+		u32 unk;
 		u32 race;
 		u32 class;
 		u32 zone;
 		u32 time;
 		u32 points;
+		u32 level;
 		*/
 		out.WriteString(emu->PVPLastKill.Name);
-		out.WriteUInt32(emu->PVPLastKill.Level);
-		out.WriteUInt32(0);
 		out.WriteUInt32(0);
 		out.WriteUInt32(emu->PVPLastKill.Race);
 		out.WriteUInt32(emu->PVPLastKill.Class);
 		out.WriteUInt32(emu->PVPLastKill.Zone);
 		out.WriteUInt32(emu->PVPLastKill.Time);
 		out.WriteUInt32(emu->PVPLastKill.Points);
+		out.WriteUInt32(emu->PVPLastKill.Level);
 
 		//PvPDeath last_death;
 		/*
@@ -2179,24 +2177,22 @@ namespace TOB
 		for (int i = 0; i < 50; ++i) {
 			/*
 			char name[];
-			u32 level;
-			u32 unknown1; //not sure
-			u32 unknown2; //not sure
+			u32 unknown1;
 			u32 race;
 			u32 class;
 			u32 zone;
 			u32 time;
 			u32 points;
+			u32 level;
 			*/
 			out.WriteString(emu->PVPRecentKills[i].Name);
-			out.WriteUInt32(emu->PVPRecentKills[i].Level);
-			out.WriteUInt32(0);
 			out.WriteUInt32(0);
 			out.WriteUInt32(emu->PVPRecentKills[i].Race);
 			out.WriteUInt32(emu->PVPRecentKills[i].Class);
 			out.WriteUInt32(emu->PVPRecentKills[i].Zone);
 			out.WriteUInt32(emu->PVPRecentKills[i].Time);
 			out.WriteUInt32(emu->PVPRecentKills[i].Points);
+			out.WriteUInt32(emu->PVPRecentKills[i].Level);
 		}
 
 		/*
@@ -2238,21 +2234,29 @@ namespace TOB
 
 		//AltCurrency alt_currency;
 		/*
-		u32 alt_currency_str_length;
-		u32 unknown1;
+		u64 alt_currency_str_length;
 		char alt_currency_string[alt_currency_str_length];
 		*/
-		out.WriteUInt32(1);
-		out.WriteUInt32(0);
+		out.WriteUInt64(1);
 		out.WriteUInt8(0x31);
 
 		//u32 completed_event_subcomponent_count;
 		out.WriteUInt32(0);
 		//AchivementSubComponentData completed_event_subcomponents[completed_event_subcomponent_count];
+		// s32 component id
+		// s32 requirement id
+		// u32 requirement type
+		// s32 count
+		// u32 unk
 
 		//u32 inprogress_event_subcomponent_count;
 		out.WriteUInt32(0);
 		//AchivementSubComponentData inprogress_event_subcomponents[inprogress_event_subcomponent_count];
+		// s32 component id
+		// s32 requirement id
+		// u32 requirement type
+		// s32 count
+		// u32 unk
 
 		/*
 		u64 merc_aa_exp;
@@ -2278,10 +2282,18 @@ namespace TOB
 		//alchemy_bonus_list_count
 		out.WriteUInt32(0);
 		//AlchemyBonusSkillData alchemy_bonus_list[alchemy_bonus_list_count];
+		// s32 skill id
+		// s32 bonus points
 
 		//u32 persona_count;
 		out.WriteUInt32(0);
 		//PersonaEquipmentSet persona_equipment_set[persona_count];
+		// u32
+		// u32 (length)
+		//    u32
+		//    u32
+		//    u32
+		// (there is a way to set two more u32's here, but the client seems to not ever reach that code)
 
 		//u8 term;
 		out.WriteUInt8(0);
