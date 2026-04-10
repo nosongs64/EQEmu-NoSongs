@@ -1017,16 +1017,15 @@ namespace TOB
 
 		/*
 		s32 ZoneType;
-		s16 ZoneId;
-		s16 ZoneInstance;
+		s32 ZoneId; // combine id + instance
 		float ZoneExpModifier;
 		s32 GroupLvlExpRelated;
 		s32 FilterID;
 		s32 Unknown1;
 		*/
 		buffer.WriteInt32(emu->ztype);
-		buffer.WriteInt16(emu->zone_id);
-		buffer.WriteInt16(emu->zone_instance);
+		buffer.WriteUInt16(emu->zone_id);
+		buffer.WriteUInt16(emu->zone_instance);
 		buffer.WriteFloat(emu->zone_exp_multiplier);
 		buffer.WriteInt32(0);
 		buffer.WriteInt32(0);
@@ -1202,10 +1201,12 @@ namespace TOB
 		u8 bNoEncumber;
 		u8 Unknown6;
 		u8 Unknown7;
+		u8 Unknown7a;
 		*/
 		buffer.WriteUInt8(1);
 		buffer.WriteUInt8(0);
 		buffer.WriteUInt8(1);
+		buffer.WriteUInt8(0);
 		buffer.WriteUInt8(0);
 		buffer.WriteUInt8(0);
 		buffer.WriteUInt8(0);
@@ -1482,12 +1483,10 @@ namespace TOB
 			s32 index;
 			s32 points_spent;
 			s32 charges_spent;
-			u8 unknown1;
 			*/
 			out.WriteUInt32(emu->aa_array[i].AA);
 			out.WriteUInt32(emu->aa_array[i].value);
 			out.WriteUInt32(emu->aa_array[i].charges);
-			out.WriteUInt8(0);
 		}
 
 		for (int i = 0; i < 60; ++i) {
@@ -1495,12 +1494,10 @@ namespace TOB
 			s32 index;
 			s32 points_spent;
 			s32 charges_spent;
-			u8 unknown1; //not sure about this one
 			*/
 			out.WriteUInt32(0);
 			out.WriteUInt32(0);
 			out.WriteUInt32(0);
-			out.WriteUInt8(0);
 		}
 
 		/*u32 skill_count;*/
@@ -1622,16 +1619,15 @@ namespace TOB
 
 			*/
 			out.WriteFloat(1.0f);
-			out.WriteUInt32(0);
-			out.WriteUInt32(0);
+			out.WriteUInt64(0);
 			out.WriteUInt32(0);
 			out.WriteUInt32(0);
 			out.WriteUInt8(0);
 			out.WriteUInt32(0xFFFFFFFF);
 			out.WriteUInt32(0);
+			out.WriteUInt32(0);
+			out.WriteUInt32(0);
 			out.WriteUInt8(0);
-			out.WriteUInt32(0);
-			out.WriteUInt32(0);
 			//SlotData slots[6];
 			for (int j = 0; j < 6; ++j) {
 				/*
@@ -1782,8 +1778,8 @@ namespace TOB
 		out.WriteUInt32(emu->endurance);
 		out.WriteUInt32(0);
 
-		//ItemIndex keyring_item_index[5];
-		for (int i = 0; i < 5; ++i) {
+		//ItemIndex keyring_item_index[6];
+		for (int i = 0; i < 6; ++i) {
 			/*
 			s16 slot1;
 			s16 slot2;
@@ -1826,7 +1822,7 @@ namespace TOB
 		u32 last_played_time;
 		u32 played_minutes;
 		u32 entitled_days;
-		u32 expansion_flags;
+		u64 expansion_flags;
 		*/
 
 		out.WriteUInt32(emu->birthday);
@@ -1834,7 +1830,7 @@ namespace TOB
 		out.WriteUInt32(emu->lastlogin);
 		out.WriteUInt32(5000);
 		out.WriteUInt32(6000);
-		out.WriteUInt32(0x3FFFFFFF);
+		out.WriteUInt64(0x3FFFFFFF);
 
 		//u32 language_count;
 		out.WriteUInt32(32);
@@ -1850,7 +1846,7 @@ namespace TOB
 		}
 
 		/*
-		u32 current_zone;
+		u32 current_zone; // combine id + instance
 		float current_x;
 		float current_y;
 		float current_z;
@@ -1880,8 +1876,7 @@ namespace TOB
 		u8 status;
 		*/
 
-		out.WriteInt32(emu->guild_id);
-		out.WriteUInt32(0);
+		out.WriteUInt64(emu->guild_id);
 		out.WriteUInt8(0);
 		out.WriteUInt8(5);
 
@@ -1908,19 +1903,17 @@ namespace TOB
 		/*
 		u32 BenefitTimer;
 		s32 unknown1;
-		s32 current_favor;
-		s32 unknown2;
-		s32 all_time_favor;
-		s32 unknown3; //some of these are probably the bools on the pcclient;
-		u16 unknown4;
+		s64 current_favor;
+		s64 all_time_favor;
+		u8 unknown;
+		u8 unknown;
 		*/
 		out.WriteUInt32(600000);
 		out.WriteInt32(-1);
-		out.WriteUInt32(emu->tribute_points);
-		out.WriteUInt32(0);
-		out.WriteUInt32(emu->career_tribute_points);
-		out.WriteUInt32(0);
-		out.WriteUInt16(0);
+		out.WriteUInt64(emu->tribute_points);
+		out.WriteUInt64(emu->career_tribute_points);
+		out.WriteUInt8(0);
+		out.WriteUInt8(0);
 
 		//u32 tribute_benefit_count
 		out.WriteUInt32(5);
@@ -1949,23 +1942,50 @@ namespace TOB
 			out.WriteUInt32(0xFFFFFFFF);
 			out.WriteUInt32(0);
 		}
-		const uint8_t task_data[137] = {
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x80, 0x3F, 0x00, 0x00, 0x00, 0x00,
-		};
 
-		//u8 tasks[137]; //on live and on xac's capture from 12/28/23 these both are the same size;
-		for (int i = 0; i < 137; i++)
-		{
-			out.WriteUInt8(task_data[i]);
+		// u32 BankItems type
+		// u32 BankItems data1
+		// u32 BankItems data2
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+		out.WriteUInt32(0);
+
+		// s32 ActiveSharedTaskID
+		// bool IsMonsterMission
+		// s32 TaskID
+		// s32 MovingStartTime
+		// s32 InitialStartTime
+		out.WriteInt32(0);
+		out.WriteUInt8(0);
+		out.WriteInt32(0);
+		out.WriteInt32(0);
+		out.WriteInt32(0);
+
+		for (int i = 0; i < 2; ++i) {
+			// these are the element active booleans, will want to set them all individually later
+			for (int j = 0; j < 10; ++j)
+				out.WriteUInt8(0);
 		}
+
+		for (int i = 0; i < 2; ++i) {
+			// these are the current count integers, will want to set them all individually later
+			for (int j = 0; j < 10; ++j)
+				out.WriteUInt32(0);
+		}
+
+		// float RewardAdjustment
+		out.WriteFloat(0.f);
+
+		// monster mission count (set to 0 for now)
+		// monster mission packets are as follows:
+		//   s32 template id
+		//   s32 min
+		//   s32 max
+		//   s32 num selected
+		//   bool can select
+		//   string template name
+		out.WriteUInt32(0);
+
 
 		/*
 		u32 good_points_available;
@@ -2108,24 +2128,22 @@ namespace TOB
 		//PvPKill last_kill;
 		/*
 		char name[];
-		u32 level;
-		u32 unknown1; //not sure
-		u32 unknown2; //not sure
+		u32 unk;
 		u32 race;
 		u32 class;
 		u32 zone;
 		u32 time;
 		u32 points;
+		u32 level;
 		*/
 		out.WriteString(emu->PVPLastKill.Name);
-		out.WriteUInt32(emu->PVPLastKill.Level);
-		out.WriteUInt32(0);
 		out.WriteUInt32(0);
 		out.WriteUInt32(emu->PVPLastKill.Race);
 		out.WriteUInt32(emu->PVPLastKill.Class);
 		out.WriteUInt32(emu->PVPLastKill.Zone);
 		out.WriteUInt32(emu->PVPLastKill.Time);
 		out.WriteUInt32(emu->PVPLastKill.Points);
+		out.WriteUInt32(emu->PVPLastKill.Level);
 
 		//PvPDeath last_death;
 		/*
@@ -2159,24 +2177,22 @@ namespace TOB
 		for (int i = 0; i < 50; ++i) {
 			/*
 			char name[];
-			u32 level;
-			u32 unknown1; //not sure
-			u32 unknown2; //not sure
+			u32 unknown1;
 			u32 race;
 			u32 class;
 			u32 zone;
 			u32 time;
 			u32 points;
+			u32 level;
 			*/
 			out.WriteString(emu->PVPRecentKills[i].Name);
-			out.WriteUInt32(emu->PVPRecentKills[i].Level);
-			out.WriteUInt32(0);
 			out.WriteUInt32(0);
 			out.WriteUInt32(emu->PVPRecentKills[i].Race);
 			out.WriteUInt32(emu->PVPRecentKills[i].Class);
 			out.WriteUInt32(emu->PVPRecentKills[i].Zone);
 			out.WriteUInt32(emu->PVPRecentKills[i].Time);
 			out.WriteUInt32(emu->PVPRecentKills[i].Points);
+			out.WriteUInt32(emu->PVPRecentKills[i].Level);
 		}
 
 		/*
@@ -2218,21 +2234,29 @@ namespace TOB
 
 		//AltCurrency alt_currency;
 		/*
-		u32 alt_currency_str_length;
-		u32 unknown1;
+		u64 alt_currency_str_length;
 		char alt_currency_string[alt_currency_str_length];
 		*/
-		out.WriteUInt32(1);
-		out.WriteUInt32(0);
+		out.WriteUInt64(1);
 		out.WriteUInt8(0x31);
 
 		//u32 completed_event_subcomponent_count;
 		out.WriteUInt32(0);
 		//AchivementSubComponentData completed_event_subcomponents[completed_event_subcomponent_count];
+		// s32 component id
+		// s32 requirement id
+		// u32 requirement type
+		// s32 count
+		// u32 unk
 
 		//u32 inprogress_event_subcomponent_count;
 		out.WriteUInt32(0);
 		//AchivementSubComponentData inprogress_event_subcomponents[inprogress_event_subcomponent_count];
+		// s32 component id
+		// s32 requirement id
+		// u32 requirement type
+		// s32 count
+		// u32 unk
 
 		/*
 		u64 merc_aa_exp;
@@ -2258,10 +2282,18 @@ namespace TOB
 		//alchemy_bonus_list_count
 		out.WriteUInt32(0);
 		//AlchemyBonusSkillData alchemy_bonus_list[alchemy_bonus_list_count];
+		// s32 skill id
+		// s32 bonus points
 
 		//u32 persona_count;
 		out.WriteUInt32(0);
 		//PersonaEquipmentSet persona_equipment_set[persona_count];
+		// u32
+		// u32 (length)
+		//    u32
+		//    u32
+		//    u32
+		// (there is a way to set two more u32's here, but the client seems to not ever reach that code)
 
 		//u8 term;
 		out.WriteUInt8(0);
@@ -2469,10 +2501,12 @@ namespace TOB
 		s32 AutoGrantExpansion;
 		s32 Unknown098;
 		u8 Unknown09C;
+		u8 unk TOB added
 		*/
 
 		buffer.WriteInt32(emu->expansion);
 		buffer.WriteInt32(0);
+		buffer.WriteUInt8(0);
 		buffer.WriteUInt8(0);
 
 		//u32 TotalEffects;
@@ -3088,8 +3122,10 @@ namespace TOB
 				buffer.WriteFloat(SpawnSize - 0.7f);
 			}
 
+			buffer.WriteFloat(1.0f); // This has something to do with collisions, generally between 1.0-1.1
+
 			/*
-			EqGuid HashKey;
+			EqGuid HashKey; -- this is actually uint64 in the client
 			*/
 			buffer.WriteUInt32(emu->CharacterGuid.Id);
 			buffer.WriteUInt16(emu->CharacterGuid.WorldId);
@@ -3142,7 +3178,7 @@ namespace TOB
 			buffer.WriteFloat(1.0f);
 			buffer.WriteInt32(-1);
 
-			if (emu->DestructibleObject || emu->class_ == Class::LDoNTreasure)
+			if (emu->DestructibleObject || emu->class_ == Class::LDoNTreasure) // flags & interactiveobject
 			{
 				/*
 				char InteractiveObjectModelName[];
@@ -4580,11 +4616,11 @@ namespace TOB
 		SerializeItemDefinition(buffer, item);
 
 		//u32 RealEstateArrayCount;
-		buffer.WriteInt32(0);
+		// buffer.WriteInt32(0);
 		//s32 RealEstateArray[RealEstateArrayCount];
 		
 		//bool bRealEstateItemPlaceable;
-		buffer.WriteInt8(0);
+		// buffer.WriteInt8(0);
 
 		//u32 SubContentSize;
 		uint32 subitem_count = 0;
