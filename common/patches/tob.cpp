@@ -858,82 +858,82 @@ namespace TOB
 
 		//pvp
 		if (emu->enable_pvp) {
-			*(char*)&__packet->pBuffer[0x06] = 1;
+			*(char*)&__packet->pBuffer[0x04] = 1;
 		}
 
 		if (emu->enable_FV) {
 			//FV sets these both to 1
 			//one appears to enable the no drop flag the other just marks the server as special?
+			*(char*)&__packet->pBuffer[0x08] = 1;
 			*(char*)&__packet->pBuffer[0x0a] = 1;
-			*(char*)&__packet->pBuffer[0x0c] = 1;
 		}
 
 		//This has something to do with heirloom and prestige items but im not sure what it does
 		//Seems to sit at 0
-		*(char*)&__packet->pBuffer[0x75f] = 0;
+		*(char*)&__packet->pBuffer[0x75d] = 0;
 
 		//not sure what this does, something to do with server select
-		*(char*)&__packet->pBuffer[0x0b] = 0;
+		*(char*)&__packet->pBuffer[0x09] = 0;
 
 		//this appears to have some effect on the tradeskill system; disabling made by tags perhaps?
-		*(char*)&__packet->pBuffer[0x0d] = 0;
+		*(char*)&__packet->pBuffer[0x0b] = 0;
 
 		//not sure, setting it to the value ive seen
-		*(char*)&__packet->pBuffer[0x0e] = 1;
+		*(char*)&__packet->pBuffer[0x0c] = 1;
 
 		//Something to do with languages
-		*(char*)&__packet->pBuffer[0x0f] = 1;
+		*(char*)&__packet->pBuffer[0x0d] = 1;
 
 		//These seem to affect if server has betabuff enabled
-		*(char*)&__packet->pBuffer[0x602] = 0;
-		*(char*)&__packet->pBuffer[0x603] = 0;
+		*(char*)&__packet->pBuffer[0x600] = 0;
+		*(char*)&__packet->pBuffer[0x601] = 0;
 		//This is set on test so it's probably indicating this is a test server
-		*(char*)&__packet->pBuffer[0x604] = 0;
+		*(char*)&__packet->pBuffer[0x602] = 0;
 
 		//not sure, but it's grouped with the beta and test stuff
-		*(char*)&__packet->pBuffer[0x605] = 0;
+		*(char*)&__packet->pBuffer[0x603] = 0;
 
 		//world short name
-		strncpy((char*)&__packet->pBuffer[0x17], emu->worldshortname, 32);
+		strncpy((char*)&__packet->pBuffer[0x15], emu->worldshortname, 32);
 
 		//not sure, affects some player calculation but didn't care to look more
-		*(char*)&__packet->pBuffer[0x5ee] = 0;
+		*(char*)&__packet->pBuffer[0x5ec] = 0;
 
 		//Looks right
 		if (emu->enablemail) {
-			*(char*)&__packet->pBuffer[0x5f7] = 1;
+			*(char*)&__packet->pBuffer[0x5f5] = 1;
 		}
 
 		//Looks right
 		if (emu->enablevoicemacros) {
-			*(char*)&__packet->pBuffer[0x5f6] = 1;
+			*(char*)&__packet->pBuffer[0x5f4] = 1;
 		}
 
 		//Not sure, sending what we've seen
-		*(char*)&__packet->pBuffer[0x5f8] = 0;
+		*(char*)&__packet->pBuffer[0x5f6] = 0;
 
 		//Not sure sending what we've seen
-		*(char*)&__packet->pBuffer[0x5fa] = 1;
+		*(char*)&__packet->pBuffer[0x5f8] = 1;
 
 		//Not sure sending what we've seen
-		*(int32_t*)&__packet->pBuffer[0x63e] = -1;
+		*(int32_t*)&__packet->pBuffer[0x63c] = -1;
 
 		//Test sets this to 1, everyone else seems to set it to 0
-		*(int32_t*)&__packet->pBuffer[0x642] = 0;
+		*(int32_t*)&__packet->pBuffer[0x640] = 0;
 
 		//Disassembly puts it next to code dealing with commands, ive not seen anyone send anything but 0
-		*(char*)&__packet->pBuffer[0x747] = 0;
+		*(char*)&__packet->pBuffer[0x745] = 0;
 
 		//Something about item restrictions, seems to always be set to 1
-		*(char*)&__packet->pBuffer[0x752] = 1;
+		*(char*)&__packet->pBuffer[0x750] = 1;
 
 		//This and 0x724 are often multiplied together in guild favor calcs, live and test send 1.0f
-		*(float*)&__packet->pBuffer[0x762] = 1.0f;
-		*(float*)&__packet->pBuffer[0x766] = 1.0f;
+		*(float*)&__packet->pBuffer[0x760] = 1.0f;
+		*(float*)&__packet->pBuffer[0x764] = 1.0f;
 
 		//This and 0x72c are often multiplied together in non-guild favor calcs, live and test send 1.0f
-		*(float*)&__packet->pBuffer[0x76a] = 1.0f;
-		*(float*)&__packet->pBuffer[0x76e] = 1.0f;
+		*(float*)&__packet->pBuffer[0x768] = 1.0f;
+		*(float*)&__packet->pBuffer[0x76c] = 1.0f;
 
 		FINISH_ENCODE();
 	}
