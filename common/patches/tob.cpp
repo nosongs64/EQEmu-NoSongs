@@ -856,82 +856,70 @@ namespace TOB
 		SETUP_VAR_ENCODE(LogServer_Struct);
 		ALLOC_LEN_ENCODE(1932);
 
-		//pvp
+		// pvp
 		if (emu->enable_pvp) {
 			*(char*)&__packet->pBuffer[0x04] = 1;
 		}
 
 		if (emu->enable_FV) {
-			//FV sets these both to 1
-			//one appears to enable the no drop flag the other just marks the server as special?
-			*(char*)&__packet->pBuffer[0x08] = 1;
-			*(char*)&__packet->pBuffer[0x0a] = 1;
+			*(char*)&__packet->pBuffer[0x08] = 1; // RP server
+			*(char*)&__packet->pBuffer[0x0a] = 1; // free loot server
 		}
 
-		//This has something to do with heirloom and prestige items but im not sure what it does
-		//Seems to sit at 0
+		// this lets you transfer no drop items in the shared bank
 		*(char*)&__packet->pBuffer[0x75d] = 0;
 
-		//not sure what this does, something to do with server select
+		// disable tutorial at character create/select
 		*(char*)&__packet->pBuffer[0x09] = 0;
 
-		//this appears to have some effect on the tradeskill system; disabling made by tags perhaps?
+		// this is the auto-identify flag
 		*(char*)&__packet->pBuffer[0x0b] = 0;
 
-		//not sure, setting it to the value ive seen
+		// not actually used in the client, has to do with name gen
 		*(char*)&__packet->pBuffer[0x0c] = 1;
 
-		//Something to do with languages
+		// unknown languages are gibberish
 		*(char*)&__packet->pBuffer[0x0d] = 1;
 
-		//These seem to affect if server has betabuff enabled
-		*(char*)&__packet->pBuffer[0x600] = 0;
-		*(char*)&__packet->pBuffer[0x601] = 0;
-		//This is set on test so it's probably indicating this is a test server
-		*(char*)&__packet->pBuffer[0x602] = 0;
-
-		//not sure, but it's grouped with the beta and test stuff
-		*(char*)&__packet->pBuffer[0x603] = 0;
+		// is_dev_server flags
+		*(char*)&__packet->pBuffer[0x600] = 0; // is beta server
+		*(char*)&__packet->pBuffer[0x601] = 0; // override allow beta buff (for any server)
+		*(char*)&__packet->pBuffer[0x602] = 0; // is test server (name reservations are unavailable)
+		*(char*)&__packet->pBuffer[0x603] = 0; // unused in the client
 
 		//world short name
 		strncpy((char*)&__packet->pBuffer[0x15], emu->worldshortname, 32);
 
-		//not sure, affects some player calculation but didn't care to look more
+		// static base HP/MP regen
 		*(char*)&__packet->pBuffer[0x5ec] = 0;
 
-		//Looks right
+		// use mail system
 		if (emu->enablemail) {
 			*(char*)&__packet->pBuffer[0x5f5] = 1;
 		}
 
-		//Looks right
+		// use voice macros
 		if (emu->enablevoicemacros) {
 			*(char*)&__packet->pBuffer[0x5f4] = 1;
 		}
 
-		//Not sure, sending what we've seen
+		// Disable character select buttons except create character
 		*(char*)&__packet->pBuffer[0x5f6] = 0;
 
-		//Not sure sending what we've seen
+		// enable tutorial at character create/select
 		*(char*)&__packet->pBuffer[0x5f8] = 1;
 
-		//Not sure sending what we've seen
+		// client defaults, unused
 		*(int32_t*)&__packet->pBuffer[0x63c] = -1;
-
-		//Test sets this to 1, everyone else seems to set it to 0
 		*(int32_t*)&__packet->pBuffer[0x640] = 0;
-
-		//Disassembly puts it next to code dealing with commands, ive not seen anyone send anything but 0
 		*(char*)&__packet->pBuffer[0x745] = 0;
-
-		//Something about item restrictions, seems to always be set to 1
 		*(char*)&__packet->pBuffer[0x750] = 1;
 
-		//This and 0x724 are often multiplied together in guild favor calcs, live and test send 1.0f
+		// these are always multiplied together in guild favor calcs for display, live and test send 1.0f
 		*(float*)&__packet->pBuffer[0x760] = 1.0f;
 		*(float*)&__packet->pBuffer[0x764] = 1.0f;
 
-		//This and 0x72c are often multiplied together in non-guild favor calcs, live and test send 1.0f
+		// these are always multiplied together in non-guild favor calcs for display, live and test send 1.0f
 		*(float*)&__packet->pBuffer[0x768] = 1.0f;
 		*(float*)&__packet->pBuffer[0x76c] = 1.0f;
 
