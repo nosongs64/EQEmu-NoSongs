@@ -166,7 +166,7 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_EndLootRequest` | 🟡 Unverified | | |
 | `OP_EnduranceUpdate` | 🔴 Not-Set | | |
 | `OP_EnterChat` | 🔴 Not-Set | | |
-| `OP_EnterWorld` | 🟢 Verified | Seems to largely work | |
+| `OP_EnterWorld` | 🟢 Verified | | |
 | `OP_EnvDamage` | 🟡 Unverified | | |
 | `OP_EvolveItem` | 🔴 Not-Set | | |
 | `OP_ExpansionInfo` | 🟢 Verified | Updated from u32 to u64 and works now | |

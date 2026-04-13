@@ -397,8 +397,8 @@ namespace TOB {
 
 		struct EnterWorld_Struct {
 			/*000*/	char	name[64];
-			/*064*/	int32	unknown1;
-			/*068*/	int32	unknown2; //tob handles these differently so for now im just going to ignore them till i figure it out
+			/*064*/	int32	unknown1; // this appears to always be 0
+			/*068*/	int32	zoneID;  // this is -1 for "last zone"
 		};
 
 		struct ZoneChange_Struct {
