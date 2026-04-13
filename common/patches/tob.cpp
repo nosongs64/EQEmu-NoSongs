@@ -2587,16 +2587,16 @@ namespace TOB
 			eq_cse->Face = emu_cse->Face;
 
 			for (int equip_index = 0; equip_index < EQ::textures::materialCount; equip_index++) {
-				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material;
-				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1;
-				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteModel;
-				eq_cse->Equip[equip_index].HeroForgeModel = emu_cse->Equip[equip_index].HerosForgeModel;
-				eq_cse->Equip[equip_index].Material2 = emu_cse->Equip[equip_index].Unknown2;
-				eq_cse->Equip[equip_index].Color = emu_cse->Equip[equip_index].Color;
+				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material; // type
+				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1; // variation
+				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteModel; // material
+				eq_cse->Equip[equip_index].HeroForgeModel = emu_cse->Equip[equip_index].HerosForgeModel; // new armor id
+				eq_cse->Equip[equip_index].Material2 = emu_cse->Equip[equip_index].Unknown2; // new armor type
+				eq_cse->Equip[equip_index].Color = emu_cse->Equip[equip_index].Color; // tint
 			}
 
-			eq_cse->Unknown1 = 255;
-			eq_cse->Unknown2 = 0;
+			eq_cse->TextureType = 255;
+			eq_cse->HeadType = 0;
 			eq_cse->DrakkinTattoo = emu_cse->DrakkinTattoo;
 			eq_cse->DrakkinDetails = emu_cse->DrakkinDetails;
 			eq_cse->Deity = emu_cse->Deity;
@@ -2608,18 +2608,16 @@ namespace TOB
 			eq_cse->EyeColor2 = emu_cse->EyeColor2;
 			eq_cse->HairStyle = emu_cse->HairStyle;
 			eq_cse->Beard = emu_cse->Beard;
-			eq_cse->GoHome = emu_cse->GoHome;
+			eq_cse->PreFTP = 1;
 			eq_cse->Tutorial = emu_cse->Tutorial;
 			eq_cse->DrakkinHeritage = emu_cse->DrakkinHeritage;
-			eq_cse->Enabled = emu_cse->Enabled;
+			eq_cse->GoHome = emu_cse->GoHome;
 			eq_cse->LastLogin = emu_cse->LastLogin;
-			eq_cse->Unknown3 = 0;
-			eq_cse->Unknown4 = 0;
-			eq_cse->Unknown5 = 0;
-			eq_cse->Unknown6 = 0;
-			eq_cse->Unknown7 = 0;
+			eq_cse->TooHighLevel = 0;
+			eq_cse->Usable = emu_cse->Enabled; // this doesn't seem to do anything
+			eq_cse->Shrouded = 0;
+			eq_cse->Unknown = 0;
 			eq_cse->CharacterId = 0;
-			eq_cse->Unknown8 = 1;
 
 			emu_ptr += sizeof(CharacterSelectEntry_Struct);
 			eq_ptr += sizeof(structs::CharacterSelectEntry_Struct);

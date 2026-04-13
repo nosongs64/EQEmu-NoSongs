@@ -479,7 +479,7 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_SelectTribute` | 🔴 Not-Set | | |
 | `OP_SendAAStats` | 🟡 Unverified | | |
 | `OP_SendAATable` | 🟡 Unverified | | |
-| `OP_SendCharInfo` | 🟢 Verified | Seems to largely work correctly | |
+| `OP_SendCharInfo` | 🟢 Verified | | |
 | `OP_SendExpZonein` | 🟡 Unverified | | |
 | `OP_SendFindableNPCs` | 🔴 Not-Set | | |
 | `OP_SendGuildTributes` | 🔴 Not-Set | | |

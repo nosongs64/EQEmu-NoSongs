@@ -98,16 +98,16 @@ namespace TOB {
 		};
 
 		/*
-		* Visible equiptment.
+		* Visible equipment.
 		* Size: 20 Octets
 		*/
 		struct Texture_Struct
 		{
-			uint32 Material;
-			uint32 Unknown1;
-			uint32 EliteMaterial;
-			uint32 HeroForgeModel;
-			uint32 Material2;	// Same as material?
+			uint32 Material; // type
+			uint32 Unknown1; // material
+			uint32 EliteMaterial; // variation
+			uint32 HeroForgeModel; // new armor ID
+			uint32 Material2; // new armor type
 		};
 
 		/*
@@ -145,10 +145,10 @@ namespace TOB {
 			uint8 Gender;
 			uint8 Face;
 			CharSelectEquip Equip[9];
-			uint8 Unknown1; //Seen 256
-			uint8 Unknown2; //Seen 0
-			uint32 DrakkinTattoo;
-			uint32 DrakkinDetails;
+			uint8 TextureType; //Seen 256
+			uint8 HeadType; //Seen 0
+			uint32 DrakkinTattoo; // tattoo index
+			uint32 DrakkinDetails; // face attachment index
 			uint32 Deity;
 			uint32 PrimaryIDFile;
 			uint32 SecondaryIDFile;
@@ -158,18 +158,16 @@ namespace TOB {
 			uint8 EyeColor2;
 			uint8 HairStyle;
 			uint8 Beard;
-			uint8 Enabled;
-			uint8 Tutorial;
-			uint32 DrakkinHeritage;
-			uint8 Unknown3;
 			uint8 GoHome;
+			uint8 Tutorial;
+			uint32 DrakkinHeritage; // parent ID
+			uint8 TooHighLevel;
+			uint8 PreFTP;
 			uint32 LastLogin;
-			uint8 Unknown4; // Seen 0
-			uint8 Unknown5; // Seen 0
-			uint8 Unknown6; // Seen 0
-			uint8 Unknown7; // Seen 0
-			uint32 CharacterId; //A Guess, Character I made a little bit after has a number a few hundred after the first
-			uint32 Unknown8; // Seen 1
+			uint8 Usable;
+			uint16 Shrouded;
+			uint8 Unknown;
+			uint64 CharacterId; // A Guess, Character I made a little bit after has a number a few hundred after the first
 		};
 
 		/*
