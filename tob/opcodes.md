@@ -608,9 +608,9 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_Weblink` | 🟡 Unverified |                                                        | |
 | `OP_WhoAllRequest` | 🟡 Unverified |                                                        | |
 | `OP_WhoAllResponse` | 🟡 Unverified |                                                        | |
-| `OP_World_Client_CRC1` | 🟡 Unverified |                                                        | |
-| `OP_World_Client_CRC2` | 🟡 Unverified |                                                        | |
-| `OP_World_Client_CRC3` | 🟡 Unverified |                                                        | |
+| `OP_World_Client_CRC1` | 🟢 Verified |                                                        | |
+| `OP_World_Client_CRC2` | 🟢 Verified |                                                        | |
+| `OP_World_Client_CRC3` | 🟢 Verified |                                                        | |
 | `OP_WorldClientReady` | 🟡 Unverified |                                                        | |
 | `OP_WorldComplete` | 🟡 Unverified |                                                        | |
 | `OP_WorldLogout` | 🔴 Not-Set |                                                        | |
