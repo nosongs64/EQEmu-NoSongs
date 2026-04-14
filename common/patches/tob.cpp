@@ -2632,21 +2632,23 @@ namespace TOB
 		ENCODE_LENGTH_EXACT(MaxCharacters_Struct);
 		SETUP_DIRECT_ENCODE(MaxCharacters_Struct, structs::MaxCharacters_Struct);
 
-		//OUT(max_chars);
-		eq->max_chars = 8; //needs to be fixed
-		eq->marketplace_chars = 0;
+		*eq = {0};
+		eq->total_character_slots = 8;
+		eq->marketplace_character_slots = 0;
 		eq->unknown008 = -1;
-		eq->unknown00c = 196608;
-		eq->unknown010 = 0;
-		eq->unknown014 = 0;
-		eq->unknown018 = 0;
-		eq->unknown01c = 0;
-		eq->unknown020 = -1;
-		eq->unknown024 = 0;
-		eq->unknown028 = 0;
-		eq->unknown02c = 0;
-		eq->unknown030 = 0;
-		eq->unknown034 = 0;
+		eq->head_start_button = 0;
+		eq->heroic_related = 0x0003;
+		eq->heroic_50_count = 0;
+		eq->heroic_100_count = 0;
+		eq->disable_character_creation = 0; // this works, but it soft-locks the UI for some reason, needs to be fixed
+		eq->monthly_claim = -1;
+		eq->marketplace_related = 0;
+		eq->add_marketplace_chars = 0;
+		eq->add_unknown = 0;
+		eq->legacy_characters_ruleset = 0;
+		eq->num_max_characters = 0;
+		eq->num_personas_available = 10;
+		eq->has_de_ranger = 1; // this is probably an expansion flag only
 
 		FINISH_ENCODE();
 	}

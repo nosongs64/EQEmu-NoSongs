@@ -75,21 +75,28 @@ namespace TOB {
 		};
 
 		struct MaxCharacters_Struct {
-			/*000*/ uint32 max_chars;
-			/*004*/ uint32 marketplace_chars;
-			/*008*/ int32 unknown008; //some of these probably deal with heroic characters or something
-			/*00c*/ int32 unknown00c;
-			/*010*/ int32 unknown010;
-			/*014*/ int32 unknown014;
-			/*018*/ int32 unknown018;
-			/*01c*/ int32 unknown01c;
-			/*020*/ int32 unknown020;
-			/*024*/ int32 unknown024;
-			/*028*/ int32 unknown028;
-			/*02c*/ int32 unknown02c;
-			/*030*/ int32 unknown030;
-			/*034*/ int32 unknown034;
-			/*038*/
+			/*000*/ uint32 total_character_slots; // total character slots, different than max characters
+			/*004*/ uint32 marketplace_character_slots;
+			/*008*/ uint32 unknown008; // definitely 4 bytes, read in client, value for CEverQuest::Unknown0x0608
+			/*00c*/ uint8 head_start_button;
+			/*00d*/ uint8 unused00d;
+			/*00e*/ uint16 heroic_related;
+			/*010*/ int64 heroic_50_count; // read as 64 bits in the client
+			/*018*/ int32 heroic_100_count;
+			/*01c*/ uint8 disable_character_creation;
+			/*01d*/ uint8 unused01d[3];
+			/*020*/ int32 monthly_claim; // (-1 for don't set)
+			/*024*/ uint8 marketplace_related; // marketplace related boolean (int32 for convenience here, it's 4 bytes)
+			/*025*/ uint8 unused025[3];
+			/*028*/ int32 unused028;
+			/*02c*/ uint8 add_marketplace_chars; // boolean on whether to add or set marketplace characters
+			/*02d*/ uint8 add_unknown; // boolean on whether to add unknown008 or set marketplace characters to some unknown global
+			/*02e*/ uint8 legacy_characters_ruleset;
+			/*02f*/ uint8 unused02f;
+			/*030*/ int32 num_max_characters; // used for legacy exp calculation
+			/*034*/ int32 num_personas_available;
+			/*038*/ int32 has_de_ranger;
+			/*03c*/
 		};
 
 		struct ExpansionInfo_Struct {
