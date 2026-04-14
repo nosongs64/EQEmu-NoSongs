@@ -3532,6 +3532,20 @@ namespace TOB
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_ApproveName)
+	{
+		DECODE_LENGTH_EXACT(structs::NameApproval_Struct);
+		SETUP_DIRECT_DECODE(NameApproval_Struct, structs::NameApproval_Struct);
+
+		IN_str(name);
+		IN(race_id);
+		IN(class_id);
+
+		// TODO: expand the approval logic to include the rest of the TOB struct values (and remove the direct translation here)
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_AugmentInfo)
 	{
 		DECODE_LENGTH_EXACT(structs::AugmentInfo_Struct);
@@ -3628,6 +3642,39 @@ namespace TOB
 		strcpy(emu->message, new_message.c_str());
 
 		delete[] __eq_buffer;
+	}
+
+	DECODE(OP_CharacterCreate) {
+		DECODE_LENGTH_EXACT(structs::CharCreate_Struct);
+		SETUP_DIRECT_DECODE(CharCreate_Struct, structs::CharCreate_Struct);
+
+		IN(gender);
+		IN(race);
+		IN(class_);
+		IN(deity);
+		IN(start_zone);
+		IN(haircolor);
+		IN(beard);
+		IN(beardcolor);
+		IN(hairstyle);
+		IN(face);
+		IN(eyecolor1);
+		IN(eyecolor2);
+		IN(drakkin_heritage);
+		IN(drakkin_tattoo);
+		IN(drakkin_details);
+		IN(STR);
+		IN(STA);
+		IN(AGI);
+		IN(DEX);
+		IN(WIS);
+		IN(INT);
+		IN(CHA);
+		IN(tutorial);
+
+		// TODO: can handle the heroic type here as well (new member)
+
+		FINISH_DIRECT_DECODE();
 	}
 
 	DECODE(OP_ClickDoor)

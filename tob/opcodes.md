@@ -44,7 +44,7 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_Animation` | 🟡 Unverified |                                                      | |
 | `OP_AnnoyingZoneUnknown` | 🔴 Not-Set |                                                      | |
 | `OP_ApplyPoison` | 🟡 Unverified |                                                      | |
-| `OP_ApproveName` | 🟡 Unverified |                                                      | |
+| `OP_ApproveName` | 🟡 Unverified | This takes multiple parameters from the client, and it can take multiple integer values from the server                                                     | |
 | `OP_ApproveWorld` | 🔴 Not-Set |                                                      | |
 | `OP_ApproveZone` | 🔴 Not-Set |                                                      | |
 | `OP_Assist` | 🟡 Unverified |                                                      | |
@@ -83,8 +83,8 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_ChangeSize` | 🟡 Unverified |                                                      | |
 | `OP_ChannelMessage` | 🟡 Unverified |                                                      | |
 | `OP_ChangePetName` | 🔴 Not-Set |                                                      | |
-| `OP_CharacterCreate` | 🟡 Unverified | Wasn't sure on the status of this                    | |
-| `OP_CharacterCreateRequest` | 🟡 Unverified | Wasn't sure on status of this                        | |
+| `OP_CharacterCreate` | 🟢 Verified | Sends heroic type, can be used for something? | |
+| `OP_CharacterCreateRequest` | 🟢 Verified |                                                      | |
 | `OP_CharInventory` | 🟡 Unverified |                                                      | |
 | `OP_Charm` | 🟡 Unverified |                                                      | |
 | `OP_ChatMessage` | 🔴 Not-Set |                                                      | |
@@ -125,7 +125,7 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_Damage` | 🟡 Unverified |                                                      | |
 | `OP_Death` | 🟡 Unverified |                                                      | |
 | `OP_DelegateAbility` | 🔴 Not-Set |                                                      | |
-| `OP_DeleteCharacter` | 🟡 Unverified |                                                      | |
+| `OP_DeleteCharacter` | 🟢 Verified |                                                      | |
 | `OP_DeleteCharge` | 🟡 Unverified |                                                      | |
 | `OP_DeleteItem` | 🟡 Unverified |                                                      | |
 | `OP_DeletePetition` | 🔴 Not-Set |                                                      | |
@@ -182,7 +182,7 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_FinishWindow2` | 🟡 Unverified |                                                      | |
 | `OP_Fishing` | 🟡 Unverified |                                                      | |
 | `OP_Fling` | 🟡 Unverified |                                                      | |
-| `OP_FloatListThing` | 🟡 Unverified |                                                      | |
+| `OP_FloatListThing` | 🟢 Verified | Movement History. Sent from client, but emu doesn't use it so setting it as varified. Reference is 0x1402FFAD0                                                     | |
 | `OP_Forage` | 🟡 Unverified |                                                      | |
 | `OP_ForceFindPerson` | 🔴 Not-Set |                                                      | |
 | `OP_FormattedMessage` | 🟡 Unverified |                                                      | |
@@ -376,7 +376,7 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_MobUpdate` | 🔴 Not-Set |                                                      | |
 | `OP_MoneyOnCorpse` | 🟡 Unverified |                                                      | |
 | `OP_MoneyUpdate` | 🟡 Unverified |                                                      | |
-| `OP_MOTD` | 🟡 Unverified |                                                      | |
+| `OP_MOTD` | 🟢 Verified |                                                      | |
 | `OP_MoveCoin` | 🟡 Unverified |                                                      | |
 | `OP_MoveDoor` | 🟡 Unverified |                                                      | |
 | `OP_MoveItem` | 🟡 Unverified |                                                      | |
@@ -441,7 +441,7 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_RaidInvite` | 🔴 Not-Set |                                                      | |
 | `OP_RaidJoin` | 🔴 Not-Set |                                                      | |
 | `OP_RaidUpdate` | 🔴 Not-Set |                                                      | |
-| `OP_RandomNameGenerator` | 🟡 Unverified |                                                      | |
+| `OP_RandomNameGenerator` | 🟢 Verified | The client no longer sends this packet (random name generation is done entirely in the client). The client will still accept this packet to set name (emu doesn't do this, but it's always been supported)                                                     | |
 | `OP_RandomReply` | 🟡 Unverified |                                                      | |
 | `OP_RandomReq` | 🟡 Unverified |                                                      | |
 | `OP_ReadBook` | 🟡 Unverified |                                                      | |
@@ -486,7 +486,7 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_SendLoginInfo` | 🟢 Verified |                                                      | |
 | `OP_SendMaxCharacters` | 🟢 Verified |                                                      | |
 | `OP_SendMembership` | 🟢 Verified |                                                      | |
-| `OP_SendMembershipDetails` | 🟢 Unverified | The struct is correct, will need reversing for actual option keys/values | |
+| `OP_SendMembershipDetails` | 🟢 Verified | The struct is correct, will need reversing for actual option keys/values | |
 | `OP_SendSystemStats` | 🔴 Not-Set |                                                      | |
 | `OP_SendTitleList` | 🔴 Not-Set |                                                      | |
 | `OP_SendTributes` | 🔴 Not-Set |                                                      | |
@@ -497,7 +497,7 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_ServerListResponse` | 🔴 Not-Set |                                                      | |
 | `OP_SessionReady` | 🔴 Not-Set |                                                      | |
 | `OP_SetChatServer` | 🔴 Not-Set |                                                      | |
-| `OP_SetChatServer2` | 🟡 Unverified |                                                      | |
+| `OP_SetChatServer2` | 🟢 Verified |                                                                  | |
 | `OP_SetFace` | 🔴 Not-Set |                                                      | |
 | `OP_SetGroupTarget` | 🔴 Not-Set |                                                      | |
 | `OP_SetGuildMOTD` | 🔴 Not-Set |                                                      | |
@@ -612,10 +612,10 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_World_Client_CRC2` | 🟢 Verified |                                                      | |
 | `OP_World_Client_CRC3` | 🟢 Verified |                                                      | |
 | `OP_WorldClientReady` | 🟡 Unverified |                                                      | |
-| `OP_WorldComplete` | 🟡 Unverified |                                                      | |
+| `OP_WorldComplete` | 🟢 Verified |                                                      | |
 | `OP_WorldLogout` | 🔴 Not-Set |                                                      | |
 | `OP_WorldObjectsSent` | 🟡 Unverified |                                                      | |
-| `OP_WorldUnknown001` | 🟡 Unverified |                                                      | |
+| `OP_WorldUnknown001` | 🟢 Verified | SetServerTime. emu doesn't currently use it so setting it to verified, but the reference is 0x140292550                                                     | |
 | `OP_XTargetAutoAddHaters` | 🔴 Not-Set |                                                      | |
 | `OP_XTargetOpen` | 🔴 Not-Set |                                                      | |
 | `OP_XTargetOpenResponse` | 🔴 Not-Set |                                                      | |

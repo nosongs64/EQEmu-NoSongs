@@ -186,6 +186,50 @@ namespace TOB {
 			/*000*/	uint32 CharCount;	//number of chars in this packet
 		};
 
+		/*
+		** Character Creation struct
+		** Length: 168 Bytes
+		** OpCode: 0x1859
+		*/
+		struct CharCreate_Struct
+		{
+			/*00*/ uint8 padding[72];
+			/*48*/ uint32 gender;
+			/*4c*/ uint32 race;
+			/*50*/ uint32 class_;
+			/*54*/ uint32 deity;
+			/*58*/ uint32 start_zone; // this is the zone ID of the start zone
+			/*5c*/ uint32 haircolor;
+			/*60*/ uint32 beard;
+			/*64*/ uint32 beardcolor;
+			/*68*/ uint32 hairstyle;
+			/*6c*/ uint32 face;
+			/*70*/ uint32 eyecolor1;
+			/*74*/ uint32 eyecolor2;
+			/*78*/ uint32 drakkin_heritage;
+			/*7c*/ uint32 drakkin_tattoo;
+			/*80*/ uint32 drakkin_details;
+			/*84*/ uint32 STR;
+			/*88*/ uint32 STA;
+			/*8c*/ uint32 AGI;
+			/*90*/ uint32 DEX;
+			/*94*/ uint32 WIS;
+			/*98*/ uint32 INT;
+			/*9c*/ uint32 CHA;
+			/*a0*/ uint32 tutorial;
+			/*a4*/ uint32 heroic_type;
+			/*a8*/
+		};
+
+		struct NameApproval_Struct {
+			char name[64];
+			uint32 race_id;
+			uint32 class_id;
+			uint32 deity_id;
+			uint32 heroic_type; // seen 0, client can also send 1-4
+			uint32 unknown; // always 0?
+		};
+
 		enum TOBAppearance : uint32
 		{
 			None,
