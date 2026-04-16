@@ -856,82 +856,70 @@ namespace TOB
 		SETUP_VAR_ENCODE(LogServer_Struct);
 		ALLOC_LEN_ENCODE(1932);
 
-		//pvp
+		// pvp
 		if (emu->enable_pvp) {
 			*(char*)&__packet->pBuffer[0x04] = 1;
 		}
 
 		if (emu->enable_FV) {
-			//FV sets these both to 1
-			//one appears to enable the no drop flag the other just marks the server as special?
-			*(char*)&__packet->pBuffer[0x08] = 1;
-			*(char*)&__packet->pBuffer[0x0a] = 1;
+			*(char*)&__packet->pBuffer[0x08] = 1; // RP server
+			*(char*)&__packet->pBuffer[0x0a] = 1; // free loot server
 		}
 
-		//This has something to do with heirloom and prestige items but im not sure what it does
-		//Seems to sit at 0
+		// this lets you transfer no drop items in the shared bank
 		*(char*)&__packet->pBuffer[0x75d] = 0;
 
-		//not sure what this does, something to do with server select
+		// disable tutorial at character create/select
 		*(char*)&__packet->pBuffer[0x09] = 0;
 
-		//this appears to have some effect on the tradeskill system; disabling made by tags perhaps?
+		// this is the auto-identify flag
 		*(char*)&__packet->pBuffer[0x0b] = 0;
 
-		//not sure, setting it to the value ive seen
+		// not actually used in the client, has to do with name gen
 		*(char*)&__packet->pBuffer[0x0c] = 1;
 
-		//Something to do with languages
+		// unknown languages are gibberish
 		*(char*)&__packet->pBuffer[0x0d] = 1;
 
-		//These seem to affect if server has betabuff enabled
-		*(char*)&__packet->pBuffer[0x600] = 0;
-		*(char*)&__packet->pBuffer[0x601] = 0;
-		//This is set on test so it's probably indicating this is a test server
-		*(char*)&__packet->pBuffer[0x602] = 0;
-
-		//not sure, but it's grouped with the beta and test stuff
-		*(char*)&__packet->pBuffer[0x603] = 0;
+		// is_dev_server flags
+		*(char*)&__packet->pBuffer[0x600] = 0; // is beta server
+		*(char*)&__packet->pBuffer[0x601] = 0; // override allow beta buff (for any server)
+		*(char*)&__packet->pBuffer[0x602] = 0; // is test server (name reservations are unavailable)
+		*(char*)&__packet->pBuffer[0x603] = 0; // unused in the client
 
 		//world short name
 		strncpy((char*)&__packet->pBuffer[0x15], emu->worldshortname, 32);
 
-		//not sure, affects some player calculation but didn't care to look more
+		// static base HP/MP regen
 		*(char*)&__packet->pBuffer[0x5ec] = 0;
 
-		//Looks right
+		// use mail system
 		if (emu->enablemail) {
 			*(char*)&__packet->pBuffer[0x5f5] = 1;
 		}
 
-		//Looks right
+		// use voice macros
 		if (emu->enablevoicemacros) {
 			*(char*)&__packet->pBuffer[0x5f4] = 1;
 		}
 
-		//Not sure, sending what we've seen
+		// Disable character select buttons except create character
 		*(char*)&__packet->pBuffer[0x5f6] = 0;
 
-		//Not sure sending what we've seen
+		// enable tutorial at character create/select
 		*(char*)&__packet->pBuffer[0x5f8] = 1;
 
-		//Not sure sending what we've seen
+		// client defaults, unused
 		*(int32_t*)&__packet->pBuffer[0x63c] = -1;
-
-		//Test sets this to 1, everyone else seems to set it to 0
 		*(int32_t*)&__packet->pBuffer[0x640] = 0;
-
-		//Disassembly puts it next to code dealing with commands, ive not seen anyone send anything but 0
 		*(char*)&__packet->pBuffer[0x745] = 0;
-
-		//Something about item restrictions, seems to always be set to 1
 		*(char*)&__packet->pBuffer[0x750] = 1;
 
-		//This and 0x724 are often multiplied together in guild favor calcs, live and test send 1.0f
+		// these are always multiplied together in guild favor calcs for display, live and test send 1.0f
 		*(float*)&__packet->pBuffer[0x760] = 1.0f;
 		*(float*)&__packet->pBuffer[0x764] = 1.0f;
 
-		//This and 0x72c are often multiplied together in non-guild favor calcs, live and test send 1.0f
+		// these are always multiplied together in non-guild favor calcs for display, live and test send 1.0f
 		*(float*)&__packet->pBuffer[0x768] = 1.0f;
 		*(float*)&__packet->pBuffer[0x76c] = 1.0f;
 
@@ -2599,16 +2587,16 @@ namespace TOB
 			eq_cse->Face = emu_cse->Face;
 
 			for (int equip_index = 0; equip_index < EQ::textures::materialCount; equip_index++) {
-				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material;
-				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1;
-				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteModel;
-				eq_cse->Equip[equip_index].HeroForgeModel = emu_cse->Equip[equip_index].HerosForgeModel;
-				eq_cse->Equip[equip_index].Material2 = emu_cse->Equip[equip_index].Unknown2;
-				eq_cse->Equip[equip_index].Color = emu_cse->Equip[equip_index].Color;
+				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material; // type
+				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1; // variation
+				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteModel; // material
+				eq_cse->Equip[equip_index].HeroForgeModel = emu_cse->Equip[equip_index].HerosForgeModel; // new armor id
+				eq_cse->Equip[equip_index].Material2 = emu_cse->Equip[equip_index].Unknown2; // new armor type
+				eq_cse->Equip[equip_index].Color = emu_cse->Equip[equip_index].Color; // tint
 			}
 
-			eq_cse->Unknown1 = 255;
-			eq_cse->Unknown2 = 0;
+			eq_cse->TextureType = 255;
+			eq_cse->HeadType = 0;
 			eq_cse->DrakkinTattoo = emu_cse->DrakkinTattoo;
 			eq_cse->DrakkinDetails = emu_cse->DrakkinDetails;
 			eq_cse->Deity = emu_cse->Deity;
@@ -2620,18 +2608,16 @@ namespace TOB
 			eq_cse->EyeColor2 = emu_cse->EyeColor2;
 			eq_cse->HairStyle = emu_cse->HairStyle;
 			eq_cse->Beard = emu_cse->Beard;
-			eq_cse->GoHome = emu_cse->GoHome;
+			eq_cse->PreFTP = 1;
 			eq_cse->Tutorial = emu_cse->Tutorial;
 			eq_cse->DrakkinHeritage = emu_cse->DrakkinHeritage;
-			eq_cse->Enabled = emu_cse->Enabled;
+			eq_cse->GoHome = emu_cse->GoHome;
 			eq_cse->LastLogin = emu_cse->LastLogin;
-			eq_cse->Unknown3 = 0;
-			eq_cse->Unknown4 = 0;
-			eq_cse->Unknown5 = 0;
-			eq_cse->Unknown6 = 0;
-			eq_cse->Unknown7 = 0;
+			eq_cse->TooHighLevel = 0;
+			eq_cse->Usable = emu_cse->Enabled; // this doesn't seem to do anything
+			eq_cse->Shrouded = 0;
+			eq_cse->Unknown = 0;
 			eq_cse->CharacterId = 0;
-			eq_cse->Unknown8 = 1;
 
 			emu_ptr += sizeof(CharacterSelectEntry_Struct);
 			eq_ptr += sizeof(structs::CharacterSelectEntry_Struct);
@@ -2646,21 +2632,23 @@ namespace TOB
 		ENCODE_LENGTH_EXACT(MaxCharacters_Struct);
 		SETUP_DIRECT_ENCODE(MaxCharacters_Struct, structs::MaxCharacters_Struct);
 
-		//OUT(max_chars);
-		eq->max_chars = 8; //needs to be fixed
-		eq->marketplace_chars = 0;
+		*eq = {0};
+		eq->total_character_slots = 8;
+		eq->marketplace_character_slots = 0;
 		eq->unknown008 = -1;
-		eq->unknown00c = 196608;
-		eq->unknown010 = 0;
-		eq->unknown014 = 0;
-		eq->unknown018 = 0;
-		eq->unknown01c = 0;
-		eq->unknown020 = -1;
-		eq->unknown024 = 0;
-		eq->unknown028 = 0;
-		eq->unknown02c = 0;
-		eq->unknown030 = 0;
-		eq->unknown034 = 0;
+		eq->head_start_button = 0;
+		eq->heroic_related = 0x0003;
+		eq->heroic_50_count = 0;
+		eq->heroic_100_count = 0;
+		eq->disable_character_creation = 0; // this works, but it soft-locks the UI for some reason, needs to be fixed
+		eq->monthly_claim = -1;
+		eq->marketplace_related = 0;
+		eq->add_marketplace_chars = 0;
+		eq->add_unknown = 0;
+		eq->legacy_characters_ruleset = 0;
+		eq->num_max_characters = 0;
+		eq->num_personas_available = 10;
+		eq->has_de_ranger = 1; // this is probably an expansion flag only
 
 		FINISH_ENCODE();
 	}
@@ -3029,13 +3017,13 @@ namespace TOB
 		ENCODE_LENGTH_EXACT(ZoneChange_Struct);
 		SETUP_DIRECT_ENCODE(ZoneChange_Struct, structs::ZoneChange_Struct);
 
-		memcpy(eq->char_name, emu->char_name, sizeof(emu->char_name));
+		OUT_str(char_name);
 		OUT(zoneID);
 		OUT(instanceID);
 		OUT(y);
 		OUT(x);
-		OUT(z)
-			OUT(zone_reason);
+		OUT(z);
+		OUT(zone_reason);
 		OUT(success);
 
 		if (eq->success < 0)
@@ -3544,6 +3532,20 @@ namespace TOB
 		FINISH_DIRECT_DECODE();
 	}
 
+	DECODE(OP_ApproveName)
+	{
+		DECODE_LENGTH_EXACT(structs::NameApproval_Struct);
+		SETUP_DIRECT_DECODE(NameApproval_Struct, structs::NameApproval_Struct);
+
+		IN_str(name);
+		IN(race_id);
+		IN(class_id);
+
+		// TODO: expand the approval logic to include the rest of the TOB struct values (and remove the direct translation here)
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_AugmentInfo)
 	{
 		DECODE_LENGTH_EXACT(structs::AugmentInfo_Struct);
@@ -3640,6 +3642,39 @@ namespace TOB
 		strcpy(emu->message, new_message.c_str());
 
 		delete[] __eq_buffer;
+	}
+
+	DECODE(OP_CharacterCreate) {
+		DECODE_LENGTH_EXACT(structs::CharCreate_Struct);
+		SETUP_DIRECT_DECODE(CharCreate_Struct, structs::CharCreate_Struct);
+
+		IN(gender);
+		IN(race);
+		IN(class_);
+		IN(deity);
+		IN(start_zone);
+		IN(haircolor);
+		IN(beard);
+		IN(beardcolor);
+		IN(hairstyle);
+		IN(face);
+		IN(eyecolor1);
+		IN(eyecolor2);
+		IN(drakkin_heritage);
+		IN(drakkin_tattoo);
+		IN(drakkin_details);
+		IN(STR);
+		IN(STA);
+		IN(AGI);
+		IN(DEX);
+		IN(WIS);
+		IN(INT);
+		IN(CHA);
+		IN(tutorial);
+
+		// TODO: can handle the heroic type here as well (new member)
+
+		FINISH_DIRECT_DECODE();
 	}
 
 	DECODE(OP_ClickDoor)
@@ -3868,7 +3903,7 @@ namespace TOB
 		DECODE_LENGTH_EXACT(structs::ClientZoneEntry_Struct);
 		SETUP_DIRECT_DECODE(ClientZoneEntry_Struct, structs::ClientZoneEntry_Struct);
 
-		memcpy(emu->char_name, eq->char_name, sizeof(emu->char_name));
+		IN_str(char_name);
 
 		FINISH_DIRECT_DECODE();
 	}

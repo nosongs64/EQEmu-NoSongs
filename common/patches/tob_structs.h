@@ -75,21 +75,28 @@ namespace TOB {
 		};
 
 		struct MaxCharacters_Struct {
-			/*000*/ uint32 max_chars;
-			/*004*/ uint32 marketplace_chars;
-			/*008*/ int32 unknown008; //some of these probably deal with heroic characters or something
-			/*00c*/ int32 unknown00c;
-			/*010*/ int32 unknown010;
-			/*014*/ int32 unknown014;
-			/*018*/ int32 unknown018;
-			/*01c*/ int32 unknown01c;
-			/*020*/ int32 unknown020;
-			/*024*/ int32 unknown024;
-			/*028*/ int32 unknown028;
-			/*02c*/ int32 unknown02c;
-			/*030*/ int32 unknown030;
-			/*034*/ int32 unknown034;
-			/*038*/
+			/*000*/ uint32 total_character_slots; // total character slots, different than max characters
+			/*004*/ uint32 marketplace_character_slots;
+			/*008*/ uint32 unknown008; // definitely 4 bytes, read in client, value for CEverQuest::Unknown0x0608
+			/*00c*/ uint8 head_start_button;
+			/*00d*/ uint8 unused00d;
+			/*00e*/ uint16 heroic_related;
+			/*010*/ int64 heroic_50_count; // read as 64 bits in the client
+			/*018*/ int32 heroic_100_count;
+			/*01c*/ uint8 disable_character_creation;
+			/*01d*/ uint8 unused01d[3];
+			/*020*/ int32 monthly_claim; // (-1 for don't set)
+			/*024*/ uint8 marketplace_related; // marketplace related boolean (int32 for convenience here, it's 4 bytes)
+			/*025*/ uint8 unused025[3];
+			/*028*/ int32 unused028;
+			/*02c*/ uint8 add_marketplace_chars; // boolean on whether to add or set marketplace characters
+			/*02d*/ uint8 add_unknown; // boolean on whether to add unknown008 or set marketplace characters to some unknown global
+			/*02e*/ uint8 legacy_characters_ruleset;
+			/*02f*/ uint8 unused02f;
+			/*030*/ int32 num_max_characters; // used for legacy exp calculation
+			/*034*/ int32 num_personas_available;
+			/*038*/ int32 has_de_ranger;
+			/*03c*/
 		};
 
 		struct ExpansionInfo_Struct {
@@ -98,16 +105,16 @@ namespace TOB {
 		};
 
 		/*
-		* Visible equiptment.
+		* Visible equipment.
 		* Size: 20 Octets
 		*/
 		struct Texture_Struct
 		{
-			uint32 Material;
-			uint32 Unknown1;
-			uint32 EliteMaterial;
-			uint32 HeroForgeModel;
-			uint32 Material2;	// Same as material?
+			uint32 Material; // type
+			uint32 Unknown1; // material
+			uint32 EliteMaterial; // variation
+			uint32 HeroForgeModel; // new armor ID
+			uint32 Material2; // new armor type
 		};
 
 		/*
@@ -145,10 +152,10 @@ namespace TOB {
 			uint8 Gender;
 			uint8 Face;
 			CharSelectEquip Equip[9];
-			uint8 Unknown1; //Seen 256
-			uint8 Unknown2; //Seen 0
-			uint32 DrakkinTattoo;
-			uint32 DrakkinDetails;
+			uint8 TextureType; //Seen 256
+			uint8 HeadType; //Seen 0
+			uint32 DrakkinTattoo; // tattoo index
+			uint32 DrakkinDetails; // face attachment index
 			uint32 Deity;
 			uint32 PrimaryIDFile;
 			uint32 SecondaryIDFile;
@@ -158,18 +165,16 @@ namespace TOB {
 			uint8 EyeColor2;
 			uint8 HairStyle;
 			uint8 Beard;
-			uint8 Enabled;
-			uint8 Tutorial;
-			uint32 DrakkinHeritage;
-			uint8 Unknown3;
 			uint8 GoHome;
+			uint8 Tutorial;
+			uint32 DrakkinHeritage; // parent ID
+			uint8 TooHighLevel;
+			uint8 PreFTP;
 			uint32 LastLogin;
-			uint8 Unknown4; // Seen 0
-			uint8 Unknown5; // Seen 0
-			uint8 Unknown6; // Seen 0
-			uint8 Unknown7; // Seen 0
-			uint32 CharacterId; //A Guess, Character I made a little bit after has a number a few hundred after the first
-			uint32 Unknown8; // Seen 1
+			uint8 Usable;
+			uint16 Shrouded;
+			uint8 Unknown;
+			uint64 CharacterId; // A Guess, Character I made a little bit after has a number a few hundred after the first
 		};
 
 		/*
@@ -179,6 +184,50 @@ namespace TOB {
 		struct CharacterSelect_Struct
 		{
 			/*000*/	uint32 CharCount;	//number of chars in this packet
+		};
+
+		/*
+		** Character Creation struct
+		** Length: 168 Bytes
+		** OpCode: 0x1859
+		*/
+		struct CharCreate_Struct
+		{
+			/*00*/ uint8 padding[72];
+			/*48*/ uint32 gender;
+			/*4c*/ uint32 race;
+			/*50*/ uint32 class_;
+			/*54*/ uint32 deity;
+			/*58*/ uint32 start_zone; // this is the zone ID of the start zone
+			/*5c*/ uint32 haircolor;
+			/*60*/ uint32 beard;
+			/*64*/ uint32 beardcolor;
+			/*68*/ uint32 hairstyle;
+			/*6c*/ uint32 face;
+			/*70*/ uint32 eyecolor1;
+			/*74*/ uint32 eyecolor2;
+			/*78*/ uint32 drakkin_heritage;
+			/*7c*/ uint32 drakkin_tattoo;
+			/*80*/ uint32 drakkin_details;
+			/*84*/ uint32 STR;
+			/*88*/ uint32 STA;
+			/*8c*/ uint32 AGI;
+			/*90*/ uint32 DEX;
+			/*94*/ uint32 WIS;
+			/*98*/ uint32 INT;
+			/*9c*/ uint32 CHA;
+			/*a0*/ uint32 tutorial;
+			/*a4*/ uint32 heroic_type;
+			/*a8*/
+		};
+
+		struct NameApproval_Struct {
+			char name[64];
+			uint32 race_id;
+			uint32 class_id;
+			uint32 deity_id;
+			uint32 heroic_type; // seen 0, client can also send 1-4
+			uint32 unknown; // always 0?
 		};
 
 		enum TOBAppearance : uint32
@@ -285,21 +334,21 @@ namespace TOB {
 				struct {
 					signed deltaHeading : 10;
 					signed animation : 10;
-					// unsigned pad1 : 12;
+					unsigned pad1 : 12;
 
 					signed deltaX : 13;
 					signed z : 19;
 
 					signed y : 19;
 					unsigned heading : 12;
-					// unsigned pad2 : 1;
+					unsigned pad2 : 1;
 
 					signed x : 19;
 					signed deltaZ : 13;
 
 					unsigned pitch : 12;
 					signed deltaY : 13;
-					// unsigned pad3 : 7;
+					unsigned pad3 : 7;
 				};
 				uint32_t raw[5];
 			};
@@ -311,15 +360,15 @@ namespace TOB {
 			/*0x04*/ float delta_y;
 			/*0x08*/ float x;
 			/*0x0c*/ int animation : 10;
-			// signed padding1 : 22;
+			signed padding1 : 22;
 			/*0x10*/ float delta_x;
 			/*0x14*/ float z;
 			/*0x18*/ float delta_z;
 			/*0x1c*/ int heading : 12;
 			int pitch : 12;
-			// signed padding2 : 8;
+			signed padding2 : 8;
 			/*0x20*/ int delta_heading : 10;
-			// signed padding3 : 22;
+			signed padding3 : 22;
 			/*0x24*/
 		};
 
@@ -399,8 +448,8 @@ namespace TOB {
 
 		struct EnterWorld_Struct {
 			/*000*/	char	name[64];
-			/*064*/	int32	unknown1;
-			/*068*/	int32	unknown2; //tob handles these differently so for now im just going to ignore them till i figure it out
+			/*064*/	int32	unknown1; // this appears to always be 0
+			/*068*/	int32	zoneID;  // this is -1 for "last zone"
 		};
 
 		struct ZoneChange_Struct {
@@ -427,7 +476,7 @@ namespace TOB {
 			/*016*/	float	z;
 			/*020*/	float	heading;
 			/*024*/	uint32	type;	//unknown... values
-			/*032*/	uint8	unknown032[144];
+			/*032*/	uint8	unknown032[144]; // this is mostly a string passed to the teleport function (follow starting at 0x1401F71BA), it appears to be an override for a message
 			/*172*/	uint32	unknown172;
 			/*176*/
 		};
