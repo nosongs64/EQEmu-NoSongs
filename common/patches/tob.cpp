@@ -3017,13 +3017,13 @@ namespace TOB
 		ENCODE_LENGTH_EXACT(ZoneChange_Struct);
 		SETUP_DIRECT_ENCODE(ZoneChange_Struct, structs::ZoneChange_Struct);
 
-		memcpy(eq->char_name, emu->char_name, sizeof(emu->char_name));
+		OUT_str(char_name);
 		OUT(zoneID);
 		OUT(instanceID);
 		OUT(y);
 		OUT(x);
-		OUT(z)
-			OUT(zone_reason);
+		OUT(z);
+		OUT(zone_reason);
 		OUT(success);
 
 		if (eq->success < 0)
@@ -3903,7 +3903,7 @@ namespace TOB
 		DECODE_LENGTH_EXACT(structs::ClientZoneEntry_Struct);
 		SETUP_DIRECT_DECODE(ClientZoneEntry_Struct, structs::ClientZoneEntry_Struct);
 
-		memcpy(emu->char_name, eq->char_name, sizeof(emu->char_name));
+		IN_str(char_name);
 
 		FINISH_DIRECT_DECODE();
 	}

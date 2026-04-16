@@ -332,22 +332,22 @@ namespace TOB {
 		{
 			union {
 				struct {
-					signed deltaHeading : 10;
 					signed animation : 10;
+					signed deltaHeading : 10;
 					// unsigned pad1 : 12;
 
-					signed deltaX : 13;
 					signed z : 19;
+					signed deltaX : 13;
 
-					signed y : 19;
 					unsigned heading : 12;
+					signed y : 19;
 					// unsigned pad2 : 1;
 
-					signed x : 19;
 					signed deltaZ : 13;
+					signed x : 19;
 
-					unsigned pitch : 12;
 					signed deltaY : 13;
+					unsigned pitch : 12;
 					// unsigned pad3 : 7;
 				};
 				uint32_t raw[5];
@@ -476,7 +476,7 @@ namespace TOB {
 			/*016*/	float	z;
 			/*020*/	float	heading;
 			/*024*/	uint32	type;	//unknown... values
-			/*032*/	uint8	unknown032[144];
+			/*032*/	uint8	unknown032[144]; // this is mostly a string passed to the teleport function (follow starting at 0x1401F71BA), it appears to be an override for a message
 			/*172*/	uint32	unknown172;
 			/*176*/
 		};

@@ -11,7 +11,7 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_AAAction` | 🟡 Unverified |                                                      | |
 | `OP_AAExpUpdate` | 🟡 Unverified |                                                      | |
 | `OP_AcceptNewTask` | 🔴 Not-Set |                                                      | |
-| `OP_AckPacket` | 🟡 Unverified |                                                      | |
+| `OP_AckPacket` | 🟢 Verified |                                                      | |
 | `OP_Action` | 🟡 Unverified |                                                      | |
 | `OP_Action2` | 🔴 Not-Set |                                                      | |
 | `OP_AddNimbusEffect` | 🟡 Unverified |                                                      | |
@@ -320,7 +320,7 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_LeaveAdventure` | 🔴 Not-Set |                                                      | |
 | `OP_LeaveBoat` | 🟡 Unverified |                                                      | |
 | `OP_LevelAppearance` | 🟡 Unverified |                                                      | |
-| `OP_LevelUpdate` | 🟡 Unverified |                                                      | |
+| `OP_LevelUpdate` | 🟢 Verified  |                                                      | |
 | `OP_LFGAppearance` | 🔴 Not-Set |                                                      | |
 | `OP_LFGCommand` | 🔴 Not-Set |                                                      | |
 | `OP_LFGGetMatchesRequest` | 🔴 Not-Set |                                                      | |
@@ -384,7 +384,7 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_MoveLogDisregard` | 🔴 Not-Set |                                                      | |
 | `OP_MoveLogRequest` | 🔴 Not-Set |                                                      | |
 | `OP_MultiLineMsg` | 🔴 Not-Set |                                                      | |
-| `OP_NewSpawn` | 🟡 Unverified |                                                      | |
+| `OP_NewSpawn` | 🟢 Verified | Deprecated in the client, already handled in emu                                                     | |
 | `OP_NewTitlesAvailable` | 🔴 Not-Set |                                                      | |
 | `OP_NewZone` | 🟢 Verified |                                                      | |
 | `OP_NPCMoveUpdate` | 🔴 Not-Set |                                                      | |
@@ -458,8 +458,8 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_RemoveTrap` | 🔴 Not-Set |                                                      | |
 | `OP_Report` | 🟡 Unverified |                                                      | |
 | `OP_ReqClientSpawn` | 🟢 Verified |                                                      | |
-| `OP_ReqNewZone` | 🟢 Verified |                                                      | |
-| `OP_RequestClientZoneChange` | 🟡 Unverified |                                                      | |
+| `OP_ReqNewZone` | 🟢 Verified | Client does not send this (in LS or TOB), but it does receive it. emu does not send it                                                    | |
+| `OP_RequestClientZoneChange` | 🟢 Verified | parity with RoF2, there's a string that gets passed to teleport at the end that's not known                                                     | |
 | `OP_RequestDuel` | 🔴 Not-Set |                                                      | |
 | `OP_RequestGuildTributes` | 🔴 Not-Set |                                                      | |
 | `OP_RequestKnowledgeBase` | 🔴 Not-Set |                                                      | |
@@ -546,7 +546,7 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_SpecialMesg` | 🟡 Unverified |                                                      | |
 | `OP_SpellEffect` | 🟡 Unverified |                                                      | |
 | `OP_Split` | 🟡 Unverified |                                                      | |
-| `OP_Stamina` | 🟡 Unverified |                                                      | |
+| `OP_Stamina` | 🟢 Verified | These values are 0-32k instead of 0-127                                                     | |
 | `OP_Stun` | 🟡 Unverified |                                                      | |
 | `OP_Surname` | 🔴 Not-Set |                                                      | |
 | `OP_SwapSpell` | 🟡 Unverified |                                                      | |
@@ -566,7 +566,7 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_Taunt` | 🟡 Unverified |                                                      | |
 | `OP_TestBuff` | 🔴 Not-Set |                                                      | |
 | `OP_TGB` | 🔴 Not-Set |                                                      | |
-| `OP_TimeOfDay` | 🟡 Unverified |                                                      | |
+| `OP_TimeOfDay` | 🟢 Verified |                                                      | |
 | `OP_Track` | 🟡 Unverified |                                                      | |
 | `OP_TrackTarget` | 🟡 Unverified |                                                      | |
 | `OP_TrackUnknown` | 🟡 Unverified |                                                      | |
@@ -611,11 +611,11 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_World_Client_CRC1` | 🟢 Verified |                                                      | |
 | `OP_World_Client_CRC2` | 🟢 Verified |                                                      | |
 | `OP_World_Client_CRC3` | 🟢 Verified |                                                      | |
-| `OP_WorldClientReady` | 🟡 Unverified |                                                      | |
+| `OP_WorldClientReady` | 🟢 Verified |                                                      | |
 | `OP_WorldComplete` | 🟢 Verified |                                                      | |
 | `OP_WorldLogout` | 🔴 Not-Set |                                                      | |
 | `OP_WorldObjectsSent` | 🟡 Unverified |                                                      | |
-| `OP_WorldUnknown001` | 🟢 Verified | SetServerTime. emu doesn't currently use it so setting it to verified, but the reference is 0x140292550                                                     | |
+| `OP_WorldUnknown001` | 🟢 Verified | SetServerTime. emu doesn't currently send it so setting it to verified, but the reference is 0x140292550                                                     | |
 | `OP_XTargetAutoAddHaters` | 🔴 Not-Set |                                                      | |
 | `OP_XTargetOpen` | 🔴 Not-Set |                                                      | |
 | `OP_XTargetOpenResponse` | 🔴 Not-Set |                                                      | |
@@ -624,13 +624,13 @@ Below is a status list for the 450 opcodes we currently use on the server for th
 | `OP_YellForHelp` | 🟡 Unverified |                                                      | |
 | `OP_ZoneChange` | 🟡 Unverified |                                                      | |
 | `OP_ZoneComplete` | 🔴 Not-Set |                                                      | |
-| `OP_ZoneEntry` | 🟢 Verified |                                                      | |
+| `OP_ZoneEntry` | 🟢 Verified | unknown fields in C->S struct are various CRCs, emu doesn't use them                                                     | |
 | `OP_ZoneGuildList` | 🔴 Not-Set |                                                      | |
 | `OP_ZoneInUnknown` | 🔴 Not-Set |                                                      | |
 | `OP_ZonePlayerToBind` | 🟡 Unverified |                                                      | |
 | `OP_ZoneServerInfo` | 🟢 Verified |                                                      | |
 | `OP_ZoneServerReady` | 🔴 Not-Set |                                                      | |
-| `OP_ZoneSpawns` | 🟢 Verified |                                                      | |
-| `OP_ZoneUnavail` | 🟡 Unverified |                                                      | |
+| `OP_ZoneSpawns` | 🟢 Verified | This is deprecated in the client (and emu never sends it directly)                                                     | |
+| `OP_ZoneUnavail` | 🟢 Verified | The client discards all content of this packet                                                     | |
 | `OP_ResetAA` | 🟡 Unverified |                                                      | |
 | `OP_UnderWorld` | 🟡 Unverified |                                                      | |
