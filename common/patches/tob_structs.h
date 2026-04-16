@@ -332,23 +332,23 @@ namespace TOB {
 		{
 			union {
 				struct {
-					signed animation : 10;
 					signed deltaHeading : 10;
-					// unsigned pad1 : 12;
+					signed animation : 10;
+					unsigned pad1 : 12;
 
-					signed z : 19;
 					signed deltaX : 13;
+					signed z : 19;
 
-					unsigned heading : 12;
 					signed y : 19;
-					// unsigned pad2 : 1;
+					unsigned heading : 12;
+					unsigned pad2 : 1;
 
-					signed deltaZ : 13;
 					signed x : 19;
+					signed deltaZ : 13;
 
-					signed deltaY : 13;
 					unsigned pitch : 12;
-					// unsigned pad3 : 7;
+					signed deltaY : 13;
+					unsigned pad3 : 7;
 				};
 				uint32_t raw[5];
 			};
