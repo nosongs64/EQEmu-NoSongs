@@ -360,15 +360,15 @@ namespace TOB {
 			/*0x04*/ float delta_y;
 			/*0x08*/ float x;
 			/*0x0c*/ int animation : 10;
-			// signed padding1 : 22;
+			signed padding1 : 22;
 			/*0x10*/ float delta_x;
 			/*0x14*/ float z;
 			/*0x18*/ float delta_z;
 			/*0x1c*/ int heading : 12;
 			int pitch : 12;
-			// signed padding2 : 8;
+			signed padding2 : 8;
 			/*0x20*/ int delta_heading : 10;
-			// signed padding3 : 22;
+			signed padding3 : 22;
 			/*0x24*/
 		};
 
