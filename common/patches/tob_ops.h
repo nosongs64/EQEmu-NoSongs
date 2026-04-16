@@ -1,4 +1,5 @@
 //list of packets we need to encode on the way out:
+E(OP_AAExpUpdate)
 E(OP_Action)
 E(OP_Animation)
 E(OP_ApplyPoison)

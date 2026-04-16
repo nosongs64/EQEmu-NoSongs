@@ -145,6 +145,20 @@ namespace TOB
 #include "ss_define.h"
 
 	// ENCODE methods
+	ENCODE(OP_AAExpUpdate) {
+		ENCODE_LENGTH_EXACT(AltAdvStats_Struct);
+		SETUP_DIRECT_ENCODE(AltAdvStats_Struct, structs::AltAdvStats_Struct);
+
+		//later we should change the underlying server to use this more accurate value
+		//and encode the 330 in the other patches
+		eq->experience = emu->experience * 100000 / 330;
+
+		OUT(unspent);
+		OUT(percentage);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_Action) {
 		ENCODE_LENGTH_EXACT(Action_Struct);
 		SETUP_DIRECT_ENCODE(Action_Struct, structs::MissileHitInfo);

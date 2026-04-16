@@ -503,8 +503,8 @@ namespace TOB {
 
 		struct ExpUpdate_Struct
 		{
-			/*000*/ uint64 exp; //This is exp % / 1000 now; eg 69250 = 69.25%
-			/*008*/ uint64 unknown; //unclear, I didn't see the client actually read this value but i might have missed it
+			/*000*/ uint64 exp; // This is exp % / 1000 now; eg 69250 = 69.25%
+			/*008*/ uint64 unknown; // if this is the value "2", it opens up the tip window
 		};
 
 		struct DeleteSpawn_Struct
@@ -832,7 +832,7 @@ namespace TOB {
 			/*000*/	uint32 experience;
 			/*004*/	uint32 unspent;
 			/*008*/	uint8 percentage;
-			/*009*/	uint8 unknown009[3];
+			/*009*/	uint8 padding[3];
 		};
 
 		struct ZonePlayerToBind_Struct {
