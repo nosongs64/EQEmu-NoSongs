@@ -23,6 +23,7 @@
 #include <numeric>
 #include <cassert>
 #include <cinttypes>
+#include <set>
 
 #include "world/sof_char_create_data.h"
 
@@ -217,19 +218,22 @@ namespace TOB
 
 	ENCODE(OP_BlockedBuffs)
 	{
-		ENCODE_LENGTH_EXACT(BlockedBuffs_Struct);
-		SETUP_DIRECT_ENCODE(BlockedBuffs_Struct, structs::BlockedBuffs_Struct);
+		// Blocked buffs are a major change. They are stored in a resizable array in TOB, so this sends size, then
+		// spells, then the final two bools -- see 0x140202750
+		SETUP_VAR_ENCODE(BlockedBuffs_Struct);
 
-		for (uint32 i = 0; i < BLOCKED_BUFF_COUNT; ++i)
-			eq->SpellID[i] = emu->SpellID[i];
+		// size is uint32 + count * int32 + uint8 + uint8
+		uint32 sz = 6 + emu->Count * 4;
+		__packet->size = sz;
+		__packet->pBuffer = new unsigned char[sz];
+		memset(__packet->pBuffer, 0, sz);
 
-		for (uint32 i = BLOCKED_BUFF_COUNT; i < structs::BLOCKED_BUFF_COUNT; ++i)
-			eq->SpellID[i] = -1;
+		__packet->WriteUInt32(emu->Count);
+		for (int i = 0; i < emu->Count; i++)
+			__packet->WriteSInt32(emu->SpellID[i]);
 
-		OUT(Count);
-		OUT(Pet);
-		OUT(Initialise);
-		OUT(Flags);
+		__packet->WriteUInt8(emu->Pet);
+		__packet->WriteUInt8(emu->Initialise);
 
 		FINISH_ENCODE();
 	}
@@ -981,6 +985,7 @@ namespace TOB
 	ENCODE(OP_NewSpawn) { ENCODE_FORWARD(OP_ZoneSpawns); }
 
 	ENCODE(OP_NewZone) {
+		// zoneHeader
 		EQApplicationPacket* in = *p;
 		*p = nullptr;
 
@@ -2903,7 +2908,7 @@ namespace TOB
 
 		buf.WriteString(new_message);
 
-		auto outapp = new EQApplicationPacket(OP_SpecialMesg, buf);
+		auto outapp = new EQApplicationPacket(OP_SpecialMesg, std::move(buf));
 
 		dest->FastQueuePacket(&outapp, ack_req);
 		delete in;
@@ -2934,14 +2939,14 @@ namespace TOB
 			return;
 		}
 	
-		auto outapp = new EQApplicationPacket(OP_ChangeSize, sizeof(ChangeSize_Struct));
+		auto outapp = new EQApplicationPacket(OP_ChangeSize, sizeof(structs::ChangeSize_Struct));
 	
-		ChangeSize_Struct* css = (ChangeSize_Struct*)outapp->pBuffer;
+		structs::ChangeSize_Struct* css = (structs::ChangeSize_Struct*)outapp->pBuffer;
 	
 		css->EntityID = sas->spawn_id;
 		css->Size = (float)sas->parameter;
-		css->Unknown08 = 0;
-		css->Unknown12 = 1.0f;
+		css->CameraOffset = 0;
+		css->AnimationSpeedRelated = 1.0f;
 	
 		dest->FastQueuePacket(&outapp, ack_req);
 		delete in;
@@ -3574,18 +3579,28 @@ namespace TOB
 
 	DECODE(OP_BlockedBuffs)
 	{
-		DECODE_LENGTH_EXACT(structs::BlockedBuffs_Struct);
-		SETUP_DIRECT_DECODE(BlockedBuffs_Struct, structs::BlockedBuffs_Struct);
+		uint32 count = __packet->ReadUInt32();
+		std::vector<int32> blocked_spell_ids;
+		blocked_spell_ids.reserve(count);
+		for (int i = 0; i < count; ++i)
+			blocked_spell_ids.push_back(static_cast<int32>(__packet->ReadUInt32()));
 
-		for (uint32 i = 0; i < BLOCKED_BUFF_COUNT; ++i)
-			emu->SpellID[i] = eq->SpellID[i];
+		bool pet = __packet->ReadUInt8() == 1;
+		bool init = __packet->ReadUInt8() == 1;
 
-		IN(Count);
-		IN(Pet);
-		IN(Initialise);
-		IN(Flags);
+		__packet->SetReadPosition(0); // reset the packet read to pass it along
 
-		FINISH_DIRECT_DECODE();
+		__packet->size = sizeof(BlockedBuffs_Struct);
+		__packet->pBuffer = new unsigned char[__packet->size]{};
+		BlockedBuffs_Struct* emu = (BlockedBuffs_Struct*)__packet->pBuffer;
+
+		memset(emu->SpellID, -1, sizeof(emu->SpellID));
+		for (int i = 0; i < count; ++i)
+			emu->SpellID[i] = blocked_spell_ids[i];
+
+		emu->Count = count;
+		emu->Pet = pet;
+		emu->Initialise = init;
 	}
 
 	DECODE(OP_CastSpell)

@@ -12,7 +12,7 @@ namespace TOB {
 		static const uint32 MAX_PP_UNKNOWN_ABILITIES = 25;
 		static const uint32 MAX_RECAST_TYPES = 25;
 		static const uint32 MAX_ITEM_RECAST_TYPES = 100;
-		static const uint32 BLOCKED_BUFF_COUNT = 40;
+		static const uint32 BLOCKED_BUFF_COUNT = 60; // this might not be needed?
 		static const uint32 BUFF_COUNT = 62;
 		static const uint32 MAX_PP_LANGUAGE = 32;
 #pragma pack(1)
@@ -274,7 +274,6 @@ namespace TOB {
 			Unknown39,
 			Unknown40,
 			Unknown41,
-			Unknown42,
 			Birthdate,
 			EncounterLock
 		};
@@ -286,6 +285,15 @@ namespace TOB {
 			/*0008*/ uint64 parameter;		// Type of data sent
 			/*0016*/ uint64 lock_id; //the only place client uses this as far as I can tell is when you send 0x2c as type in which case it sets LockID = this
 			/*0024*/
+		};
+
+		struct ChangeSize_Struct
+		{
+			/*00*/ uint32 EntityID;
+			/*04*/ float Size;
+			/*08*/ float CameraOffset;
+			/*12*/ float AnimationSpeedRelated;
+			/*16*/
 		};
 
 		struct Spawn_Struct_Bitfields
@@ -400,14 +408,14 @@ namespace TOB {
 			/*056*/ float X;
 			/*060*/ float Z;
 			/*064*/ float Heading;
-			/*068*/ float DoorAngle; //not sure if this is actually a float; it might be a uint32 like DefaultDoorAngle
+			/*068*/ float DoorAngle;
 			/*072*/ uint32 ScaleFactor; //rof2's size
 			/*076*/ uint32 Unknown76; //client doesn't seem to read this
 			/*080*/ uint8 Id; //doorid
 			/*081*/ uint8 Type; //opentype
 			/*082*/ uint8 State; //state_at_spawn
 			/*083*/ uint8 DefaultState; //invert_state
-			/*084*/ int32 Param; //door_param
+			/*084*/ int32 Param; //door_param (spell id?)
 			/*088*/ uint32 AdventureDoorId;
 			/*092*/ uint32 DynDoorID;
 			/*096*/ uint32 RealEstateDoorID;
@@ -547,15 +555,6 @@ namespace TOB {
 			/*022*/ uint8	unknown022;				// Padding probably
 			/*023*/ uint8	unknown023;				// Padding probably
 			/*024*/
-		};
-
-		struct ChangeSize_Struct
-		{
-			/*00*/ uint32 EntityID;
-			/*04*/ float Size;
-			/*08*/ uint32 Unknown08;	// Observed 0
-			/*12*/ float Unknown12;		// Observed 1.0f
-			/*16*/
 		};
 
 		struct SpawnHPUpdate_Struct
@@ -835,15 +834,6 @@ namespace TOB {
 			/*004*/	uint32 unspent;
 			/*008*/	uint8 percentage;
 			/*009*/	uint8 unknown009[3];
-		};
-
-		struct BlockedBuffs_Struct
-		{
-			/*000*/ int32 SpellID[BLOCKED_BUFF_COUNT];
-			/*120*/ uint32 Count;
-			/*124*/ uint8 Pet;
-			/*125*/ uint8 Initialise;
-			/*126*/ uint16 Flags;
 		};
 
 		struct ZonePlayerToBind_Struct {
