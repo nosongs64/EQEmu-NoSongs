@@ -2391,7 +2391,7 @@ namespace TOB
 		s32 Desc;
 		*/
 
-		buffer.WriteUInt32(emu->id);
+		buffer.WriteUInt32(emu->id); // Index
 		buffer.WriteUInt8(1);
 		buffer.WriteInt32(emu->upper_hotkey_sid);
 		buffer.WriteInt32(emu->lower_hotkey_sid);
