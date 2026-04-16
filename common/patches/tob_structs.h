@@ -818,9 +818,8 @@ namespace TOB {
 		struct AA_Array
 		{
 			uint32 AA;
-			uint32 value;
+			uint32 value; // points spent
 			uint32 charges;	// expendable charges
-			bool bUnknown0x0c; // added test winter 2024; removed sometime in summer 2024
 		};
 
 		struct AATable_Struct {

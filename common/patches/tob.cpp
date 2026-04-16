@@ -2337,12 +2337,11 @@ namespace TOB
 		eq->aapoints_assigned[4] = 0;
 		eq->aapoints_assigned[5] = 0;
 
-		for (uint32 i = 0; i < MAX_PP_AA_ARRAY; ++i)
+		for (uint32 i = 0; i < structs::MAX_PP_AA_ARRAY; ++i)
 		{
 			eq->aa_list[i].AA = emu->aa_list[i].AA;
 			eq->aa_list[i].value = emu->aa_list[i].value;
 			eq->aa_list[i].charges = emu->aa_list[i].charges;
-			eq->aa_list[i].bUnknown0x0c = false;
 		}
 
 		FINISH_ENCODE();
