@@ -523,8 +523,7 @@ namespace TOB {
 		// The padding is because these structs are padded to the default 4 bytes
 		struct InventorySlot_Struct
 		{
-			/*000*/	int16 Type;
-			/*002*/	int16 Padding1;
+			/*000*/	int32 Type;
 			/*004*/	int16 Slot;
 			/*006*/	int16 SubIndex;
 			/*008*/	int16 AugIndex;

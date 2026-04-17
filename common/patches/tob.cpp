@@ -471,7 +471,7 @@ namespace TOB
 
 		int item_count = in->size / sizeof(EQ::InternalSerializedItem_Struct);
 		if (!item_count || (in->size % sizeof(EQ::InternalSerializedItem_Struct)) != 0) {
-			Log(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
+			LogNetcode("[STRUCTS] Wrong size on outbound {}: Got {}, expected multiple of {}",
 				opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(EQ::InternalSerializedItem_Struct));
 
 			delete in;
@@ -2324,7 +2324,6 @@ namespace TOB
 		eq->container_slot = ServerToTOBSlot(emu->unknown1);
 		structs::InventorySlot_Struct TOBSlot;
 		TOBSlot.Type = 8;	// Observed
-		TOBSlot.Padding1 = 0;
 		TOBSlot.Slot = 0xffff;
 		TOBSlot.SubIndex = 0xffff;
 		TOBSlot.AugIndex = 0xffff;
@@ -5045,8 +5044,8 @@ namespace TOB
 			TOBSlot.Slot = server_slot - EQ::invslot::WORLD_BEGIN;
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to TOB Slot [%i, %i, %i, %i]",
-			server_slot, TOBSlot.Type, TOBSlot.Slot, TOBSlot.SubIndex, TOBSlot.AugIndex);
+		Log(Logs::Detail, Logs::Netcode, fmt::format("Convert Server Slot {} to TOB Slot [{}, {}, {}, {}]",
+			server_slot, TOBSlot.Type, TOBSlot.Slot, TOBSlot.SubIndex, TOBSlot.AugIndex).c_str());
 
 		return TOBSlot;
 	}
@@ -5062,8 +5061,8 @@ namespace TOB
 		if (TOBSlot.Slot != invslot::SLOT_INVALID)
 			TOBSlot.Type = invtype::typeCorpse;
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Corpse Slot %i to TOB Corpse Slot [%i, %i, %i, %i]",
-			server_corpse_slot, TOBSlot.Type, TOBSlot.Slot, TOBSlot.SubIndex, TOBSlot.AugIndex);
+		Log(Logs::Detail, Logs::Netcode, fmt::format("Convert Server Corpse Slot {} to TOB Corpse Slot [{}, {}, {}, {}]",
+			server_corpse_slot, TOBSlot.Type, TOBSlot.Slot, TOBSlot.SubIndex, TOBSlot.AugIndex).c_str());
 
 		return TOBSlot;
 	}
@@ -5103,8 +5102,8 @@ namespace TOB
 			}
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert Server Slot %i to TOB Typeless Slot [%i, %i, %i] (implied type: %i)",
-			server_slot, TOBSlot.Slot, TOBSlot.SubIndex, TOBSlot.AugIndex, server_type);
+		Log(Logs::Detail, Logs::Netcode, fmt::format("Convert Server Slot {} to TOB Typeless Slot [{}, {}, {}] (implied type: {})",
+			server_slot, TOBSlot.Slot, TOBSlot.SubIndex, TOBSlot.AugIndex, server_type).c_str());
 
 		return TOBSlot;
 	}
@@ -5112,8 +5111,8 @@ namespace TOB
 	static inline uint32 TOBToServerSlot(structs::InventorySlot_Struct tob_slot)
 	{
 		if (tob_slot.AugIndex < invaug::SOCKET_INVALID || tob_slot.AugIndex >= invaug::SOCKET_COUNT) {
-			Log(Logs::Detail, Logs::Netcode, "Convert TOB Slot [%i, %i, %i, %i] to Server Slot %i",
-				tob_slot.Type, tob_slot.Slot, tob_slot.SubIndex, tob_slot.AugIndex, EQ::invslot::SLOT_INVALID);
+			Log(Logs::Detail, Logs::Netcode, fmt::format("Convert TOB Slot [{}, {}, {}, {}] to Server Slot {}",
+				tob_slot.Type, tob_slot.Slot, tob_slot.SubIndex, tob_slot.AugIndex, EQ::invslot::SLOT_INVALID).c_str());
 
 			return EQ::invslot::SLOT_INVALID;
 		}
@@ -5235,8 +5234,8 @@ namespace TOB
 		}
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert TOB Slot [%i, %i, %i, %i] to Server Slot %i",
-			tob_slot.Type, tob_slot.Slot, tob_slot.SubIndex, tob_slot.AugIndex, server_slot);
+		Log(Logs::Detail, Logs::Netcode, fmt::format("Convert TOB Slot [{}, {}, {}, {}] to Server Slot {}",
+			tob_slot.Type, tob_slot.Slot, tob_slot.SubIndex, tob_slot.AugIndex, server_slot).c_str());
 
 		return server_slot;
 	}
@@ -5253,8 +5252,8 @@ namespace TOB
 			ServerSlot = TOBToServerCorpseMainSlot(tob_corpse_slot.Slot);
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert TOB Slot [%i, %i, %i, %i] to Server Slot %i",
-			tob_corpse_slot.Type, tob_corpse_slot.Slot, tob_corpse_slot.SubIndex, tob_corpse_slot.AugIndex, ServerSlot);
+		Log(Logs::Detail, Logs::Netcode, fmt::format("Convert TOB Slot [{}, {}, {}, {}] to Server Slot {}",
+			tob_corpse_slot.Type, tob_corpse_slot.Slot, tob_corpse_slot.SubIndex, tob_corpse_slot.AugIndex, ServerSlot).c_str());
 
 		return ServerSlot;
 	}
@@ -5275,8 +5274,8 @@ namespace TOB
 	static inline uint32 TOBToServerTypelessSlot(structs::TypelessInventorySlot_Struct tob_slot, int16 tob_type)
 	{
 		if (tob_slot.AugIndex < invaug::SOCKET_INVALID || tob_slot.AugIndex >= invaug::SOCKET_COUNT) {
-			Log(Logs::Detail, Logs::Netcode, "Convert TOB Typeless Slot [%i, %i, %i] (implied type: %i) to Server Slot %i",
-				tob_slot.Slot, tob_slot.SubIndex, tob_slot.AugIndex, tob_type, EQ::invslot::SLOT_INVALID);
+			Log(Logs::Detail, Logs::Netcode, fmt::format("Convert TOB Typeless Slot [{}, {}, {}] (implied type: {}) to Server Slot {}",
+				tob_slot.Slot, tob_slot.SubIndex, tob_slot.AugIndex, tob_type, EQ::invslot::SLOT_INVALID).c_str());
 
 			return EQ::invslot::SLOT_INVALID;
 		}
@@ -5389,8 +5388,8 @@ namespace TOB
 		}
 		}
 
-		Log(Logs::Detail, Logs::Netcode, "Convert TOB Typeless Slot [%i, %i, %i] (implied type: %i) to Server Slot %i",
-			tob_slot.Slot, tob_slot.SubIndex, tob_slot.AugIndex, tob_type, ServerSlot);
+		Log(Logs::Detail, Logs::Netcode, fmt::format("Convert TOB Typeless Slot [{}, {}, {}] (implied type: {}) to Server Slot {}",
+			tob_slot.Slot, tob_slot.SubIndex, tob_slot.AugIndex, tob_type, ServerSlot).c_str());
 
 		return ServerSlot;
 	}
