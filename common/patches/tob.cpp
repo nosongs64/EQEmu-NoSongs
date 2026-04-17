@@ -3845,7 +3845,7 @@ namespace TOB
 
 		int r;
 		for (r = 0; r < 29; r++) {
-			// Size 68 in TOB
+			// Size 69 in TOB
 			IN(filters[r]);
 		}
 
@@ -4149,7 +4149,7 @@ namespace TOB
 		//s32 Variation;
 		//s32 NewArmorId;
 		//s32 NewArmorType;
-		buffer.WriteUInt32(item->Material);
+		buffer.WriteUInt32(item->Material); // this isn't labeled well, material is material *type*
 		buffer.WriteUInt32(0); //unsupported atm
 		buffer.WriteUInt32(item->EliteMaterial);
 		buffer.WriteUInt32(item->HerosForgeModel);
@@ -4267,8 +4267,19 @@ namespace TOB
 
 		//u8 SpellDataSkillMask[78];
 		for (int j = 0; j < 78; ++j) {
-			buffer.WriteUInt8(0); //unsure what this is exactly
+			buffer.WriteUInt8(0); // TODO: collection of ints for bitfield for each skill required to use. reads 19 ints byte by byte in the client, leave like this for further investigation
 		}
+
+
+		/* There are a static 7 spell data entries on an item:
+			Clicky
+			Proc
+			Worn
+			Focus
+			Scroll
+			Focus2
+			Blessing
+		 */
 
 		/* SpellData:
 			s32 SpellId;
@@ -4678,55 +4689,42 @@ namespace TOB
 		//ItemDefinition Item;
 		SerializeItemDefinition(buffer, item);
 
-		//u32 RealEstateArrayCount;
-		// buffer.WriteInt32(0);
-		//s32 RealEstateArray[RealEstateArrayCount];
-		
-		//bool bRealEstateItemPlaceable;
-		// buffer.WriteInt8(0);
-
 		//u32 SubContentSize;
-		uint32 subitem_count = 0;
-
 		int16 SubSlotNumber = EQ::invbag::SLOT_INVALID;
 		
 		if (slot_id_in <= EQ::invslot::GENERAL_END && slot_id_in >= EQ::invslot::GENERAL_BEGIN)
-			SubSlotNumber = EQ::invbag::GENERAL_BAGS_BEGIN + ((slot_id_in - EQ::invslot::GENERAL_BEGIN) * EQ::invbag::SLOT_COUNT);
+			SubSlotNumber = EQ::invbag::GENERAL_BAGS_BEGIN + (slot_id_in - EQ::invslot::GENERAL_BEGIN) * EQ::invbag::SLOT_COUNT;
 		else if (slot_id_in == EQ::invslot::slotCursor)
 			SubSlotNumber = EQ::invbag::CURSOR_BAG_BEGIN;
 		else if (slot_id_in <= EQ::invslot::BANK_END && slot_id_in >= EQ::invslot::BANK_BEGIN)
-			SubSlotNumber = EQ::invbag::BANK_BAGS_BEGIN + ((slot_id_in - EQ::invslot::BANK_BEGIN) * EQ::invbag::SLOT_COUNT);
+			SubSlotNumber = EQ::invbag::BANK_BAGS_BEGIN + (slot_id_in - EQ::invslot::BANK_BEGIN) * EQ::invbag::SLOT_COUNT;
 		else if (slot_id_in <= EQ::invslot::SHARED_BANK_END && slot_id_in >= EQ::invslot::SHARED_BANK_BEGIN)
-			SubSlotNumber = EQ::invbag::SHARED_BANK_BAGS_BEGIN + ((slot_id_in - EQ::invslot::SHARED_BANK_BEGIN) * EQ::invbag::SLOT_COUNT);
+			SubSlotNumber = EQ::invbag::SHARED_BANK_BAGS_BEGIN + (slot_id_in - EQ::invslot::SHARED_BANK_BEGIN) * EQ::invbag::SLOT_COUNT;
 		else
 			SubSlotNumber = slot_id_in; // not sure if this is the best way to handle this..leaving for now
 
 		if (SubSlotNumber != EQ::invbag::SLOT_INVALID) {
+			std::vector<std::pair<int, EQ::ItemInstance*>> subitems;
 			for (uint32 index = EQ::invbag::SLOT_BEGIN; index <= EQ::invbag::SLOT_END; ++index) {
 				EQ::ItemInstance* sub = inst->GetItem(index);
-				if (!sub)
-					continue;
-
-				++subitem_count;
+				if (sub != nullptr)
+					subitems.emplace_back(index, sub);
 			}
 
-			buffer.WriteUInt32(subitem_count);
+			buffer.WriteUInt32(subitems.size());
 
-			for (uint32 index = EQ::invbag::SLOT_BEGIN; index <= EQ::invbag::SLOT_END; ++index) {
-				EQ::ItemInstance* sub = inst->GetItem(index);
-				if (!sub)
-					continue;
-
+			// This must be guaranteed to have subitem_count members, where the index is the correct index. The client doesn't loop through all slots here
+			for (const auto& [index, subitem] : subitems) {
 				buffer.WriteUInt32(index);
-
-				SerializeItem(buffer, sub, SubSlotNumber, (depth + 1), packet_type);
+				SerializeItem(buffer, subitem, SubSlotNumber, depth + 1, packet_type);
 			}
-		}
+		} else
+			buffer.WriteUInt32(0); // no subitems, client needs to know that
 
 		//bool bCollected;
 		buffer.WriteInt8(0); //unsupported atm
 		//u64 DontKnow;
-		buffer.WriteUInt64(0); //unsupported atm
+		buffer.WriteInt64(0); //unsupported atm
 		//s32 Luck;
 		buffer.WriteInt32(0); //unsupported atm
 	}

@@ -516,7 +516,7 @@ namespace TOB {
 
 		//OP_SetServerFilter
 		struct SetServerFilter_Struct {
-			uint32 filters[68];
+			uint32 filters[69];
 		};
 
 		// Was new to RoF2, doesn't look changed
@@ -748,10 +748,10 @@ namespace TOB {
 		struct ManaChange_Struct
 		{
 			uint32 new_mana;
-			uint32 stamina;
+			uint32 stamina; // endurance
 			uint32 spell_id;
 			uint32 keepcasting;
-			int32 slot;
+			int32 slot; // gem slot
 		};
 
 		//This is what we call OP_Action
