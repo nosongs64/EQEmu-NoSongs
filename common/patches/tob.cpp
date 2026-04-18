@@ -671,8 +671,8 @@ namespace TOB
 		}
 
 		SerializeBuffer buffer;
-		buffer.WriteUInt32(emu->unknown0);
-		buffer.WriteUInt8(0); // Observed
+		buffer.WriteUInt32(0); // This is a string written like the message arrays
+		buffer.WriteUInt8(emu->unknown0);
 		buffer.WriteUInt32(emu->string_id);
 		buffer.WriteUInt32(emu->type);
 
@@ -972,7 +972,7 @@ namespace TOB
 		else if (emu->scribing == 3)
 			eq->scribing = 4;
 		else
-			OUT(scribing); // TODO: can handle 4 here (I assume it's just like 2 or 3 but can have a reduction component)
+			OUT(scribing);
 
 		OUT(slot);
 		OUT(spell_id);
@@ -3866,7 +3866,7 @@ namespace TOB
 		else if (eq->scribing == 4)
 			emu->scribing = 3;
 		else
-			IN(scribing); // TODO: Handle 4 here (clicky keyring)
+			IN(scribing);
 
 		IN(slot);
 		IN(spell_id);

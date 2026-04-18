@@ -713,6 +713,13 @@ namespace TOB {
 			/*39*/
 		};
 
+		struct InterruptCast_Struct
+		{
+			uint32 spawnid;
+			uint32 messageid;
+			char	message[0];
+		};
+
 		struct EQAffectSlot_Struct {
 			/*00*/ int32 slot;
 			/*04*/ int32 padding;
