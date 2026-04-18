@@ -25,6 +25,7 @@
 #include <cinttypes>
 #include <set>
 
+#include "common/packet_dump.h"
 #include "world/sof_char_create_data.h"
 
 namespace TOB
@@ -961,11 +962,13 @@ namespace TOB
 		ENCODE_LENGTH_EXACT(MemorizeSpell_Struct);
 		SETUP_DIRECT_ENCODE(MemorizeSpell_Struct, structs::MemorizeSpell_Struct);
 
-		// TODO: TOB has a "finish memming" value (2) here, might be needed to keep client spell gems in sync
-		if (emu->scribing == 2)
+		// in TOB, 2 is "finish memming" so that becomes 1 in emu and 3 is "unmem" which becomes 2
+		if (emu->scribing == 1)
+			eq->scribing = 2;
+		else if (emu->scribing == 2)
 			eq->scribing = 3;
 		else
-			OUT(scribing);
+			OUT(scribing); // TODO: can handle 4 here (I assume it's just like 2 or 3 but can have a reduction component)
 
 		OUT(slot);
 		OUT(spell_id);
@@ -3842,11 +3845,21 @@ namespace TOB
 		DECODE_LENGTH_EXACT(structs::MemorizeSpell_Struct);
 		SETUP_DIRECT_DECODE(MemorizeSpell_Struct, structs::MemorizeSpell_Struct);
 
-		// TODO: TOB has a "finish memming" value (2) here, might be needed to keep client spell gems in sync
-		if (emu->scribing == 3)
-			eq->scribing = 2;
+		// TOB sends status 1 here to let the server know that it's started memming, but doesn't want a response
+		if (eq->scribing == 1) {
+			// TODO: There should be a timer set here to detect short-mem cheats, and then checked when the 2 packet is sent
+			// The previous detection will still happen on scribing == 2, the new client just handles it better
+			__packet->SetOpcode(OP_Unknown);
+			return;
+		}
+
+		// in TOB, 2 is "finish memming" so that becomes 1 in emu and 3 is "unmem" which becomes 2
+		if (eq->scribing == 2)
+			emu->scribing = 1;
+		else if (eq->scribing == 3)
+			emu->scribing = 2;
 		else
-			IN(scribing);
+			IN(scribing); // TODO: Handle 4 here (clicky keyring)
 
 		IN(slot);
 		IN(spell_id);
