@@ -969,6 +969,8 @@ namespace TOB
 			eq->scribing = 2;
 		else if (emu->scribing == 2)
 			eq->scribing = 3;
+		else if (emu->scribing == 3)
+			eq->scribing = 4;
 		else
 			OUT(scribing); // TODO: can handle 4 here (I assume it's just like 2 or 3 but can have a reduction component)
 
@@ -3861,6 +3863,8 @@ namespace TOB
 			emu->scribing = 1;
 		else if (eq->scribing == 3)
 			emu->scribing = 2;
+		else if (eq->scribing == 4)
+			emu->scribing = 3;
 		else
 			IN(scribing); // TODO: Handle 4 here (clicky keyring)
 
