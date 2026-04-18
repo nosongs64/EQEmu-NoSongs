@@ -957,6 +957,23 @@ namespace TOB
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_MemorizeSpell) {
+		ENCODE_LENGTH_EXACT(MemorizeSpell_Struct);
+		SETUP_DIRECT_ENCODE(MemorizeSpell_Struct, structs::MemorizeSpell_Struct);
+
+		// TODO: TOB has a "finish memming" value (2) here, might be needed to keep client spell gems in sync
+		if (emu->scribing == 2)
+			eq->scribing = 3;
+		else
+			OUT(scribing);
+
+		OUT(slot);
+		OUT(spell_id);
+		OUT(reduction);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_MobHealth) {
 		ENCODE_LENGTH_EXACT(SpawnHPUpdate_Struct2);
 		SETUP_DIRECT_ENCODE(SpawnHPUpdate_Struct2, structs::MobHealth_Struct);
@@ -3819,6 +3836,23 @@ namespace TOB
 	DECODE(OP_GroupInvite2)
 	{
 		DECODE_FORWARD(OP_GroupInvite);
+	}
+
+	DECODE(OP_MemorizeSpell) {
+		DECODE_LENGTH_EXACT(structs::MemorizeSpell_Struct);
+		SETUP_DIRECT_DECODE(MemorizeSpell_Struct, structs::MemorizeSpell_Struct);
+
+		// TODO: TOB has a "finish memming" value (2) here, might be needed to keep client spell gems in sync
+		if (emu->scribing == 3)
+			eq->scribing = 2;
+		else
+			IN(scribing);
+
+		IN(slot);
+		IN(spell_id);
+		IN(reduction);
+
+		FINISH_DIRECT_DECODE();
 	}
 
 	DECODE(OP_MoveItem)

@@ -675,9 +675,16 @@ namespace TOB {
 			/*000*/	uint32 spell_id;
 			/*004*/	uint16 caster_id;
 			/*006*/	uint32 cast_time; // in miliseconds
-			/*010*/	uint32 unknown0a; // I think this is caster effective level but im not sure. live always sends 0
+			/*010*/	uint32 unknown0a; // I think this is caster effective level but im not sure. live always sends 0. The client uses this for the spell link
 			/*014*/	uint8 unknown0e; // 0 will short circuit the cast, seen 1 from live usually, maybe related to interrupts or particles or something
 			/*015*/
+		};
+
+		struct MemorizeSpell_Struct {
+			uint32 slot;		// Spot in the spell book/memorized slot
+			uint32 spell_id;	// Spell id (200 or c8 is minor healing, etc)
+			uint32 scribing;	// -1 refreshes book, 0 scribe to book, 2 end mem, 1 start mem, 3 unmem, 4 set activated item keyring -- client will send back 2 if a 0 operation updated a memorized spell of the same group + subgroup
+			uint32 reduction;	// lower reuse (only used if scribing is 4)
 		};
 
 		//I've observed 5 s16 that are all -1.

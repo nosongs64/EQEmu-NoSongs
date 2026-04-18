@@ -12239,6 +12239,9 @@ void Client::Handle_OP_QueryUCSServerStatus(const EQApplicationPacket *app)
 		case EQ::versions::ClientVersion::RoF2:
 			ConnectionType = EQ::versions::ucsRoF2Combined;
 			break;
+		case EQ::versions::ClientVersion::TOB:
+			ConnectionType = EQ::versions::ucsTOBCombined;
+			break;
 		default:
 			ConnectionType = EQ::versions::ucsUnknown;
 			break;
