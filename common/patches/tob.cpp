@@ -352,6 +352,7 @@ namespace TOB
 
 	ENCODE(OP_CastSpell)
 	{
+		// I don't think the client handles this at all, it only sends the cast packet
 		ENCODE_LENGTH_EXACT(CastSpell_Struct);
 		SETUP_DIRECT_ENCODE(CastSpell_Struct, structs::CastSpell_Struct);
 
@@ -363,6 +364,7 @@ namespace TOB
 		//OUT(inventoryslot);
 		OUT(target_id);
 
+		LogNetcode("S->C OP_CastSpell {}", DumpPacketToString(__packet));
 		FINISH_ENCODE();
 	}
 
@@ -3648,6 +3650,7 @@ namespace TOB
 		IN(y_pos);
 		IN(x_pos);
 		IN(z_pos);
+		LogNetcode("C->S OP_CastSpell {}", DumpPacketToString(__packet));
 		FINISH_DIRECT_DECODE();
 	}
 
