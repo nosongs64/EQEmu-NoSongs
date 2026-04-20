@@ -364,7 +364,6 @@ namespace TOB
 		//OUT(inventoryslot);
 		OUT(target_id);
 
-		LogNetcode("S->C OP_CastSpell {}", DumpPacketToString(__packet));
 		FINISH_ENCODE();
 	}
 
@@ -3652,7 +3651,6 @@ namespace TOB
 		IN(y_pos);
 		IN(x_pos);
 		IN(z_pos);
-		LogNetcode("C->S OP_CastSpell {}", DumpPacketToString(__packet));
 		FINISH_DIRECT_DECODE();
 	}
 
@@ -4864,7 +4862,9 @@ namespace TOB
 				}
 				default:
 					//unsupported etag right now; just pass it as is
+					message_out.push_back('\x12');
 					message_out.append(segments[segment_iter]);
+					message_out.push_back('\x12');
 					break;
 				}
 			}
