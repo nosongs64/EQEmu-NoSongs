@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - tob_patch
   pull_request:
 
 jobs:
