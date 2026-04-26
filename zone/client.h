@@ -343,10 +343,10 @@ public:
 	void DyeArmor(EQ::TintProfile* dye);
 	void DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue, uint8 use_tint = 0x00);
 	uint8 SlotConvert(uint8 slot,bool bracer=false);
-	void MessageString(uint32 type, uint32 string_id, uint32 distance = 0);
-	void MessageString(uint32 type, uint32 string_id, const char* message,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0, uint32 distance = 0);
+	void MessageString(uint32 type, uint32 string_id, uint32 distance = 0) override;
+	void MessageString(uint32 type, uint32 string_id, const char* message,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0, uint32 distance = 0) override;
 	void MessageString(const CZClientMessageString_Struct* msg);
-	bool FilteredMessageCheck(Mob *sender, eqFilterType filter);
+	bool ShouldGetPacket(Mob *sender, eqFilterType filter);
 	void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id);
 	void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter,
 					uint32 string_id, const char *message1, const char *message2 = nullptr,
@@ -1550,7 +1550,8 @@ public:
 
 	inline const EQ::versions::ClientVersion ClientVersion() const { return m_ClientVersion; }
 	inline const uint32 ClientVersionBit() const { return m_ClientVersionBit; }
-	inline void SetClientVersion(EQ::versions::ClientVersion client_version) { m_ClientVersion = client_version; }
+	void SetClientVersion(EQ::versions::ClientVersion client_version);
+	EQ::versions::ClientVersion GetClientVersion() const;
 
 	/** Adventure Stuff **/
 	void SendAdventureError(const char *error);
