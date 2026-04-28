@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - master
-      - tob_patch
+      - develop
   pull_request:
 
 jobs:
@@ -25,6 +25,17 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential ninja-build ccache uuid-dev
+
+      - name: Restore vcpkg Cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            vcpkg_installed
+            submodules/vcpkg/downloads
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}-
+            ${{ runner.os }}-vcpkg-
 
       - name: Configure
         run: |
@@ -61,6 +72,17 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: x64
+
+      - name: Restore vcpkg Cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            vcpkg_installed
+            submodules/vcpkg/downloads
+          key: ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}
+          restore-keys: |
+            ${{ runner.os }}-vcpkg-${{ hashFiles('vcpkg.json') }}-
+            ${{ runner.os }}-vcpkg-
 
       - name: Configure
         shell: pwsh
