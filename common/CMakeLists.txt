@@ -87,6 +87,7 @@ set(common_sources
     packet_dump_file.cpp
     packet_dump.cpp
     packet_functions.cpp
+	patches/client_version.cpp
     patches/patches.cpp
     patches/rof_limits.cpp
     patches/rof.cpp
@@ -136,6 +137,7 @@ set(common_sources
     util/directory.cpp
     util/uuid.cpp
     zone_store.cpp
+	links.cpp
 )
 
 set(repositories
@@ -655,6 +657,8 @@ set(common_headers
     packet_dump_file.h
     packet_dump.h
     packet_functions.h
+	patches/IMessage.h
+	patches/client_version.h
     patches/patches.h
     patches/rof_limits.h
     patches/rof_ops.h
@@ -734,9 +738,8 @@ set(common_headers
     util/memory_stream.h
     util/uuid.h
     version.h
-    zone_store.h
-		links.h
-		links.cpp
+	zone_store.h
+	links.h
 )
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" PREFIX "Source Files" FILES ${common_sources})

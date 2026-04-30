@@ -46,6 +46,7 @@
 #include "common/zone_store.h"
 #include "zone/bot_command.h"
 #include "zone/cheat_manager.h"
+#include "zone/client_version.h"
 #include "zone/command.h"
 #include "zone/dialogue_window.h"
 #include "zone/dynamic_zone.h"
@@ -1792,7 +1793,7 @@ void Client::Message(uint32 type, const char* message, ...) {
 }
 
 void Client::FilteredMessage(Mob *sender, uint32 type, eqFilterType filter, const char* message, ...) {
-	if (!FilteredMessageCheck(sender, filter))
+	if (!ShouldGetPacket(sender, filter))
 		return;
 
 	va_list argptr;
@@ -3808,18 +3809,12 @@ void Client::MessageString(uint32 type, uint32 string_id, uint32 distance)
 		return;
 	if (GetFilter(FilterSpellCrits) == FilterHide && type == Chat::SpellCrit)
 		return;
-	auto outapp = new EQApplicationPacket(OP_SimpleMessage, 12);
-	SimpleMessage_Struct* sms = (SimpleMessage_Struct*)outapp->pBuffer;
-	sms->color=type;
-	sms->string_id=string_id;
 
-	sms->unknown8=0;
-
-	if(distance>0)
-		entity_list.QueueCloseClients(this,outapp,false,distance);
+	if (distance > 0)
+		Message::CloseMessageString(this, false, static_cast<float>(distance))(
+			type, string_id);
 	else
-		QueuePacket(outapp);
-	safe_delete(outapp);
+		Message::MessageString(this, type, string_id);
 }
 
 //
@@ -3829,9 +3824,9 @@ void Client::MessageString(uint32 type, uint32 string_id, uint32 distance)
 // This hack sucks but it's gonna work for now.
 //
 void Client::MessageString(uint32 type, uint32 string_id, const char* message1,
-	const char* message2,const char* message3,const char* message4,
-	const char* message5,const char* message6,const char* message7,
-	const char* message8,const char* message9, uint32 distance)
+	const char* message2, const char* message3, const char* message4,
+	const char* message5, const char* message6, const char* message7,
+	const char* message8, const char* message9, uint32 distance)
 {
 	if (GetFilter(FilterSpellDamage) == FilterHide && type == Chat::NonMelee)
 		return;
@@ -3847,34 +3842,12 @@ void Client::MessageString(uint32 type, uint32 string_id, const char* message1,
 	if (type == Chat::Emote)
 		type = 4;
 
-	if (!message1) {
-		MessageString(type, string_id);	// use the simple message instead
-		return;
-	}
-
-	const char *message_arg[] = {
-		message1, message2, message3, message4, message5,
-		message6, message7, message8, message9
-	};
-
-	SerializeBuffer buf(20);
-	buf.WriteInt32(0); // unknown
-	buf.WriteInt32(string_id);
-	buf.WriteInt32(type);
-	for (auto &m : message_arg) {
-		if (m == nullptr)
-			break;
-		buf.WriteString(m);
-	}
-
-	buf.WriteInt8(0); // prevent oob in packet translation, maybe clean that up sometime
-
-	auto outapp = std::make_unique<EQApplicationPacket>(OP_FormattedMessage, std::move(buf));
-
 	if (distance > 0)
-		entity_list.QueueCloseClients(this, outapp.get(), false, distance);
+		Message::CloseMessageString(this, false, static_cast<float>(distance))(type, string_id, message1,
+			message2, message3, message4, message5, message6, message7, message8, message9);
 	else
-		QueuePacket(outapp.get());
+		Message::MessageString(this, type, string_id, message1, message2, message3, message4, message5,
+			message6, message7, message8, message9);
 }
 
 void Client::MessageString(const CZClientMessageString_Struct* msg)
@@ -3898,60 +3871,49 @@ void Client::MessageString(const CZClientMessageString_Struct* msg)
 	}
 }
 
-// helper function, returns true if we should see the message
-bool Client::FilteredMessageCheck(Mob *sender, eqFilterType filter)
+// helper function, returns true if the client should get the packet based on the filter and sender
+bool Client::ShouldGetPacket(Mob *sender, eqFilterType filter)
 {
 	eqFilterMode mode = GetFilter(filter);
-	// easy ones first
-	if (mode == FilterShow) {
-		return true;
-	} else if (mode == FilterHide) {
-		return false;
-	}
 
-	if (sender != this && mode == FilterShowSelfOnly) {
+	// easy ones first
+	if (mode == FilterShow)
+		return true;
+
+	if (mode == FilterHide)
 		return false;
-	} else if (sender) {
-		if (mode == FilterShowGroupOnly) {
-			auto g = GetGroup();
-			auto r = GetRaid();
-			if (g) {
-				if (g->IsGroupMember(sender)) {
-					return true;
-				}
-			} else if (r && sender->IsClient()) {
-				auto rgid1 = r->GetGroup(this);
-				auto rgid2 = r->GetGroup(sender->CastToClient());
-				if (rgid1 != RAID_GROUPLESS && rgid1 == rgid2) {
-					return true;
-				}
-			} else {
-				return false;
-			}
+
+	if (sender != this && mode == FilterShowSelfOnly)
+		return false;
+
+	if (sender != nullptr && mode == FilterShowGroupOnly) {
+		if (sender == this)
+			return true;
+
+		Group* g = GetGroup();
+		if (g && g->IsGroupMember(sender))
+			return true;
+
+		Raid* r = GetRaid();
+		if (r && sender->IsClient()) {
+			uint32 rgid1 = r->GetGroup(this);
+			uint32 rgid2 = r->GetGroup(sender->CastToClient());
+			if (rgid1 != RAID_GROUPLESS && rgid1 == rgid2)
+				return true;
+		} else {
+			return false;
 		}
 	}
 
-	// we passed our checks
+	// fallback case (send by default)
 	return true;
 }
 
 void Client::FilteredMessageString(Mob *sender, uint32 type,
 		eqFilterType filter, uint32 string_id)
 {
-	if (!FilteredMessageCheck(sender, filter))
-		return;
-
-	auto outapp = new EQApplicationPacket(OP_SimpleMessage, 12);
-	SimpleMessage_Struct *sms = (SimpleMessage_Struct *)outapp->pBuffer;
-	sms->color = type;
-	sms->string_id = string_id;
-
-	sms->unknown8 = 0;
-
-	QueuePacket(outapp);
-	safe_delete(outapp);
-
-	return;
+	if (ShouldGetPacket(sender, filter))
+		MessageString(type, string_id);
 }
 
 void Client::FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id,
@@ -3959,37 +3921,16 @@ void Client::FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter
 		const char *message4, const char *message5, const char *message6,
 		const char *message7, const char *message8, const char *message9)
 {
-	if (!FilteredMessageCheck(sender, filter))
-		return;
-
-	if (type == Chat::Emote)
-		type = 4;
-
 	if (!message1) {
 		FilteredMessageString(sender, type, filter, string_id);	// use the simple message instead
-		return;
+	} else if (ShouldGetPacket(sender, filter)) {
+		if (type == Chat::Emote)
+			type = 4;
+
+		MessageString(
+			type, string_id, message1, message2, message3, message4,
+			message5, message6, message7, message8, message9);
 	}
-
-	const char *message_arg[] = {
-		message1, message2, message3, message4, message5,
-		message6, message7, message8, message9
-	};
-
-	SerializeBuffer buf(20);
-	buf.WriteInt32(0); // unknown
-	buf.WriteInt32(string_id);
-	buf.WriteInt32(type);
-	for (auto &m : message_arg) {
-		if (m == nullptr)
-			break;
-		buf.WriteString(m);
-	}
-
-	buf.WriteInt8(0); // prevent oob in packet translation, maybe clean that up sometime
-
-	auto outapp = std::make_unique<EQApplicationPacket>(OP_FormattedMessage, std::move(buf));
-
-	QueuePacket(outapp.get());
 }
 
 void Client::Tell_StringID(uint32 string_id, const char *who, const char *message)

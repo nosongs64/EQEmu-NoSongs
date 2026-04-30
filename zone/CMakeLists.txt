@@ -28,6 +28,7 @@ set(zone_sources
     client_mods.cpp
     client_packet.cpp
     client_process.cpp
+    client_version.cpp
     combat_record.cpp
     corpse.cpp
     dialogue_window.cpp
@@ -130,6 +131,7 @@ set(zone_headers
     cheat_manager.h
     client.h
     client_packet.h
+    client_version.h
     combat_record.h
     command.h
     common.h
@@ -672,6 +674,8 @@ set_target_properties(gm_commands_zone PROPERTIES UNITY_BUILD ON UNITY_BUILD_BAT
 set_property(TARGET gm_commands_zone PROPERTY FOLDER libraries)
 
 add_executable(zone ${zone_sources} ${zone_headers})
+
+target_include_directories(zone PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 install(TARGETS zone RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
