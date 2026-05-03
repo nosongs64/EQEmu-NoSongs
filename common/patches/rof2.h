@@ -17,46 +17,28 @@
 */
 #pragma once
 
-#include "rof.h"
 #include "common/struct_strategy.h"
+#include "common/patches/rof.h"
 
 class EQStreamIdentifier;
 
-namespace RoF2
-{
+namespace RoF2 {
 
-	//these are the only public member of this namespace.
-	extern void Register(EQStreamIdentifier &into);
-	extern void Reload();
+extern void Register(EQStreamIdentifier& into);
+extern void Reload();
 
-
-
-	//you should not directly access anything below..
-	//I just dont feel like making a seperate header for it.
-
-	class Strategy : public StructStrategy {
-	public:
-		Strategy();
-
-	protected:
-
-		virtual std::string Describe() const;
-		virtual const EQ::versions::ClientVersion ClientVersion() const;
-
-		//magic macro to declare our opcode processors
-		#include "ss_declare.h"
-		#include "rof2_ops.h"
-	};
-
-}; /*RoF2*/
-
-namespace Message {
-
-class RoF2 : public RoF
+class Strategy : public StructStrategy
 {
 public:
-	RoF2() = default;
-	~RoF2() override = default;
+	Strategy();
+
+protected:
+	virtual std::string Describe() const;
+	virtual const EQ::versions::ClientVersion ClientVersion() const;
+
+	//magic macro to declare our opcode processors
+#include "ss_declare.h"
+#include "rof2_ops.h"
 };
 
-} // namespace Message
+}; /*RoF2*/

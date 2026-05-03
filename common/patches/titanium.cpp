@@ -32,6 +32,7 @@
 #include "common/raid.h"
 #include "common/rulesys.h"
 #include "common/strings.h"
+#include "zone/mob.h"
 #include "zone/string_ids.h"
 
 #include <sstream>
@@ -62,7 +63,6 @@ namespace Titanium
 	static inline spells::CastingSlot ServerToTitaniumCastingSlot(EQ::spells::CastingSlot slot);
 	static inline EQ::spells::CastingSlot TitaniumToServerCastingSlot(spells::CastingSlot slot, uint32 item_location);
 
-	static inline int ServerToTitaniumBuffSlot(int index);
 	static inline int TitaniumToServerBuffSlot(int index);
 
 	void Register(EQStreamIdentifier &into)
@@ -326,7 +326,7 @@ namespace Titanium
 		}
 	}
 
-	ENCODE(OP_Buff)
+	ENCODE(OP_BuffDefinition)
 	{
 		ENCODE_LENGTH_EXACT(SpellBuffPacket_Struct);
 		SETUP_DIRECT_ENCODE(SpellBuffPacket_Struct, structs::SpellBuffPacket_Struct);
@@ -339,7 +339,7 @@ namespace Titanium
 		OUT(buff.duration);
 		OUT(buff.counters);
 		OUT(buff.player_id);
-		eq->slotid = ServerToTitaniumBuffSlot(emu->slotid);
+		OUT(slotid);
 		OUT(bufffade);
 
 		FINISH_ENCODE();
@@ -1303,28 +1303,6 @@ namespace Titanium
 
 		eq->unknown4236 = 0x00000000;
 		eq->unknown4240 = 0xffffffff;
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_PetBuffWindow)
-	{
-		ENCODE_LENGTH_EXACT(PetBuff_Struct);
-		SETUP_DIRECT_ENCODE(PetBuff_Struct, PetBuff_Struct);
-
-		OUT(petid);
-		OUT(buffcount);
-
-		int EQBuffSlot = 0; // do we really want to shuffle them around like this?
-
-		for (uint32 EmuBuffSlot = 0; EmuBuffSlot < PET_BUFF_COUNT; ++EmuBuffSlot)
-		{
-			if (emu->spellid[EmuBuffSlot])
-			{
-				eq->spellid[EQBuffSlot] = emu->spellid[EmuBuffSlot];
-				eq->ticsremaining[EQBuffSlot++] = emu->ticsremaining[EmuBuffSlot];
-			}
-		}
 
 		FINISH_ENCODE();
 	}
@@ -2540,7 +2518,7 @@ namespace Titanium
 		}
 	}
 
-	DECODE(OP_Buff)
+	DECODE(OP_BuffDefinition)
 	{
 		DECODE_LENGTH_EXACT(structs::SpellBuffPacket_Struct);
 		SETUP_DIRECT_DECODE(SpellBuffPacket_Struct, structs::SpellBuffPacket_Struct);
@@ -3894,19 +3872,6 @@ namespace Titanium
 		}
 	}
 
-	static inline int ServerToTitaniumBuffSlot(int index)
-	{
-		// we're a disc
-		if (index >= EQ::spells::LONG_BUFFS + EQ::spells::SHORT_BUFFS)
-			return index - EQ::spells::LONG_BUFFS - EQ::spells::SHORT_BUFFS +
-			       spells::LONG_BUFFS + spells::SHORT_BUFFS;
-		// we're a song
-		if (index >= EQ::spells::LONG_BUFFS)
-			return index - EQ::spells::LONG_BUFFS + spells::LONG_BUFFS;
-		// we're a normal buff
-		return index; // as long as we guard against bad slots server side, we should be fine
-	}
-
 	static inline int TitaniumToServerBuffSlot(int index)
 	{
 		// we're a disc
@@ -3919,10 +3884,8 @@ namespace Titanium
 		// we're a normal buff
 		return index; // as long as we guard against bad slots server side, we should be fine
 	}
-} /*Titanium*/
 
-namespace Message {
-std::unique_ptr<EQApplicationPacket> Titanium::Simple(uint32_t color, uint32_t id) const
+std::unique_ptr<EQApplicationPacket> MessageComponent::Simple(uint32_t color, uint32_t id) const
 {
 	uint32_t string_id = ResolveID(id);
 	if (string_id > 0) {
@@ -3938,8 +3901,8 @@ std::unique_ptr<EQApplicationPacket> Titanium::Simple(uint32_t color, uint32_t i
 	return nullptr;
 }
 
-std::unique_ptr<EQApplicationPacket> Titanium::Formatted(
-	uint32_t color, uint32_t id, const std::array<const char*, 9>& args) const
+std::unique_ptr<EQApplicationPacket> MessageComponent::Formatted(uint32_t color, uint32_t id,
+	const FormattedArgs& args) const
 {
 	uint32_t string_id = ResolveID(id);
 	if (string_id > 0) {
@@ -3966,7 +3929,7 @@ std::unique_ptr<EQApplicationPacket> Titanium::Formatted(
 	return nullptr;
 }
 
-std::unique_ptr<EQApplicationPacket> Titanium::InterruptSpell(uint32_t message, uint32_t spawn_id,
+std::unique_ptr<EQApplicationPacket> MessageComponent::InterruptSpell(uint32_t message, uint32_t spawn_id,
 	const char* spell_link) const
 {
 	auto outapp = std::make_unique<EQApplicationPacket>(OP_InterruptCast, sizeof(InterruptCast_Struct));
@@ -3978,40 +3941,121 @@ std::unique_ptr<EQApplicationPacket> Titanium::InterruptSpell(uint32_t message, 
 	return outapp;
 }
 
-std::unique_ptr<EQApplicationPacket> Titanium::InterruptSpellOther(Mob* sender, uint32_t message, uint32_t spawn_id,
-	const char* name,
-	const char* spell_link) const
+std::unique_ptr<EQApplicationPacket> MessageComponent::InterruptSpellOther(Mob* sender, uint32_t message, uint32_t spawn_id,
+	const char* name, const char* spell_link) const
 {
 	auto outapp = std::make_unique<EQApplicationPacket>(OP_InterruptCast, sizeof(InterruptCast_Struct) + strlen(name) + 1);
 	auto ic = reinterpret_cast<InterruptCast_Struct*>(outapp->pBuffer);
 	ic->messageid = ResolveID(message);
 	ic->spawnid = spawn_id;
-	fmt::format_to_n(ic->message, strlen(name) + 1, "{}\0", name);
+	strcpy(ic->message, spell_link);
 	return outapp;
 }
 
 // A value of 0 means that the string isn't mapped in this client, valid string ids start at 1
-uint32_t Titanium::ResolveID(uint32_t id) const
+uint32_t MessageComponent::ResolveID(uint32_t id) const
 {
 	// passthrough — string IDs are defined at the base client level;
 	// override in patches where IDs need remapping
 	return id;
 }
 
-void Titanium::ResolveArguments(uint32_t id, std::array<const char*, 9>& args) const
+void MessageComponent::ResolveArguments(uint32_t id, std::array<const char*, 9>& args) const
 {
 	switch (id) {
 	case SPELL_FIZZLE:
 	case MISS_NOTE:
-		args[0] = nullptr; // drop spell link
+		args[0] = nullptr; // the 0th (and only) argument here is the spell link, not supported before TOB
 		break;
 	case SPELL_FIZZLE_OTHER:
 	case MISSED_NOTE_OTHER:
-		args[1] = nullptr; // drop spell link
+		args[1] = nullptr; // the 1st argument here is the spell link, not supported before TOB
 		break;
 	default:
 		break;
 	}
 }
 
-} // namespace Message
+std::unique_ptr<EQApplicationPacket> BuffComponent::BuffDefinition(Mob* mob, const Buffs_Struct& buff, uint32_t slot,
+	bool fade) const
+{
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_BuffDefinition, sizeof(SpellBuffPacket_Struct));
+	auto sbf = reinterpret_cast<SpellBuffPacket_Struct*>(outapp->pBuffer);
+
+	sbf->entityid = mob->GetID();
+
+	sbf->buff.effect_type = 2;
+
+	sbf->buff.level = buff.casterlevel > 0 ? buff.casterlevel : mob->GetLevel();
+	sbf->buff.bard_modifier = buff.instrument_mod;
+	sbf->buff.spellid = buff.spellid;
+	sbf->buff.duration = buff.ticsremaining;
+	if (buff.dot_rune)
+		sbf->buff.counters = buff.dot_rune;
+	else if (buff.magic_rune)
+		sbf->buff.counters = buff.magic_rune;
+	else if (buff.melee_rune)
+		sbf->buff.counters = buff.melee_rune;
+	else if (buff.counters)
+		sbf->buff.counters = buff.counters;
+	sbf->buff.player_id = buff.casterid;
+	sbf->buff.num_hits = buff.hit_number;
+	sbf->buff.y = buff.caston_y;
+	sbf->buff.x = buff.caston_x;
+	sbf->buff.z = buff.caston_z;
+
+	sbf->slotid = ServerToPatchBuffSlot(slot);
+	sbf->bufffade = fade;
+
+	return outapp;
+}
+
+std::unique_ptr<EQApplicationPacket> BuffComponent::RefreshBuffs(EmuOpcode opcode, Mob* mob, bool remove,
+	bool buff_timers_suspended, const std::vector<uint32_t>& slots) const
+{
+	// titanium only sends refresh for pet buffs
+	if (opcode == OP_RefreshPetBuffs) {
+		Buffs_Struct* buffs = mob->GetBuffs();
+
+		std::vector<uint32_t> send_slots;
+		if (slots.empty()) {
+			for (uint32_t slot = 0; slot < mob->GetMaxTotalSlots(); ++slot)
+				if (buffs[slot].spellid > 1)
+					send_slots.push_back(slot);
+		} else {
+			for (uint32_t slot : slots)
+				if (slot < mob->GetMaxTotalSlots() && buffs[slot].spellid > 1)
+					send_slots.push_back(slot);
+		}
+
+		auto outapp = std::make_unique<EQApplicationPacket>(OP_RefreshPetBuffs, sizeof(PetBuff_Struct));
+		auto pbs = reinterpret_cast<PetBuff_Struct*>(outapp->pBuffer);
+		memset(outapp->pBuffer, 0, outapp->size);
+
+		pbs->petid = mob->GetID();
+		int MaxSlots = mob->GetMaxTotalSlots();
+		if (MaxSlots > PET_BUFF_COUNT)
+			MaxSlots = PET_BUFF_COUNT;
+
+		int count = 0;
+		for (uint32_t slot : send_slots) {
+			if (slot < MaxSlots) {
+				pbs->spellid[slot] = buffs[slot].spellid;
+				pbs->ticsremaining[slot] = buffs[slot].ticsremaining;
+				++count;
+			}
+		}
+
+		pbs->buffcount = count;
+
+		return outapp;
+	}
+
+	return nullptr;
+}
+
+bool BuffComponent::NeedsWearMessage() const { return true; }
+
+void BuffComponent::SetRefreshType(std::unique_ptr<EQApplicationPacket>& packet, uint8_t refresh_type) const {}
+
+} /*Titanium*/

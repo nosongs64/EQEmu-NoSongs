@@ -17,51 +17,40 @@
 */
 #pragma once
 
-#include "IMessage.h"
 #include "common/struct_strategy.h"
+#include "common/patches/IBuff.h"
+#include "common/patches/IMessage.h"
 
 class EQStreamIdentifier;
 
-namespace Titanium
-{
+namespace Titanium {
 
-	//these are the only public member of this namespace.
-	extern void Register(EQStreamIdentifier &into);
-	extern void Reload();
+extern void Register(EQStreamIdentifier& into);
+extern void Reload();
 
-
-
-	//you should not directly access anything below..
-	//I just dont feel like making a seperate header for it.
-
-	class Strategy : public StructStrategy {
-	public:
-		Strategy();
-
-	protected:
-
-		virtual std::string Describe() const;
-		virtual const EQ::versions::ClientVersion ClientVersion() const;
-
-		//magic macro to declare our opcode processors
-		#include "ss_declare.h"
-		#include "titanium_ops.h"
-	};
-
-} /*Titanium*/
-
-// out-going message packets
-namespace Message {
-
-class Titanium : public IMessage
+class Strategy : public StructStrategy
 {
 public:
-	Titanium() = default;
-	~Titanium() override = default;
+	Strategy();
+
+protected:
+	virtual std::string Describe() const;
+	virtual const EQ::versions::ClientVersion ClientVersion() const;
+
+	//magic macro to declare our opcode processors
+#include "ss_declare.h"
+#include "titanium_ops.h"
+};
+
+class MessageComponent : public ClientPatch::IMessage
+{
+public:
+	MessageComponent() = default;
+	~MessageComponent() override = default;
 
 	std::unique_ptr<EQApplicationPacket> Simple(uint32_t color, uint32_t id) const override;
 	std::unique_ptr<EQApplicationPacket> Formatted(uint32_t color, uint32_t id,
-		const std::array<const char*, 9>& args) const override;
+		const FormattedArgs& args) const override;
 
 	std::unique_ptr<EQApplicationPacket> InterruptSpell(uint32_t message, uint32_t spawn_id,
 		const char* spell_link) const override;
@@ -74,5 +63,20 @@ protected:
 	virtual void ResolveArguments(uint32_t id, std::array<const char*, 9>& args) const;
 };
 
-} // namespace Message
+class BuffComponent : public ClientPatch::IBuff
+{
+public:
+	BuffComponent(uint32_t maxLongBuffs, uint32_t maxShortBuffs) : IBuff(maxLongBuffs, maxShortBuffs) {}
+	BuffComponent() = delete;
+	~BuffComponent() override = default;
+
+	std::unique_ptr<EQApplicationPacket> BuffDefinition(Mob* mob, const Buffs_Struct& buff, uint32_t slot,
+		bool fade) const override;
+	std::unique_ptr<EQApplicationPacket> RefreshBuffs(EmuOpcode opcode, Mob* mob, bool remove,
+		bool buff_timers_suspended, const std::vector<uint32_t>& slots) const override;
+	bool NeedsWearMessage() const override;
+	void SetRefreshType(std::unique_ptr<EQApplicationPacket>& packet, uint8_t refresh_type) const override;
+};
+
+} /*Titanium*/
 

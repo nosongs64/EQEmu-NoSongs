@@ -37,6 +37,7 @@
 #include "common/rulesys.h"
 #include "common/shared_tasks.h"
 #include "zone/bot.h"
+#include "zone/client_version.h"
 #include "zone/dialogue_window.h"
 #include "zone/dynamic_zone.h"
 #include "zone/event_codes.h"
@@ -139,7 +140,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_BlockedBuffs] = &Client::Handle_OP_BlockedBuffs;
 	ConnectedOpcodes[OP_BoardBoat] = &Client::Handle_OP_BoardBoat;
 	ConnectedOpcodes[OP_BookButton] = &Client::Handle_OP_BookButton;
-	ConnectedOpcodes[OP_Buff] = &Client::Handle_OP_Buff;
+	ConnectedOpcodes[OP_BuffDefinition] = &Client::Handle_OP_BuffDefinition;
 	ConnectedOpcodes[OP_BuffRemoveRequest] = &Client::Handle_OP_BuffRemoveRequest;
 	ConnectedOpcodes[OP_Bug] = &Client::Handle_OP_Bug;
 	ConnectedOpcodes[OP_Camp] = &Client::Handle_OP_Camp;
@@ -758,7 +759,7 @@ void Client::CompleteConnect()
 	Mob* pet = GetPet();
 	if (pet) {
 		pet->SendWearChangeAndLighting(EQ::textures::LastTexture);
-		pet->SendPetBuffsToClient();
+		ClientPatch::SendFullBuffRefresh(pet);
 	}
 
 	if (GetGroup())
@@ -933,10 +934,7 @@ void Client::CompleteConnect()
 		delete pack;
 	}
 
-	if (IsClient() && CastToClient()->ClientVersionBit() & EQ::versions::maskUFAndLater) {
-		EQApplicationPacket *outapp = MakeBuffsPacket(false);
-		CastToClient()->FastQueuePacket(&outapp);
-	}
+	ClientPatch::SendFullBuffRefresh(this);
 
 	// TODO: load these states
 	// We at least will set them to the correct state for now
@@ -1560,7 +1558,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 				m_pp.buffs[i].num_hits = buffs[i].hit_number;
 			}
 			else {
-				m_pp.buffs[i].spellid = SPELLBOOK_UNKNOWN;
+				m_pp.buffs[i].spellid = SPELL_UNKNOWN;
 				m_pp.buffs[i].bard_modifier = 10;
 				m_pp.buffs[i].effect_type = 0;
 				m_pp.buffs[i].player_id = 0;
@@ -4163,14 +4161,14 @@ void Client::Handle_OP_BookButton(const EQApplicationPacket* app)
 	QueuePacket(&outapp);
 }
 
-void Client::Handle_OP_Buff(const EQApplicationPacket *app)
+void Client::Handle_OP_BuffDefinition(const EQApplicationPacket *app)
 {
 	/*
 		Note: if invisibility is on client, this will force it to drop.
 	*/
 	if (app->size != sizeof(SpellBuffPacket_Struct))
 	{
-		LogError("Size mismatch in OP_Buff. expected [{}] got [{}]", sizeof(SpellBuffPacket_Struct), app->size);
+		LogError("Size mismatch in OP_BuffDefinition. expected [{}] got [{}]", sizeof(SpellBuffPacket_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
@@ -4228,7 +4226,7 @@ void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app)
 	if (brrs->SlotID > (uint32)m->GetMaxTotalSlots())
 		return;
 
-	uint16 SpellID = m->GetSpellIDFromSlot(brrs->SlotID);
+	int32 SpellID = m->GetSpellIDFromSlot(brrs->SlotID);
 
 	if (SpellID && (GetGM() || ((IsBeneficialSpell(SpellID) || IsEffectInSpell(SpellID, SpellEffect::BindSight)) && !spells[SpellID].no_remove))) {
 		m->BuffFadeBySlot(brrs->SlotID, true);
@@ -4419,9 +4417,9 @@ void Client::Handle_OP_CastSpell(const EQApplicationPacket *app)
 			if (inst && inst->IsClassCommon())
 			{
 				const EQ::ItemData* item = inst->GetItem();
-				if (item->Click.Effect != (uint32)castspell->spell_id)
+				if (item->Click.Effect != castspell->spell_id)
 				{
-					std::string message = fmt::format("OP_CastSpell with item, tried to cast a different spell than what was on item - item spell id [{}] attempted [{}]", item->Click.Effect, (uint32)castspell->spell_id);
+					std::string message = fmt::format("OP_CastSpell with item, tried to cast a different spell than what was on item - item spell id [{}] attempted [{}]", item->Click.Effect, castspell->spell_id);
 					RecordPlayerEventLog(PlayerEvent::POSSIBLE_HACK, PlayerEvent::PossibleHackEvent{.message = message});
 					InterruptSpell(castspell->spell_id);	//CHEATER!!
 					return;
@@ -5841,8 +5839,8 @@ void Client::Handle_OP_DeleteSpell(const EQApplicationPacket *app)
 	if (dss->spell_slot < 0 || dss->spell_slot >= EQ::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize)
 		return;
 
-	if (m_pp.spell_book[dss->spell_slot] != SPELLBOOK_UNKNOWN) {
-		m_pp.spell_book[dss->spell_slot] = SPELLBOOK_UNKNOWN;
+	if (m_pp.spell_book[dss->spell_slot] != SPELL_UNKNOWN) {
+		m_pp.spell_book[dss->spell_slot] = SPELL_UNKNOWN;
 		database.DeleteCharacterSpell(CharacterID(), dss->spell_slot);
 		dss->success = 1;
 	}
@@ -15108,30 +15106,7 @@ void Client::Handle_OP_TargetMouse(const EQApplicationPacket *app)
 		if (nt)
 		{
 			SetTarget(nt);
-			bool inspect_buffs = false;
-			// rank 1 gives you ability to see NPC buffs in target window (SoD+)
-			if (nt->IsNPC()) {
-				if (IsRaidGrouped()) {
-					Raid *raid = GetRaid();
-					if (raid) {
-						uint32 gid = raid->GetGroup(this);
-						if (gid < 12 && raid->GroupCount(gid) > 2)
-							inspect_buffs = raid->GetLeadershipAA(groupAAInspectBuffs, gid);
-					}
-				}
-				else {
-					Group *group = GetGroup();
-					if (group && group->GroupCount() > 2)
-						inspect_buffs = group->GetLeadershipAA(groupAAInspectBuffs);
-				}
-			}
-			if (GetGM() || RuleB(Spells, AlwaysSendTargetsBuffs) || nt == this || inspect_buffs || (nt->IsClient() && !nt->CastToClient()->GetPVP()) ||
-				(nt->IsPet() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()) ||
-				(nt->IsBot() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()) || // TODO: bot pets
-				(nt->IsMerc() && nt->GetOwner() && nt->GetOwner()->IsClient() && !nt->GetOwner()->CastToClient()->GetPVP()))
-			{
-				nt->SendBuffsToClient(this);
-			}
+			ClientPatch::SendFullBuffRefresh(nt);
 		}
 		else
 		{
@@ -15866,7 +15841,7 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 	}
 
 	if (its->Complete == 1) {
-		uint32 spell_id = PendingTranslocateData.spell_id;
+		int32 spell_id = PendingTranslocateData.spell_id;
 		bool in_translocate_zone = (
 			zone->GetZoneID() == PendingTranslocateData.zone_id &&
 			zone->GetInstanceID() == PendingTranslocateData.instance_id

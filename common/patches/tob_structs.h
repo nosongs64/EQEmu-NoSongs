@@ -1,5 +1,25 @@
-#ifndef STEAM_LATEST_STRUCTS_H_
-#define STEAM_LATEST_STRUCTS_H_
+/*	EQEmu: EQEmulator
+
+Copyright (C) 2001-2026 EQEmu Development Team
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
+#pragma once
+
+#include "common/eq_packet_structs.h"
+#include "common/skills.h"
 
 namespace TOB {
 	namespace structs {
@@ -627,7 +647,7 @@ namespace TOB {
 			/*004*/	uint32	killer_id;
 			/*008*/	uint32	corpseid; //not read by client
 			/*012*/	uint32	unknown1; //not read by client
-			/*016*/	uint32	spell_id;
+			/*016*/	int32   spell_id;
 			/*020*/ uint32	attack_skill;
 			/*024*/	uint64	damage;
 			/*032*/	uint32	unknown2; //not read by client
@@ -672,7 +692,7 @@ namespace TOB {
 
 		struct BeginCast_Struct
 		{
-			/*000*/	uint32 spell_id;
+			/*000*/	int32 spell_id;
 			/*004*/	uint16 caster_id;
 			/*006*/	uint32 cast_time; // in miliseconds
 			/*010*/	uint32 unknown0a; // I think this is caster effective level but im not sure. live always sends 0. The client uses this for the spell link
@@ -682,7 +702,7 @@ namespace TOB {
 
 		struct MemorizeSpell_Struct {
 			uint32 slot;		// Spot in the spell book/memorized slot
-			uint32 spell_id;	// Spell id (200 or c8 is minor healing, etc)
+			int32  spell_id;	// Spell id (200 or c8 is minor healing, etc)
 			uint32 scribing;	// -1 refreshes book, 0 scribe to book, 2 end mem, 1 start mem, 3 unmem, 4 set activated item keyring -- client will send back 2 if a 0 operation updated a memorized spell of the same group + subgroup
 			uint32 reduction;	// lower reuse (only used if scribing is 4)
 		};
@@ -702,7 +722,7 @@ namespace TOB {
 		struct CastSpell_Struct
 		{
 			/*00*/	uint32	slot;
-			/*04*/	uint32	spell_id;
+			/*04*/	int32   spell_id;
 			/*08*/	CastSpellInventorySlot_Struct inventory_slot; 
 			/*18*/	uint32	target_id;
 			/*22*/	uint32	spell_crc; 
@@ -732,7 +752,7 @@ namespace TOB {
 			/*000*/ EQAffectSlot_Struct slots[6];
 			/*096*/ EqGuid caster_id;
 			/*104*/ uint32 flags;
-			/*108*/ uint32 spell_id;
+			/*108*/ int32  spell_id;
 			/*112*/ uint32 duration;
 			/*116*/ uint32 initial_duration;
 			/*120*/ uint32 hit_count;
@@ -762,7 +782,7 @@ namespace TOB {
 		{
 			uint32 new_mana;
 			uint32 stamina; // endurance
-			uint32 spell_id;
+			int32  spell_id;
 			uint32 keepcasting;
 			int32 slot; // gem slot
 		};
@@ -775,7 +795,7 @@ namespace TOB {
 		{
 			uint16 target;
 			uint16 source;
-			uint32 spell_id;
+			int32  spell_id;
 			//4 leaves a buff
 			uint32 effect_type; 
 			uint32 effective_casting_level;
@@ -1086,5 +1106,3 @@ namespace TOB {
 
 	};	//end namespace structs
 };	//end namespace tob
-
-#endif /*LAURION_STRUCTS_H_*/

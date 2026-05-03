@@ -15,9 +15,8 @@
 	You should have received a copy of the GNU General Public License
 	along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
-#pragma once
 
-#include "client_version.h"
+#pragma once
 
 // Migration path: replace string_ids.h usage with ID enum values one call site at a time.
 
@@ -25,7 +24,7 @@ class Client;
 class Mob;
 class EQApplicationPacket;
 
-namespace Message {
+namespace ClientPatch {
 
 template<typename... Args>
 concept AllConstChar = (std::is_convertible_v<Args, const char*> && ...);
@@ -33,13 +32,14 @@ concept AllConstChar = (std::is_convertible_v<Args, const char*> && ...);
 class IMessage
 {
 public:
+	using FormattedArgs = std::array<const char*, 9>;
 	IMessage() = default;
 	virtual ~IMessage() = default;
 
 	// these two are the basic string message packets
 	virtual std::unique_ptr<EQApplicationPacket> Simple(uint32_t color, uint32_t id) const = 0;
 	virtual std::unique_ptr<EQApplicationPacket> Formatted(uint32_t color, uint32_t id,
-		const std::array<const char*, 9>& args) const = 0;
+		const FormattedArgs& args) const = 0;
 
 	// These aren't technically messages, but they use the same format and are similar enough to include here
 	virtual std::unique_ptr<EQApplicationPacket> InterruptSpell(uint32_t message, uint32_t spawn_id,

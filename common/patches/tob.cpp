@@ -1,22 +1,46 @@
-#include "../global_define.h"
-#include "../eqemu_config.h"
-#include "../eqemu_logsys.h"
+/*	EQEmu: EQEmulator
+
+Copyright (C) 2001-2026 EQEmu Development Team
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #include "tob.h"
-#include "../opcodemgr.h"
-
-#include "../eq_stream_ident.h"
-#include "../crc32.h"
-
-#include "../eq_packet_structs.h"
-#include "../misc_functions.h"
-#include "../strings.h"
-#include "../inventory_profile.h"
 #include "tob_structs.h"
-#include "../rulesys.h"
-#include "../path_manager.h"
-#include "../classes.h"
-#include "../races.h"
-#include "../raid.h"
+
+#include "common/global_define.h"
+#include "common/eqemu_config.h"
+#include "common/eqemu_logsys.h"
+#include "common/opcodemgr.h"
+
+#include "common/eq_stream_ident.h"
+#include "common/crc32.h"
+
+#include "common/eq_packet_structs.h"
+#include "common/misc_functions.h"
+#include "common/strings.h"
+#include "common/inventory_profile.h"
+#include "common/rulesys.h"
+#include "common/path_manager.h"
+#include "common/classes.h"
+#include "common/packet_dump.h"
+#include "common/races.h"
+#include "common/raid.h"
+#include "world/sof_char_create_data.h"
+#include "zone/client.h"
+#include "zone/mob.h"
+#include "zone/string_ids.h"
 
 #include <iostream>
 #include <sstream>
@@ -24,10 +48,6 @@
 #include <cassert>
 #include <cinttypes>
 #include <set>
-
-#include "common/packet_dump.h"
-#include "world/sof_char_create_data.h"
-#include "zone/string_ids.h"
 
 namespace TOB
 {
@@ -67,7 +87,6 @@ namespace TOB
 	static inline EQ::spells::CastingSlot TOBToServerCastingSlot(spells::CastingSlot slot);
 
 	// buff slots
-	static inline int ServerToTOBBuffSlot(int index);
 	static inline int TOBToServerBuffSlot(int index);
 
 	void Register(EQStreamIdentifier& into)
@@ -250,92 +269,6 @@ namespace TOB
 
 		__packet->WriteUInt8(emu->Pet);
 		__packet->WriteUInt8(emu->Initialise);
-
-		FINISH_ENCODE();
-	}
-
-	ENCODE(OP_Buff)
-	{
-		ENCODE_LENGTH_EXACT(SpellBuffPacket_Struct);
-		SETUP_DIRECT_ENCODE(SpellBuffPacket_Struct, structs::EQAffectPacket_Struct);
-
-		eq->entity_id = emu->entityid;
-		eq->unknown004 = 0;
-
-		//fill in affect info
-		eq->affect.caster_id.Id = emu->buff.player_id;
-		eq->affect.flags = 0;
-		eq->affect.spell_id = emu->buff.spellid;
-		eq->affect.duration = emu->buff.duration;
-		eq->affect.initial_duration = emu->buff.duration;
-		eq->affect.hit_count = emu->buff.num_hits;
-		eq->affect.viral_timer = 0;
-		eq->affect.modifier = emu->buff.bard_modifier == 10 ? 1.0f : emu->buff.bard_modifier / 10.0f;
-		eq->affect.y = emu->buff.y;
-		eq->affect.x = emu->buff.x;
-		eq->affect.z = emu->buff.z;
-		eq->affect.level = emu->buff.level;
-
-		eq->slot_id = ServerToTOBBuffSlot(emu->slotid);
-		if (emu->bufffade == 1)
-		{
-			eq->buff_fade = 1;
-		}
-		else
-		{
-			eq->buff_fade = 2;
-		}
-
-		EQApplicationPacket* outapp = nullptr;
-		if (emu->bufffade == 1)
-		{
-			// Bit of a hack. OP_Buff appears to add/remove the buff while OP_BuffCreate adds/removes the actual buff icon
-			outapp = new EQApplicationPacket(OP_BuffCreate, 30);
-			outapp->WriteUInt32(emu->entityid);
-			outapp->WriteUInt32(0);	// tic timer
-			outapp->WriteUInt8(0);		// Type of OP_BuffCreate packet ?
-			outapp->WriteUInt16(1);		// 1 buff in this packet
-			outapp->WriteUInt32(ServerToTOBBuffSlot(emu->slotid));
-			outapp->WriteUInt32(0xffffffff);		// SpellID (0xffff to remove)
-			outapp->WriteUInt32(0);			// Duration
-			outapp->WriteUInt32(0);			// numhits
-			outapp->WriteUInt8(0);		// Caster name
-			outapp->WriteUInt8(0);		// Type
-			outapp->WriteUInt8(0);		// Type
-		}
-
-		FINISH_ENCODE();
-
-		if (outapp) {
-			dest->FastQueuePacket(&outapp);
-		}
-	}
-
-	ENCODE(OP_BuffCreate)
-	{
-		SETUP_VAR_ENCODE(BuffIcon_Struct);
-
-		//TOB has one extra 0x00 byte before the end byte
-		uint32 sz = 13 + (17 * emu->count) + emu->name_lengths; // 17 includes nullterm
-		__packet->size = sz;
-		__packet->pBuffer = new unsigned char[sz];
-		memset(__packet->pBuffer, 0, sz);
-
-		__packet->WriteUInt32(emu->entity_id);
-		__packet->WriteUInt32(emu->tic_timer);
-		__packet->WriteUInt8(emu->all_buffs);			// 1 indicates all buffs on the player (0 to add or remove a single buff)
-		__packet->WriteUInt16(emu->count);
-
-		for (int i = 0; i < emu->count; ++i)
-		{
-			__packet->WriteUInt32(emu->type == 0 ? ServerToTOBBuffSlot(emu->entries[i].buff_slot) : emu->entries[i].buff_slot);
-			__packet->WriteUInt32(emu->entries[i].spell_id);
-			__packet->WriteUInt32(emu->entries[i].tics_remaining);
-			__packet->WriteUInt32(emu->entries[i].num_hits); // Unknown
-			__packet->WriteString(emu->entries[i].caster);
-		}
-		__packet->WriteUInt8(0); // Unknown1
-		__packet->WriteUInt8(emu->type); // Unknown2
 
 		FINISH_ENCODE();
 	}
@@ -3603,6 +3536,20 @@ namespace TOB
 		emu->Initialise = init;
 	}
 
+	DECODE(OP_BuffRemoveRequest)
+	{
+		// This is to cater for the fact that short buff box buffs start at 30 as opposed to 25 in prior clients.
+		//
+		DECODE_LENGTH_EXACT(BuffRemoveRequest_Struct);
+		SETUP_DIRECT_DECODE(BuffRemoveRequest_Struct, BuffRemoveRequest_Struct);
+
+		emu->SlotID = TOBToServerBuffSlot(eq->SlotID);
+
+		IN(EntityID);
+
+		FINISH_DIRECT_DECODE();
+	}
+
 	DECODE(OP_CastSpell)
 	{
 		DECODE_LENGTH_EXACT(structs::CastSpell_Struct);
@@ -5536,20 +5483,6 @@ namespace TOB
 		}
 	}
 
-	//TOB has the same # of long buffs as rof2, but 10 more short buffs
-	static inline int ServerToTOBBuffSlot(int index)
-	{
-		// we're a disc
-		if (index >= EQ::spells::LONG_BUFFS + EQ::spells::SHORT_BUFFS)
-			return index - EQ::spells::LONG_BUFFS - EQ::spells::SHORT_BUFFS +
-			spells::LONG_BUFFS + spells::SHORT_BUFFS;
-		// we're a song
-		if (index >= EQ::spells::LONG_BUFFS)
-			return index - EQ::spells::LONG_BUFFS + spells::LONG_BUFFS;
-		// we're a normal buff
-		return index; // as long as we guard against bad slots server side, we should be fine
-	}
-
 	static inline int TOBToServerBuffSlot(int index)
 	{
 		// we're a disc
@@ -5562,16 +5495,13 @@ namespace TOB
 		// we're a normal buff
 		return index; // as long as we guard against bad slots server side, we should be fine
 	}
-} /*TOB*/
-
-namespace Message {
 
 struct TOBStringIDs
 {
 	static constexpr uint32_t DisarmedTrap = 1458; // You successfully disarmed the trap
 };
 
-uint32_t TOB::ResolveID(uint32_t id) const
+uint32_t MessageComponent::ResolveID(uint32_t id) const
 {
 	switch (id) {
 	case YOU_FLURRY:
@@ -5615,11 +5545,11 @@ uint32_t TOB::ResolveID(uint32_t id) const
 	case DISARMED_TRAP:
 		return TOBStringIDs::DisarmedTrap;
 	default:
-		return RoF2::ResolveID(id);
+		return Titanium::MessageComponent::ResolveID(id);
 	}
 }
 
-void TOB::ResolveArguments(uint32_t id, std::array<const char*, 9>& args) const
+void MessageComponent::ResolveArguments(uint32_t id, std::array<const char*, 9>& args) const
 {
 	switch (id) {
 	case SPELL_FIZZLE:
@@ -5629,13 +5559,13 @@ void TOB::ResolveArguments(uint32_t id, std::array<const char*, 9>& args) const
 		// take all arguments (spell link)
 		break;
 	default:
-		RoF2::ResolveArguments(id, args);
+		Titanium::MessageComponent::ResolveArguments(id, args);
 		break;
 	}
 }
 
-std::unique_ptr<EQApplicationPacket> TOB::Formatted(uint32_t color, uint32_t id,
-	const std::array<const char*, 9>& args) const
+std::unique_ptr<EQApplicationPacket> MessageComponent::Formatted(uint32_t color, uint32_t id,
+	const FormattedArgs& args) const
 {
 	uint32_t string_id = ResolveID(id);
 	if (string_id > 0) {
@@ -5667,20 +5597,20 @@ std::unique_ptr<EQApplicationPacket> TOB::Formatted(uint32_t color, uint32_t id,
 	return nullptr;
 }
 
-std::unique_ptr<EQApplicationPacket> TOB::InterruptSpell(uint32_t message, uint32_t spawn_id,
+std::unique_ptr<EQApplicationPacket> MessageComponent::InterruptSpell(uint32_t message, uint32_t spawn_id,
 	const char* spell_link) const
 {
 	auto outapp = std::make_unique<EQApplicationPacket>(OP_InterruptCast, sizeof(InterruptCast_Struct) + strlen(spell_link) + 1);
 	auto ic = reinterpret_cast<InterruptCast_Struct*>(outapp->pBuffer);
 	ic->messageid = ResolveID(message);
 	ic->spawnid = spawn_id;
-	fmt::format_to_n(ic->message, strlen(spell_link) + 1, "{}\0", spell_link);
+	strcpy(ic->message, spell_link);
 	outapp->priority = 5;
 
 	return outapp;
 }
 
-std::unique_ptr<EQApplicationPacket> TOB::InterruptSpellOther(Mob* sender, uint32_t message, uint32_t spawn_id,
+std::unique_ptr<EQApplicationPacket> MessageComponent::InterruptSpellOther(Mob* sender, uint32_t message, uint32_t spawn_id,
 	const char* name,
 	const char* spell_link) const
 {
@@ -5689,10 +5619,116 @@ std::unique_ptr<EQApplicationPacket> TOB::InterruptSpellOther(Mob* sender, uint3
 	auto ic = reinterpret_cast<InterruptCast_Struct*>(outapp->pBuffer);
 	ic->messageid = ResolveID(message);
 	ic->spawnid = spawn_id;
-	fmt::format_to_n(ic->message, strlen(name) + strlen(spell_link) + 2, "{}\0{}\0", name, spell_link);
+	strcpy(ic->message, name);
+	strcpy(&ic->message[strlen(name) + 1], spell_link);
 
 	return outapp;
 }
 
-} // namespace Message
+std::unique_ptr<EQApplicationPacket> BuffComponent::BuffDefinition(Mob* mob, const Buffs_Struct& buff, uint32_t slot, bool fade) const
+{
+	auto packet = std::make_unique<EQApplicationPacket>(OP_BuffDefinition, sizeof(structs::EQAffectPacket_Struct));
+	auto affect = reinterpret_cast<structs::EQAffectPacket_Struct*>(packet->pBuffer);
 
+	// base packet
+	affect->entity_id = mob->GetID();
+	affect->unknown004 = 0;
+	affect->slot_id = ServerToPatchBuffSlot(slot);
+	affect->buff_fade = fade ? 1 : 2; // 1 is remove, 2 is modify, 3 is add (only seen 1 and 2 sent)
+
+	memset(&affect->affect, 0, sizeof(affect->affect));
+
+	// affect slots
+	for (int affect_slot = 0; affect_slot < 6; ++affect_slot) {
+		// all of this is unknown, just what we've seen
+		affect->affect.slots[affect_slot].slot = -1; // this is always -1
+		affect->affect.slots[affect_slot].padding = 0; // this is never 0, but the values aren't clear
+		affect->affect.slots[affect_slot].value = 0; // this is always 0
+	}
+
+	// affect info
+	affect->affect.caster_id.Id = buff.casterid;
+	affect->affect.caster_id.WorldId = RuleI(World, Id);
+	affect->affect.caster_id.Reserved = 0;
+	affect->affect.flags = 0;
+	affect->affect.spell_id = buff.spellid;
+	affect->affect.duration = buff.ticsremaining;
+	affect->affect.initial_duration = buff.initialduration;
+	affect->affect.hit_count = buff.hit_number;
+	affect->affect.viral_timer = 0;
+	affect->affect.modifier = static_cast<float>(buff.instrument_mod) / 10.f;
+	affect->affect.y = static_cast<float>(buff.caston_y);
+	affect->affect.x = static_cast<float>(buff.caston_x);
+	affect->affect.z = static_cast<float>(buff.caston_z);
+	affect->affect.type = 2;
+	affect->affect.level = buff.casterlevel > 0 ? buff.casterlevel : mob->GetLevel();
+
+	//no idea if these are right; eqlib doesn't seem to know either
+	if (buff.dot_rune > 0)
+		affect->affect.charges = buff.dot_rune;
+	else if (buff.magic_rune > 0)
+		affect->affect.charges = buff.magic_rune;
+	else if (buff.melee_rune > 0)
+		affect->affect.charges = buff.melee_rune;
+	else if (buff.counters > 0)
+		affect->affect.charges = buff.counters;
+
+	affect->affect.activatable = 0;
+	affect->affect.unknown1 = 0; //might be some timer, not sure though
+
+	return packet;
+}
+
+std::unique_ptr<EQApplicationPacket> BuffComponent::RefreshBuffs(EmuOpcode opcode, Mob* mob, bool remove,
+	bool buff_timers_suspended, const std::vector<uint32_t>& slots) const
+{
+	Buffs_Struct* buffs = mob->GetBuffs();
+
+	// pre-calculate the buffer size to avoid too many grow calls
+	size_t buffer_size = 13; // 13 bytes outside the list
+	std::vector<uint32_t> send_slots;
+	if (slots.empty()) {
+		for (uint32_t slot = 0; slot < mob->GetMaxTotalSlots(); ++slot)
+			if (buffs[slot].spellid > 1) {
+				buffer_size += 17 + strlen(buffs[slot].caster_name); // 17 includes the null terminator
+				send_slots.push_back(slot);
+			}
+	} else {
+		for (uint32_t slot : slots)
+			if (slot < mob->GetMaxTotalSlots() && buffs[slot].spellid > 1) {
+				buffer_size += 17 + strlen(buffs[slot].caster_name);
+				send_slots.push_back(slot);
+			}
+	}
+
+	SerializeBuffer buffer(buffer_size);
+
+	buffer.WriteUInt32(mob->GetID());
+	buffer.WriteInt32(mob->GetRemainingTicTime());
+	buffer.WriteUInt8(slots.empty() ? 1 : 0);			// 1 indicates all buffs on the mob (0 to add or remove a single buff)
+	buffer.WriteUInt16(send_slots.size());
+
+	for (uint32_t slot : send_slots) {
+		buffer.WriteUInt32(ServerToPatchBuffSlot(slot)); // the server stores fewer buffs
+		buffer.WriteInt32(remove ? -1 : buffs[slot].spellid);
+		buffer.WriteUInt32(buffs[slot].ticsremaining);
+		buffer.WriteUInt32(buffs[slot].hit_number);
+		buffer.WriteString(buffs[slot].caster_name);
+	}
+
+	buffer.WriteUInt8(opcode == OP_RefreshPetBuffs ? 2 : 0);
+	buffer.WriteUInt8(buff_timers_suspended ? 1 : 0); // bBuffTimersOnHold
+
+	return std::make_unique<EQApplicationPacket>(opcode, std::move(buffer));
+}
+
+bool BuffComponent::NeedsWearMessage() const { return false; }
+
+// 0 = self buff window, 1 = self target window, 2 = pet buff or target window, 4 = group, 5 = PC, 7 = NPC
+void BuffComponent::SetRefreshType(std::unique_ptr<EQApplicationPacket>& packet, uint8_t refresh_type) const
+{
+	if (packet)
+		packet->pBuffer[packet->size - 2] = refresh_type;
+}
+
+} /*TOB*/

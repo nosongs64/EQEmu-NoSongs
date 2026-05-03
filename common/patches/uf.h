@@ -17,46 +17,39 @@
 */
 #pragma once
 
-#include "sod.h"
 #include "common/struct_strategy.h"
+#include "common/patches/sod.h"
 
 class EQStreamIdentifier;
 
-namespace UF
-{
+namespace UF {
 
-	//these are the only public member of this namespace.
-	extern void Register(EQStreamIdentifier &into);
-	extern void Reload();
+extern void Register(EQStreamIdentifier& into);
+extern void Reload();
 
-
-
-	//you should not directly access anything below..
-	//I just dont feel like making a seperate header for it.
-
-	class Strategy : public StructStrategy {
-	public:
-		Strategy();
-
-	protected:
-
-		virtual std::string Describe() const;
-		virtual const EQ::versions::ClientVersion ClientVersion() const;
-
-		//magic macro to declare our opcode processors
-		#include "ss_declare.h"
-		#include "uf_ops.h"
-	};
-
-}; /*UF*/
-
-namespace Message {
-
-class UF : public SoD
+class Strategy : public StructStrategy
 {
 public:
-	UF() = default;
-	~UF() override = default;
+	Strategy();
+
+protected:
+	virtual std::string Describe() const;
+	virtual const EQ::versions::ClientVersion ClientVersion() const;
+
+	//magic macro to declare our opcode processors
+#include "ss_declare.h"
+#include "uf_ops.h"
 };
 
-} // namespace Message
+class BuffComponent : public SoD::BuffComponent
+{
+public:
+	BuffComponent(uint32_t maxLongBuffs, uint32_t maxShortBuffs) : SoD::BuffComponent(maxLongBuffs, maxShortBuffs) {}
+	BuffComponent() = delete;
+	~BuffComponent() override = default;
+
+	std::unique_ptr<EQApplicationPacket> RefreshBuffs(EmuOpcode opcode, Mob* mob, bool remove,
+		bool buff_timers_suspended, const std::vector<uint32_t>& slots) const override;
+};
+
+}; /*UF*/

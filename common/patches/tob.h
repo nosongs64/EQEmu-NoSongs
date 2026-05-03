@@ -1,49 +1,55 @@
+/*	EQEmu: EQEmulator
+
+Copyright (C) 2001-2026 EQEmu Development Team
+
+	This program is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #pragma once
 
-#include "rof2.h"
-#include "../struct_strategy.h"
+#include "common/struct_strategy.h"
+#include "common/patches/rof2.h"
 
 class EQStreamIdentifier;
 
-namespace TOB
-{
+namespace TOB {
 
-	//these are the only public member of this namespace.
-	extern void Register(EQStreamIdentifier& into);
-	extern void Reload();
+extern void Register(EQStreamIdentifier& into);
+extern void Reload();
 
-
-
-	//you should not directly access anything below..
-	//I just dont feel like making a seperate header for it.
-
-	class Strategy : public StructStrategy {
-	public:
-		Strategy();
-
-	protected:
-
-		virtual std::string Describe() const;
-		virtual const EQ::versions::ClientVersion ClientVersion() const;
-
-		//magic macro to declare our opcode processors
-#include "ss_declare.h"
-#include "tob_ops.h"
-
-	};
-
-}; /*TOB*/
-
-namespace Message {
-
-class TOB : public RoF2
+class Strategy : public StructStrategy
 {
 public:
-	TOB() {}
-	~TOB() override {}
+	Strategy();
+
+protected:
+	virtual std::string Describe() const;
+	virtual const EQ::versions::ClientVersion ClientVersion() const;
+
+//magic macro to declare our opcode processors
+#include "ss_declare.h"
+#include "tob_ops.h"
+};
+
+class MessageComponent : public Titanium::MessageComponent
+{
+public:
+	MessageComponent() = default;
+	~MessageComponent() override = default;
 
 	std::unique_ptr<EQApplicationPacket> Formatted(uint32_t color, uint32_t id,
-		const std::array<const char*, 9>& args) const override;
+		const FormattedArgs& args) const override;
 
 	std::unique_ptr<EQApplicationPacket> InterruptSpell(uint32_t message, uint32_t spawn_id,
 		const char* spell_link) const override;
@@ -55,4 +61,19 @@ protected:
 	void ResolveArguments(uint32_t id, std::array<const char*, 9>& args) const override;
 };
 
-} // namespace Message
+class BuffComponent : public UF::BuffComponent
+{
+public:
+	BuffComponent(uint32_t maxLongBuffs, uint32_t maxShortBuffs) : UF::BuffComponent(maxLongBuffs, maxShortBuffs) {}
+	BuffComponent() = delete;
+	~BuffComponent() override = default;
+
+	std::unique_ptr<EQApplicationPacket>
+	BuffDefinition(Mob* mob, const Buffs_Struct& buff, uint32_t slot, bool fade) const override;
+	std::unique_ptr<EQApplicationPacket> RefreshBuffs(EmuOpcode opcode, Mob* mob, bool remove,
+		bool buff_timers_suspended, const std::vector<uint32_t>& slots) const override;
+	bool NeedsWearMessage() const override;
+	void SetRefreshType(std::unique_ptr<EQApplicationPacket>& packet, uint8_t refresh_type) const override;
+};
+
+}; /*TOB*/

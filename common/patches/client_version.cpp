@@ -18,13 +18,22 @@
 
 #include "client_version.h"
 
+#include "common/emu_constants.h"
+
 #include "common/patches/titanium.h"
+#include "common/patches/titanium_limits.h"
 #include "common/patches/sof.h"
+#include "common/patches/sof_limits.h"
 #include "common/patches/sod.h"
+#include "common/patches/sod_limits.h"
 #include "common/patches/uf.h"
+#include "common/patches/uf_limits.h"
 #include "common/patches/rof.h"
+#include "common/patches/rof_limits.h"
 #include "common/patches/rof2.h"
+#include "common/patches/rof2_limits.h"
 #include "common/patches/tob.h"
+#include "common/patches/tob_limits.h"
 
 #include <array>
 
@@ -36,25 +45,32 @@ struct ClientComponents
 	{
 		switch (version) {
 		case Version::TOB:
-			messageComponent = std::make_unique<Message::TOB>();
+			buffComponent = std::make_unique<TOB::BuffComponent>(TOB::spells::LONG_BUFFS, TOB::spells::SHORT_BUFFS);
+			messageComponent = std::make_unique<TOB::MessageComponent>();
 			break;
 		case Version::RoF2:
-			messageComponent = std::make_unique<Message::RoF2>();
+			buffComponent = std::make_unique<UF::BuffComponent>(RoF2::spells::LONG_BUFFS, RoF2::spells::SHORT_BUFFS);
+			messageComponent = std::make_unique<Titanium::MessageComponent>();
 			break;
 		case Version::RoF:
-			messageComponent = std::make_unique<Message::RoF>();
+			buffComponent = std::make_unique<UF::BuffComponent>(RoF::spells::LONG_BUFFS, RoF::spells::SHORT_BUFFS);
+			messageComponent = std::make_unique<Titanium::MessageComponent>();
 			break;
 		case Version::UF:
-			messageComponent = std::make_unique<Message::UF>();
+			buffComponent = std::make_unique<UF::BuffComponent>(UF::spells::LONG_BUFFS, UF::spells::SHORT_BUFFS);
+			messageComponent = std::make_unique<Titanium::MessageComponent>();
 			break;
 		case Version::SoD:
-			messageComponent = std::make_unique<Message::SoD>();
+			buffComponent = std::make_unique<SoD::BuffComponent>(SoD::spells::LONG_BUFFS, SoD::spells::SHORT_BUFFS);
+			messageComponent = std::make_unique<Titanium::MessageComponent>();
 			break;
 		case Version::SoF:
-			messageComponent = std::make_unique<Message::SoF>();
+			buffComponent = std::make_unique<Titanium::BuffComponent>(SoF::spells::LONG_BUFFS, SoF::spells::SHORT_BUFFS);
+			messageComponent = std::make_unique<Titanium::MessageComponent>();
 			break;
 		case Version::Titanium:
-			messageComponent = std::make_unique<Message::Titanium>();
+			buffComponent = std::make_unique<Titanium::BuffComponent>(Titanium::spells::LONG_BUFFS, Titanium::spells::SHORT_BUFFS);
+			messageComponent = std::make_unique<Titanium::MessageComponent>();
 			break;
 		default:
 			break;
@@ -62,7 +78,8 @@ struct ClientComponents
 	}
 
 	const Version version;
-	std::unique_ptr<Message::IMessage> messageComponent;
+	std::unique_ptr<ClientPatch::IBuff> buffComponent;
+	std::unique_ptr<ClientPatch::IMessage> messageComponent;
 };
 
 // this array must be in the same order as the Version enum because it converts Version to index directly
@@ -80,7 +97,27 @@ static const std::array<ClientComponents, EQ::versions::ClientVersionCount> s_pa
 	}
 };
 
-const std::unique_ptr<Message::IMessage>& GetMessageComponent(Version version)
+template<>
+const std::unique_ptr<ClientPatch::IBuff>& GetComponent(Version version)
+{
+	return s_patches.at(static_cast<uint32_t>(version)).buffComponent;
+}
+
+template<>
+const std::unique_ptr<ClientPatch::IMessage>& GetComponent(Version version)
 {
 	return s_patches.at(static_cast<uint32_t>(version)).messageComponent;
+}
+
+uint32_t ClientPatch::IBuff::ServerToPatchBuffSlot(uint32_t slot) const
+{
+	// we're a disc
+	if (slot >= EQ::spells::LONG_BUFFS + EQ::spells::SHORT_BUFFS)
+		return slot - EQ::spells::LONG_BUFFS - EQ::spells::SHORT_BUFFS +
+			m_maxLongBuffs + m_maxShortBuffs;
+	// we're a song
+	if (slot >= EQ::spells::LONG_BUFFS)
+		return slot - EQ::spells::LONG_BUFFS + m_maxLongBuffs;
+	// we're a normal buff
+	return slot; // as long as we guard against bad slots server side, we should be fine
 }
