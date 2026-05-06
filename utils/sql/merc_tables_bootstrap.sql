@@ -77,6 +77,7 @@ CREATE TABLE `merc_buffs`
     `CasterLevel`        int(10) UNSIGNED NOT NULL DEFAULT 0,
     `DurationFormula`    int(10) UNSIGNED NOT NULL DEFAULT 0,
     `TicsRemaining`      int(11) NOT NULL DEFAULT 0,
+    `InitialDuration`    int(11) NOT NULL DEFAULT 0,
     `PoisonCounters`     int(11) UNSIGNED NOT NULL DEFAULT 0,
     `DiseaseCounters`    int(11) UNSIGNED NOT NULL DEFAULT 0,
     `CurseCounters`      int(11) UNSIGNED NOT NULL DEFAULT 0,
@@ -84,12 +85,13 @@ CREATE TABLE `merc_buffs`
     `HitCount`           int(10) UNSIGNED NOT NULL DEFAULT 0,
     `MeleeRune`          int(10) UNSIGNED NOT NULL DEFAULT 0,
     `MagicRune`          int(10) UNSIGNED NOT NULL DEFAULT 0,
-    `dot_rune`           int(10) NOT NULL DEFAULT 0,
+    `dot_rune`           int(10) UNSIGNED NOT NULL DEFAULT 0,
     `caston_x`           int(10) NOT NULL DEFAULT 0,
     `Persistent`         tinyint(1) NOT NULL DEFAULT 0,
     `caston_y`           int(10) NOT NULL DEFAULT 0,
     `caston_z`           int(10) NOT NULL DEFAULT 0,
     `ExtraDIChance`      int(10) NOT NULL DEFAULT 0,
+    `instrument_mod`     int(10) UNSIGNED NOT NULL DEFAULT 10,
     PRIMARY KEY (`MercBuffId`) USING BTREE,
     INDEX                `FK_mercbuff_1`(`MercId`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Compact;
