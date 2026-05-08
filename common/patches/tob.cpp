@@ -238,6 +238,22 @@ namespace TOB
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_Begging)
+	{
+		ENCODE_LENGTH_EXACT(BeggingResponse_Struct);
+		SETUP_DIRECT_ENCODE(BeggingResponse_Struct, structs::BeggingResponse_Struct);
+
+		OUT(Unknown00);
+		OUT(Unknown04);
+		OUT(Unknown08);
+		eq->Result = static_cast<uint8>(emu->Result);
+		OUT(Amount);
+		eq->StringSize = 0; // set this to 0, but it's a string size
+		eq->Lucky = 0; // set to 1 to message a lucky beg
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_BeginCast)
 	{
 		ENCODE_LENGTH_EXACT(BeginCast_Struct);
@@ -597,8 +613,8 @@ namespace TOB
 			OUT(skills[i]);
 		}
 
-		eq->unknown408[0] = 1;
-		eq->unknown408[1] = 0xC9;
+		eq->unknown408[0] = 1; // this tells the client to update the GM window
+		eq->unknown408[1] = 0xC9; // these appear to be languages, but it's only testing if this is non-zero
 		eq->unknown408[2] = 0xC9;
 		eq->unknown408[3] = 0xC9;
 		eq->unknown408[4] = 0xC9;
@@ -698,8 +714,6 @@ namespace TOB
 		OUT(spawnid);
 		OUT_str(charname);
 		OUT(race);
-		eq->unknown006[0] = 0;
-		eq->unknown006[1] = 0;
 		OUT(gender);
 		OUT(texture);
 		OUT(helmtexture);
@@ -893,6 +907,7 @@ namespace TOB
 		ENCODE_LENGTH_EXACT(moneyOnCorpseStruct);
 		SETUP_DIRECT_ENCODE(moneyOnCorpseStruct, structs::moneyOnCorpseStruct);
 
+		// TODO: The type has changed to accomodate all kinds of loot options and actions, including advloot
 		eq->type = emu->response;
 		OUT(platinum);
 		OUT(gold);
@@ -3693,6 +3708,23 @@ namespace TOB
 
 	DECODE(OP_ConsiderCorpse) { DECODE_FORWARD(OP_Consider); }
 
+	DECODE(OP_CorpseDrag)
+	{
+		std::string CorpseName;
+		__packet->ReadLengthString(CorpseName);
+
+		std::string DraggerName;
+		__packet->ReadLengthString(DraggerName);
+
+		__packet->SetReadPosition(0);
+		__packet->size = sizeof(CorpseDrag_Struct);
+		__packet->pBuffer = new unsigned char[__packet->size]{};
+		auto* emu = reinterpret_cast<CorpseDrag_Struct*>(__packet->pBuffer);
+
+		strncpy(emu->CorpseName, CorpseName.c_str(), 64);
+		strncpy(emu->DraggerName, DraggerName.c_str(), 64);
+	}
+
 	DECODE(OP_DeleteItem)
 	{
 		DECODE_LENGTH_EXACT(structs::DeleteItem_Struct);
@@ -3757,6 +3789,21 @@ namespace TOB
 	DECODE(OP_GroupInvite2)
 	{
 		DECODE_FORWARD(OP_GroupInvite);
+	}
+
+	DECODE(OP_LootItem)
+	{
+		DECODE_LENGTH_EXACT(structs::LootingItem_Struct);
+		SETUP_DIRECT_DECODE(LootingItem_Struct, structs::LootingItem_Struct);
+
+		Log(Logs::Detail, Logs::Netcode, "TOB::DECODE(OP_LootItem)");
+
+		IN(lootee);
+		IN(looter);
+		emu->slot_id = TOBToServerCorpseMainSlot(eq->slot_id);
+		IN(auto_loot);
+
+		FINISH_DIRECT_DECODE();
 	}
 
 	DECODE(OP_MemorizeSpell) {
